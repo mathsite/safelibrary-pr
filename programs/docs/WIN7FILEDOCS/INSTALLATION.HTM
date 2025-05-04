@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<HTML DIR="LTR">
+
+<HEAD>
+ 
+
+<META NAME="MS.LOCALE" CONTENT="EN-US">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=Windows-1252">
+
+<TITLE>Step by Step: Setting up Microsoft Windows&nbsp;XP Professional x64 Edition</TITLE>
+
+
+<STYLE>
+H1 {
+	CLEAR: both; FONT-SIZE: 140%; MARGIN-BOTTOM: 0.5em
+}
+H2 {
+	CLEAR: both; MARGIN-TOP: 1.5em; FONT-SIZE: 130%; MARGIN-BOTTOM: 0.5em
+}
+H3 {
+	CLEAR: both; MARGIN-TOP: 1.2em; FONT-SIZE: 120%; MARGIN-BOTTOM: 0.5em
+}
+H4 {
+	CLEAR: both; MARGIN-TOP: 1.2em; FONT-SIZE: 110%; MARGIN-BOTTOM: 0.5em; MARGIN-LEFT: 1em
+}
+H5 {
+	CLEAR: both; MARGIN-TOP: 1.2em; FONT-SIZE: 100%; MARGIN-BOTTOM: 0.5em; MARGIN-LEFT: 2em
+}
+H6 {
+	CLEAR: both; MARGIN-TOP: 0.2em; FONT-SIZE: 70%; MARGIN-BOTTOM: 0.5em
+}
+P {
+	MARGIN-TOP: 1.5em; MARGIN-BOTTOM: 0.6em
+}
+P.indent {
+	MARGIN-LEFT: 3em
+}
+P.note {
+	CLEAR: both; MARGIN-TOP: 1em; FONT-WEIGHT: bold; MARGIN-BOTTOM: -0.25em
+}
+P.tip {
+	CLEAR: both; MARGIN-TOP: 1em; FONT-WEIGHT: bold; MARGIN-BOTTOM: -0.25em
+}
+P.important {
+	CLEAR: both; MARGIN-TOP: 1em; FONT-WEIGHT: bold; MARGIN-BOTTOM: -0.25em
+}
+P.caution {
+	CLEAR: both; MARGIN-TOP: 1em; FONT-WEIGHT: bold; MARGIN-BOTTOM: -0.25em
+}
+P.warning {
+	CLEAR: both; MARGIN-TOP: 1em; FONT-WEIGHT: bold; MARGIN-BOTTOM: -0.25em
+}
+P.proclabel {
+	CLEAR: both; FONT-WEIGHT: bold; FONT-SIZE: 100%
+}
+OL {
+	MARGIN-TOP: 0.5em; PADDING-LEFT: .5em; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2.1em
+}
+OL.indent {
+	MARGIN-TOP: 0.5em; PADDING-LEFT: 3em; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2.1em
+}
+UL {
+	MARGIN-TOP: 0.6em; PADDING-LEFT: 0em; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 1.5em; LIST-STYLE-TYPE: disc
+}
+UL.indent {
+	MARGIN-TOP: 0.5em; PADDING-LEFT: 3em; MARGIN-BOTTOM: 0px; MARGIN-LEFT: 2.1em
+}
+LI {
+	CLEAR: both; MARGIN-BOTTOM: 0.7em
+}
+DD {
+	MARGIN-BOTTOM: 0px; MARGIN-LEFT: 1.5em
+}
+CODE {
+	FONT-SIZE: 105%; BACKGROUND: #ffffff; COLOR: #000000; FONT-FAMILY: Courier New, Courier, Monospace
+}
+BODY {
+	FONT-SIZE: 80%; BACKGROUND: #ffffff; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica, Sans Serif
+}
+TABLE {
+	FONT-SIZE: 100%; BACKGROUND: #ffffff; COLOR: #000000; FONT-FAMILY: Verdana, Arial, Helvetica, Sans Serif
+}
+A:link {
+	COLOR: #0066cc; TEXT-DECORATION: none
+}
+A:visited {
+	COLOR: #0066cc; TEXT-DECORATION: none
+}
+A:hover {
+	COLOR: #ff0000; TEXT-DECORATION: underline
+}
+A:active {
+	COLOR: #ff0000; TEXT-DECORATION: underline
+}
+HR {
+	HEIGHT: 1px
+}
+DIV P {
+	MARGIN-LEFT: 2em
+}
+a.finePrint {font-size: 85%;}
+</STYLE>
+
+           
+<STYLE MEDIA="screen">
+Span.printonly
+            {display: none; }
+</STYLE>
+ 
+<STYLE MEDIA="print">
+Span.printonly
+            {display: inline; }
+</STYLE>
+
+</HEAD>
+<BODY>
+<A NAME="top"></A>
+
+<hr>
+
+<h1>Step by Step: Setting up Microsoft Windows&nbsp;XP Professional x64 Edition</h1>
+
+<hr>
+
+
+<p>This document contains important information about installing Microsoft&reg; Windows&reg;&nbsp;XP Professional x64 Edition for computers with the following processors: AMD Athlon&trade; 64, AMD Opteron&trade;, Intel&reg; Xeon&trade; with Intel Extended Memory 64 Technology (EM64T) support, and Intel Pentium&reg; 4 with Intel EM64T support.</p> 
+
+<p class="indent"><b>Important:</b> Windows&nbsp;XP Professional x64 Edition cannot be successfully installed on 64-bit Intel Itanium&reg;&ndash;based systems. Upgrading to Windows&nbsp;XP Professional x64 Edition from a previous version of Windows is not supported.</p>
+
+<p>Both this document and the Setup screens will guide you through installation and show you how to connect your computer to a network. </p>
+
+<h2>CONTENTS</h2>
+
+<P>Click a link to go directly to that section:</P>
+
+<ul>
+<li><A HREF="#_Toc1">Before You Begin</A>
+	<ul>
+		<li>   <A HREF="#_Toc2">Check Minimum Hardware Requirements</A></li>
+		<li>   <A HREF="#_Toc4">Obtain Network Information</A></li>
+	</ul>
+</li>
+
+<li><A HREF="#_Toc5">Installing Windows&nbsp;XP Professional x64 Edition</A>
+	<ul>
+		<li>   <A HREF="#_Toc55">Start Setup</A></li>
+		<li>   <A HREF="#_Toc6">Provide Workgroup or Domain Information</A></li>
+		<li>   <A HREF="#_Toc7">Create a User Account</A></li>
+	</ul>
+</li>
+
+<li><A HREF="#_Toc8">Advanced Setup Options</A>
+	<ul>
+		<li>   <A HREF="#_Toc9">Disk Partitions</A></li>
+		<li>   <A HREF="#_Toc10">File Systems</A></li>
+	</ul>
+</li>
+</ul>
+
+<A NAME="_Toc1"></A><h2>Before You Begin</h2>
+
+<A NAME="_Toc2"></A><h3>Check Minimum Hardware Requirements</h3>
+
+<p>Before you install Windows&nbsp;XP Professional x64 Edition, make sure your computer meets the following minimum hardware requirements:</p>
+
+<ul>
+	<li>Supported processors: AMD Athlon 64, AMD Opteron, Intel Xeon with Intel Extended Memory 64 Technology (EM64T) support, Intel Pentium 4 with Intel EM64T support</li>
+	<li>256 megabytes (MB) RAM</li>
+	<li>1.5 gigabytes (GB) of available hard disk space</li>
+	<li>Super VGA (800 x 600) or higher resolution video card</li>
+	<li>CD-ROM or DVD drive</li>
+	<li>Keyboard and Microsoft Mouse or compatible pointing device</li>
+</ul>
+
+<p class="indent"><b>Note: </b>If you are using a high-end video card for rendering three-dimensional graphics, or if you are using computer peripherals other than the minimum hardware requirements, make sure your computer hardware is compatible with Windows&nbsp;XP Professional x64 Edition.</p>
+
+<p>For network installation, you will need the following:</p>
+<ul>
+	<li>Windows&nbsp;XP Professional x64 Edition-compatible network adapter card and related cable</li>
+	<li>Access to the network shared directory that contains the Setup files</li>
+</ul>
+
+<p>Before you install Windows&nbsp;XP Professional x64 Edition, you should also decide which file system to use (see <A HREF="#_Toc10">File Systems</A>) and whether to partition your hard disk (see <A HREF="#_Toc9">Disk Partitions</A>).</p>
+
+<p><A HREF="#top">Back to Top</A></p>
+
+<A NAME="_Toc4"></A><h3>Obtain Network Information</h3>
+
+<p>First, decide whether your computer is joining a domain or a workgroup. If you do not know which option to choose, or if your computer will not be connected to a network, select the workgroup option. (You can join a domain after you install Windows&nbsp;XP Professional x64 Edition.)</p>
+
+<p>If your computer is currently connected to a network, request the following information from your network administrator before you begin Setup:</p>
+
+<ul>
+	<li>Name of your computer</li>
+	<li>Name of the workgroup or domain</li>
+	<li>TCP/IP address (if your network does not have a Dynamic Host Configuration Protocol [DHCP] server) </li>
+</ul>
+
+<p>To connect to a network during Setup, you must have the correct hardware installed on your computer, and it must be connected by a network cable. </p>
+
+<p><A HREF="#top">Back to Top</A></p>
+
+<A NAME="_Toc5"></A><h2>Installing Windows&nbsp;XP Professional x64 Edition</h2>
+
+<p>Setup for Windows&nbsp;XP Professional x64 Edition is divided into two phases. </p> 
+
+<p>During the first phase, Setup copies files to the computer, checks your hardware, and configures your installation. You can also choose to create multiple partitions during this phase. Your computer will restart at the end of this phase.</p> 
+
+<p>During the second phase, Setup gathers information, such as regional options, user name and password, and network information. When Setup is done, your computer will restart. </p> 
+
+<p>It is recommended that you create a single data partition for installing the operating system. If you want to dual-boot another operating system now or in the future, you need to create two partitions. For more information, see <A HREF="#_Toc9">Disk Partitions</A>.</p>
+
+<A NAME="_Toc55"></A><h3>Start Setup</h3>
+
+<p><b>To install Windows&nbsp;XP Professional x64 Edition:</b></p>
+
+<OL> 
+	<li>Ensure that the hardware for your Windows&nbsp;XP Professional x64 Edition computer is set up properly, and that all cables and devices are correctly attached.</li>
+	<li>Turn on your computer.</li>
+	<li>Insert the Windows&nbsp;XP Professional x64 Edition CD into the CD-ROM or DVD drive.</li>
+	<li>If prompted, press any key to begin Setup, or, if you are not prompted to press a key, Setup will begin automatically.</li>
+	<li>Follow the on-screen directions for the following:
+	<ul>
+		<li>End-User License Agreement page: If you agree with the terms, Setup will continue. If you do not agree, Setup will cancel installation.</li>
+		<li>Partitions: You can create partitions if you want to do so. For details, see <A HREF="#_Toc9">Disk Partitions</A>.</li>
+		<li>File Format: Choose the format of your file system. For details, see <A HREF="#_Toc10">File Systems</A>.</li>
+	</ul>
+	<p>Your computer restarts automatically when this first Setup phase is complete.</p>
+	</li>
+	
+	<li>When your computer restarts, the second Setup phase begins and Windows continues installing. The dialog boxes that appear require information about regional and language options, your name, product key, passwords, date and time settings, network settings, and workgroup and domain choices (see <A HREF="#_Toc4">Obtain Network Information</A>). Follow the directions on each screen.
+		<p class="indent"><b>Note:</b> If you have difficulty joining a domain during Setup, join a workgroup instead. You can then join the domain after you finish installation. See the next section, Provide Workgroup or Domain Information, for more information.</p></li>
+</ol>
+
+<p><A HREF="#top">Back to Top</A></p>
+
+<A NAME="_Toc6"></A><h3>Provide Workgroup or Domain Information</h3>
+
+<p>During or after Setup, you must join either a workgroup or a domain. If you will not be working on a network, select the option to join a workgroup. You can choose to change your selection after Setup has completed.</p>
+
+<h4>Joining a Workgroup</h4>
+
+<p>A workgroup consists of one or more computers with the same workgroup name. A peer-to-peer network is an example. Any user can join a workgroup by typing the workgroup name&mdash;you do not need special permissions to join a workgroup. For Setup, you can provide an existing workgroup name, a new workgroup name, or you can use the workgroup name that Setup suggests.</p>
+ 
+
+<h4>Joining a Domain</h4>
+
+<p>A domain is a collection of computers defined by a network administrator. Unlike joining a workgroup, which you can do yourself, joining a domain requires permission from the network administrator.</p> 
+
+<p>To join a domain during the setup process, you must already have an existing computer account in the domain you want to join, or have the rights to create one (see <A HREF="#_Toc4">Obtain Network Information</A>).</p> 
+
+<p>To join a domain, you must provide your user name and password.</p> 
+
+<p><A HREF="#top">Back to Top</A></p>
+
+
+<A NAME="_Toc7"></A><h3>Create a User Account</h3>
+
+<p>Your user account identifies your user name and password, the groups you are a member of, which network resources you have access to, and your personal files and settings. Each person who regularly uses the computer should have a user account. The user account is identified by a user name and a password, both of which the user types when logging on to the computer. You can create individual user accounts after logging on to the computer by using an account with Administrator rights.</p> 
+
+<p>Setup automatically creates an Administrator account during installation. When you use this account, you have full rights over the computer's settings and can create other user accounts on the computer. </p>
+
+<p>Logging on as an Administrator after you install Windows&nbsp;XP Professional x64 Edition gives you the administrative rights that you need in order to log on and manage your computer. Specify a password for the Administrator account. For security reasons, you should always assign a password to the Administrator account. Take care to remember and protect your password.</p>
+
+<p><b>To create a user account:</b></p>
+
+<ol> 
+	<li>Log on to the computer as a user with Administrator rights.</li>
+	<li>Click <b>Start</b>, click <b>Control Panel</b>, and then click <b>User Accounts</b>. </li>
+	<li>Do one of the following:
+	<ul>
+		<li>If your computer is on a domain, click <b>Add</b>, and then follow the instructions that appear on your screen.</li>
+		<li>If your computer is not on a domain, under <b>Pick a task</b>, click <b>Create a new account</b>, and then follow the instructions that appear on your screen.</li>
+	</ul>
+	</li>
+</ol>
+
+<p><A HREF="#top">Back to Top</A></p>
+
+<A NAME="_Toc8"></A><h2>Advanced Setup Options</h2> 
+
+<p>This section provides more detailed information that can help you make decisions about how you install Windows&nbsp;XP Professional x64 Edition. </p>
+
+<A NAME="_Toc9"></A><h3>Disk Partitions</h3>
+
+<p>Disk partitioning is a way of dividing your hard disk so that each section functions as a separate unit. You can create a partition to provide a place to back up data or to dual-boot with another operating system. When you create partitions on a disk, you divide the disk into one or more areas that can be formatted for use by a file system, such as FAT32 or NTFS file system.</p> 
+
+<p>During the first phase of Setup, you can create and delete partitions. Follow these guidelines for partitioning:</p>
+
+<ul> 
+	<li>A minimum space size is recommended for installing Windows&nbsp;XP Professional x64 Edition. </li>
+	<li>A partition of this size provides flexibility for adding future updates, operating system tools, or other files.</li>
+	<li>During Setup, you should create and configure only the partition on which you want to install Windows&nbsp;XP Professional x64 Edition. 
+	<p>After Windows&nbsp;XP Professional x64 Edition is installed, you can use Disk Management to further partition the unallocated space. For more information about Disk Management, open Help and Support Center from the Start menu in Windows.</p>
+	</li>
+</ul> 
+
+<p><A HREF="#top">Back to Top</A></p>
+
+<A NAME="_Toc10"></A><h3>File Systems</h3>
+
+<p>A file system is the method by which information is stored on a hard disk.</p>
+
+<p>Windows&nbsp;XP Professional x64 Edition supports the NTFS file system or one of the file-allocation table file systems (FAT or FAT32). To set up a dual-boot configuration, you should select one file system for all of your partitions: FAT32 or NTFS.</p>
+
+<h4>NTFS</h4>
+
+<p>NTFS is the recommended file system for use with Windows&nbsp;XP Professional x64 Edition. It has all of the basic capabilities of FAT, but it also has the following advantages over the FAT and FAT32 file systems:</p>
+
+<ul> 
+	<li>Better file security.</li>
+	<li>Better disk compression.</li>
+	<li>Support for large hard disks, up to 2 terabytes (TB). (The maximum disk size for NTFS is much greater than for disks formatted as FAT, and as disk size increases, performance with NTFS does not degrade as it does with FAT.)</li>
+</ul> 
+
+<h4>FAT and FAT32</h4>
+
+<p>   FAT32 is an enhanced version of the FAT file system that can be used on drives ranging from 512 MB to 32 GB. FAT and FAT32 offer compatibility with operating systems other than Windows&nbsp;XP Professional x64 Edition. </p>
+<p><A HREF="#top">Back to Top</A></p>
+
+<h2>Copyright </h2> 
+
+<p>This document is provided for informational purposes only and Microsoft makes no warranties, either express or implied, in this document. Information in this document, including URL and other Internet Web site references, is subject to change without notice. The entire risk of the use or the results from the use of this document remains with the user. Unless otherwise noted, the example companies, organizations, products, domain names, e-mail addresses, logos, people, places, and events depicted herein are fictitious, and no association with any real company, organization, product, domain name, e-mail address, logo, person, place, or event is intended or should be inferred. Complying with all applicable copyright laws is the responsibility of the user. Without limiting the rights under copyright, no part of this document may be reproduced, stored in or introduced into a retrieval system, or transmitted in any form or by any means (electronic, mechanical, photocopying, recording, or otherwise), or for any purpose, without the express written permission of Microsoft Corporation.</p>
+
+<p>Microsoft may have patents, patent applications, trademarks, copyrights, or other intellectual property rights covering subject matter in this document. Except as expressly provided in any written license agreement from Microsoft, the furnishing of this document does not give you any license to these patents, trademarks, copyrights, or other intellectual property.</p>
+
+<p>&copy; 2005 Microsoft Corporation. All rights reserved. </p>
+
+<p>Microsoft, Windows&nbsp;XP Professional x64 Edition, and Windows Server are either registered trademarks or trademarks of Microsoft Corporation in the United States and/or other countries.</p>
+<p>This product contains graphics filter software; this software is based in part on the work of the Independent JPEG Group.</p>
+<p>The names of actual companies and products mentioned herein may be the trademarks of their respective owners.</p>
+
+<p><A HREF="#top">Back to Top</A></p>
+
+</BODY>
+</HTML>
