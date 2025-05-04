@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Painting App</title>
+    <style>
+        body {
+            text-align: center;
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            border: 1px solid black;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <h1>Painting App</h1>
+    <button onclick="setColor('black')">Black</button>
+    <button onclick="setColor('red')">Red</button>
+    <button onclick="setColor('green')">Green</button>
+    <button onclick="setColor('yellow')">Yellow</button>
+    <button onclick="setColor('blue')">Blue</button>
+    <button onclick="setColor('white')">Eraser</button>
+    <br><br>
+    <label for="brushSize">Brush Size:</label>
+    <input type="range" id="brushSize" min="1" max="20" value="5" oninput="setBrushSize(this.value)">
+    <br><br>
+    <canvas id="paintCanvas"></canvas>
+    
+    <script>
+        const canvas = document.getElementById("paintCanvas");
+        const ctx = canvas.getContext("2d");
+        let painting = false;
+        let color = "black";
+        let brushSize = 5;
+        let lastX, lastY;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        
+        function setColor(newColor) {
+            if (newColor === 'white') {
+                brushSize *= 2; // Make the eraser twice as big
+            } else {
+                brushSize = document.getElementById('brushSize').value; // Reset to selected size
+            }
+            color = newColor;
+        }
+        
+        function setBrushSize(size) {
+            brushSize = size;
+        }
+        
+        canvas.addEventListener("mousedown", (event) => {
+            painting = true;
+            lastX = event.clientX - canvas.offsetLeft;
+            lastY = event.clientY - canvas.offsetTop;
+        });
+        canvas.addEventListener("mouseup", () => painting = false);
+        canvas.addEventListener("mouseleave", () => painting = false);
+        
+        canvas.addEventListener("mousemove", function (event) {
+            if (!painting) return;
+            const x = event.clientX - canvas.offsetLeft;
+            const y = event.clientY - canvas.offsetTop;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = brushSize;
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            lastX = x;
+            lastY = y;
+        });
+    </script>
+</body>
+</html>
