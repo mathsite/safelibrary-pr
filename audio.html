@@ -1,0 +1,1492 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-Y71QM9DR66"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-Y71QM9DR66");
+      
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+  const bar = document.getElementById("sidebar");
+  const overflowMenu = document.getElementById("overflow-menu");
+  document.addEventListener("click", function () {
+    bar.classList.remove("movingbar");
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("shoot")) {
+      overflowMenu.classList.add("menu-slide");
+    } else {
+      overflowMenu.classList.remove("menu-slide");
+    }
+  });
+  document.addEventListener("mousemove", function (event) {
+    if (event.clientX <= 5 && bar.classList.contains("movingbar") !== true) {
+      bar.classList.add("movingbar");
+    }
+  });
+});
+
+function search() {
+  var searchTerm = document.getElementById("searchInput").value.toLowerCase();
+  var list = document.getElementById("list");
+  var items = list.getElementsByTagName("div");
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    var itemText = item.innerText.toLowerCase();
+
+    if (itemText.includes(searchTerm)) {
+      item.style.display = "flex"; // Show the anchor tag
+    } else {
+      item.style.display = "none"; // Hide the anchor tag
+    }
+  }
+}
+
+function volume() {
+  let sounds = document.getElementsByTagName("audio");
+  const volumeI = document.getElementById("volume").value;
+  Array.from(sounds).forEach(function (sound) {
+    sound.volume = volumeI;
+  });
+}
+
+function playAll() {
+  let sounds = document.getElementsByTagName("audio");
+  Array.from(sounds).forEach(function (sound) {
+    sound.play();
+  });
+}
+
+function stopAll() {
+  const els = document.getElementsByTagName("AUDIO");
+  Array.from(els).forEach((el) => {
+    el.load();
+  });
+}
+
+function select() {
+  let list = document.getElementById("list");
+  let items = list.getElementsByTagName("div");
+  let itemsL = Array.from(items);
+  let r = Math.random();
+  let rw = Math.floor(r * 180);
+  let selected = items[rw];
+  itemsL.forEach(function (item) {
+    if (item.contains(selected)) {
+      let list = document.getElementById("randomList");
+      item.setAttribute("name", item.innerHTML);
+      item.style.paddingBottom = "12px";
+      list.innerHTML = item.outerHTML;
+    } else {
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const clearFavorite = document.getElementById("fvrbtn");
+  clearFavorite.addEventListener("click", () => {
+    localStorage.removeItem("macBoardFavorites");
+    favoriteList.style.visibility = "hidden";
+    favoriteList.style.height = "0";    
+    favoriteList.style.margin = "0";
+  })
+  setInterval(() => {
+    let theme = localStorage.getItem("theme");
+    if (theme === "light") {
+      const root = document.documentElement;
+      root.style.setProperty("--text-color", "black");
+      root.style.setProperty("--shadow-color", "0px 0px 5px rgb(84, 84, 84)");
+      root.style.setProperty("--black-color", "rgb(235, 235, 235)");
+      root.style.setProperty("--bg-color", "rgb(235, 235, 235)");
+      root.style.setProperty("--bg-color-2", "rgb(30, 30, 30)");
+      root.style.setProperty("--group-bg-color", "rgb(140, 140, 140, 0.7)");
+      root.style.setProperty("--bar-color", "rgb(200, 200, 200)");
+    } else if (theme === "deep") {
+      const root = document.documentElement;
+      root.style.setProperty("--text-color", "white");
+      root.style.setProperty("--shadow-color", "0px 5px 5px rgb(25,25,25)");
+      root.style.setProperty("--black-color", "black");
+      root.style.setProperty("--bg-color", "black");
+      root.style.setProperty("--bg-color-2", "black");
+      root.style.setProperty("--group-bg-color", "black");
+      root.style.setProperty("--bar-color", "black");
+      root.style.setProperty("--border", "rgb(50,50,50)");
+    } else if (theme === "custom") {
+      const root = document.documentElement;
+      let first = localStorage.getItem("first");
+      let second = localStorage.getItem("second");
+      document.documentElement.style.setProperty("--bg-color", first);
+      document.documentElement.style.setProperty("--bar-color", second);
+      document.documentElement.style.setProperty("--link", second);
+      document.documentElement.style.setProperty("--text-color", "white");
+      document.documentElement.style.setProperty("--black-color", "black");
+      root.style.setProperty("--shadow-color", "transparent");
+      root.style.setProperty("--bg-color-2", "white");
+      root.style.setProperty("--group-bg-color", second);
+      root.style.setProperty("--sound-color", second);
+    } else {
+      const root = document.documentElement;
+      root.style.setProperty("--text-color", "white");
+      root.style.setProperty("--link", "rgb(225, 139, 9)");
+      root.style.setProperty("--shadow-color", "transparent");
+      root.style.setProperty("--black-color", "black");
+      root.style.setProperty("--bg-color", "rgb(50, 50, 50)");
+      root.style.setProperty("--bg-color-2", "white");
+      root.style.setProperty("--group-bg-color", "rgba(40, 40, 40, 0.7)");
+      root.style.setProperty("--bar-color", "rgb(70, 70, 70)");
+    }
+  }, 100);
+  setInterval(volume, 500);
+  const soundElements = document.querySelectorAll(".sound");
+  soundElements.forEach((selement) => {
+    let repeat = document.createElement("button");
+    let downloads = document.createElement("a");
+    let favoritesound = document.createElement("button");
+    favoritesound.innerHTML =
+      '<img src="/macvg/media/star-regular.svg" id="favoritesound" title="Favorite Sound">';
+    favoritesound.classList.add("repeatbtn");
+    favoritesound.style.marginRight = "51px";
+    favoritesound.style.borderRadius = "5px 0px 0px 5px";
+    let soundName = selement
+      .getElementsByTagName("audio")[0]
+      .getAttribute("src");
+    downloads.innerHTML = `<img src="/macvg/media/download.svg" title="Download Sound">`;
+    downloads.setAttribute("href", soundName);
+    downloads.setAttribute("target", "_blank");
+    downloads.setAttribute("download", "");
+    downloads.classList.add("downloadbtn");
+    repeat.innerHTML = '<img src="repeat-solid.svg" title="Repeat Sound">';
+    repeat.classList.add("repeatbtn");
+    repeat.addEventListener("click", () => {
+      let repeatLoop = setInterval(() => {
+        selement.getElementsByTagName("audio")[0].play();
+      }, 500);
+      const stopbtn = document.getElementById("stopall");
+      stopbtn.addEventListener("click", () => {
+        clearInterval(repeatLoop);
+      });
+    });
+
+    favoritesound.addEventListener("click", () => {
+      if (favoritesound.innerHTML.includes("star-solid")) {
+        let existing = localStorage.getItem("macBoardFavorites");
+        let data = existing.split(",");
+        data.splice(data.indexOf(soundName) - 1, 1);
+        if (data.length > 0) {
+          localStorage.setItem("macBoardFavorites", data.join(","));
+        } else {
+          localStorage.removeItem("macBoardFavorites");
+        }
+        window.location.reload();
+      } else {
+        if (localStorage.macBoardFavorites) {
+          let existing = localStorage.getItem("macBoardFavorites");
+          let data = existing.split(",");
+          data.push(soundName);
+          localStorage.setItem("macBoardFavorites", data.join(","));
+          window.location.reload();
+        } else {
+          localStorage.setItem("macBoardFavorites", soundName);
+          window.location.reload();
+        }
+      }
+    });
+
+    selement.appendChild(repeat);
+    selement.appendChild(downloads);
+    selement.appendChild(favoritesound);
+  });
+  favorite();
+});
+
+function favorite() {
+  const favoriteList = document.getElementById("favoriteList");
+  const sounds = document.getElementById("list");
+  let items = sounds.querySelectorAll(".sound");
+  let thing = Array.from(items);
+  let favorites = localStorage.macBoardFavorites;
+  if (favorites) {
+    favoriteList.style.visibility = "visible";
+    favoriteList.style.height = "auto";
+    favoriteList.style.marginTop = "20px";
+    favoriteList.style.marginBottom = "25px";
+  } else {
+    favoriteList.style.visibility = "hidden";
+    favoriteList.style.height = "0";    
+    favoriteList.style.margin = "0";
+  }
+  let list = favorites.split(",");
+  let clonedElements = [];
+  const header = document.createElement("h1");
+  header.innerHTML = "Favorites";
+  header.classList.add("favorite-h");
+  favoriteList.appendChild(header);
+  list.forEach((one) => {
+    thing.forEach((game) => {
+      let item = game.getElementsByTagName("audio")[0].getAttribute("src");
+      if (item === one) {
+        clonedElements.push(game);
+        game.style.display = "flex";
+        game
+          .querySelector("#favoritesound")
+          .setAttribute("src", "/media/star-solid.svg");
+      }
+    });
+  });
+  clonedElements.forEach((element) => {
+    favoriteList.appendChild(element);
+  });
+}
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title class="cloak">HouseLearning SafeLibrary || Audio Library</title>
+    <style>
+      :root {
+  --black-color: rgb(0, 0, 0);
+  --text-color: white;
+  --bg-color: rgb(50, 50, 50);
+  --bg-color-2: white;
+  --shadow-color: transparent;
+  --group-bg-color: rgba(40, 40, 40, 0.7);
+  --bar-color: rgb(70, 70, 70);
+  --border: transparent;
+  --sound-color: rgb(61, 61, 61);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+}
+
+#favoriteList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: relative;
+}
+#fvrbtn {
+  width: 40px;
+  height: 40px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  background-color: var(--bg-color);
+  border: none;
+}
+
+#fvrbtn img {
+  height: 60%;
+  margin-block: 20%;
+}
+
+.favorites-h {
+  width: 100%;
+}
+
+h1 {
+  color: white;
+  padding-top: 20px;
+  text-align: center;
+}
+
+.sub {
+  color: white;
+  text-align: center;
+  font-size: 20px;
+  padding: 20px;
+}
+
+.btns {
+  width: 20%;
+  border-radius: 12px;
+  margin-inline: 40%;
+  display: flex;
+  justify-content: center;
+  border: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.btn {
+  color: var(--text-color);
+  font-size: 18px;
+  border: none;
+  width: 50%;
+  padding-inline: 15px;
+  padding-block: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  background-color: var(--bar-color);
+}
+
+.btn:first-of-type {
+  border-radius: 10px 0px 0px 10px;
+}
+
+.btn:last-of-type {
+  border-radius: 0px 10px 10px 0px;
+}
+
+.btn:hover {
+  background-color: rgb(90, 90, 90);
+}
+
+.btn:active {
+  background-color: rgb(80, 80, 80);
+}
+
+#volume {
+  width: 15%;
+  margin-inline: 42.5%;
+}
+
+@media (width < 950px) {
+  .btns {
+    width: 50%;
+    margin-inline: 25%;
+  }
+}
+
+p {
+  color: var(--text-color);
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.wrap {
+  width: 100%;
+}
+
+body {
+  background-color: transparent;
+  width: 100%;
+}
+
+h1 {
+  color: var(--text-color);
+  padding-top: 20px;
+  text-align: center;
+}
+
+.sub {
+  color: var(--text-color);
+  text-align: center;
+  font-size: 20px;
+  padding: 20px;
+}
+
+#volume {
+  width: 15%;
+  margin-inline: 42.5%;
+}
+
+.flex {
+  display: flex;
+  margin-inline: 5px;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.sound {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 110px;
+  position: relative;
+  height: 100px;
+  cursor: pointer;
+  border-radius: 10px;
+  margin-inline: 5px;
+  padding-inline: 10px;
+  padding-block: 10px;
+  border: 4px solid var(--bg-color);
+  background-color: var(--sound-color);
+  margin-block: 5px;
+  transition: transform 0.2s ease;
+}
+
+.repeatbtn, .downloadbtn {
+  width: 23px;
+  height: 23px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: var(--bg-color);
+  margin: 5px;
+  border: none;
+  transition: opacity 0.2s ease;
+  opacity: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.repeatbtn {
+  border-radius: 0px 5px 5px 0px;
+}
+
+.downloadbtn {
+  margin-right: 28px;
+}
+
+.sound:hover .repeatbtn, .sound:hover .downloadbtn {
+  opacity: 1;
+}
+
+.repeatbtn img, .downloadbtn img {
+  width: 60%;
+  margin-inline: 20%;
+}
+
+.name {
+  text-align: center;
+  font-size: 17px;
+  font-weight: bold;
+  margin-block: 10px;
+  color: white;
+}
+
+.footer {
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding-block: 15px;
+  margin-top: 0 !important;
+  line-height: 28px;
+  font-size: 15px;
+}
+
+.footer a {
+  color: white;
+  text-decoration: none;
+  background-color: black;
+}
+
+.footer a:hover {
+  color: gold;
+  text-decoration: underline;
+}
+
+#randomList {
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: center;
+}
+
+.flex {
+  display: flex;
+  margin-inline: 5px;
+  padding-bottom: 20px;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.title {
+  transition: background 0.2s ease;
+  font-size: 35px;
+  font-weight: bold;
+  background: linear-gradient(
+    to right,
+    var(--f-t-color),
+    var(--s-t-color),
+    var(--t-t-color)
+  );
+  background-clip: text;
+  z-index: 30;
+  -webkit-text-fill-color: transparent;
+}
+
+.homeheader {
+  color: var(--text-color);
+  padding-top: 20px;
+  text-align: center;
+}
+
+.title::before {
+  content: attr(name);
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: 65px;
+  height: 10%;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    var(--f-t-color),
+    var(--s-t-color),
+    var(--t-t-color)
+  );
+  position: absolute;
+  background-clip: text;
+  filter: blur(15px);
+}
+.sound {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 110px;
+  height: 100px;
+  cursor: pointer;
+  border-radius: 10px;
+  margin-inline: 5px;
+  padding-inline: 10px;
+  padding-block: 10px;
+  background-color: var(--sound-color);
+  margin-block: 5px;
+  transition: transform 0.2s ease;
+}
+
+.sound:hover {
+  transform: scale(1.09);
+}
+
+.name {
+  text-align: center;
+  font-size: 17px;
+  font-weight: bold;
+  margin-block: 10px;
+  color: white;
+}
+
+.footer {
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding-block: 15px;
+  line-height: 28px;
+  font-size: 15px;
+  margin-top: 40px;
+}
+
+.footer a {
+  color: white;
+  text-decoration: none;
+  background-color: black;
+}
+
+.footer a:hover {
+  color: gold;
+  text-decoration: underline;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  background-color: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--text-color);
+  border: 3px solid var(--bg-color);
+  border-radius: 10px;
+}
+    </style>
+    <link class="favicon" rel="icon" type="image/x-icon" href="/logo.png" />
+    <link rel="stylesheet" href="/macvg/style.css" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="apps.js"></script>
+  </head>
+  <body>
+    <nav class="nav" id="nav">
+
+    </nav>
+    <div class="macsidebar" id="sidebar">
+  
+    </div>
+    <div class="wrap">
+      <div class="homeheader">
+<center><h1>SafeLibrary Audio Library</h1></center>
+<div class="sub">
+          A simple, easy to use, and abounding online platform for all kinds of
+          safe, carefully reviewed sounds.<br>
+          <a href="https://forms.gle/oiRN4PUdsh37PzLu5">Submit a sound</a>
+          
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn" onclick="playAll()">Play All [NOT RECOMMENDED]</button>
+        <button class="btn" onclick="stopAll()" id="stopall">
+          Stop All Current Sounds
+        </button>
+      </div>
+      <input
+        type="range"
+        id="volume"
+        min="0.01"
+        max="1"
+        step="0.01"
+        value="0.5"
+      />
+      <p>Volume</p>
+      <div class="functions">
+        <input
+          type="text"
+          id="searchInput"
+          oninput="search()"
+          autocomplete="off"
+          placeholder="Search 190+ sounds"
+        /><button
+          class="random"
+          onclick="select()"
+          id="random"
+          title="Random Game Selector"
+        >
+          <span class="button-helper"></span>🎲
+        </button>
+      </div>
+      <div id="favoriteList">
+        <button
+          id="fvrbtn"
+          style="position: absolute; top: 0; right: 0"
+          title="Clear Favorites"
+        >
+          <img src="/macvg/media/trash-solid.svg" />
+        </button>
+      </div>
+      <div id="randomList"></div>
+      <div class="flex" id="list">
+        <div class="sound" onclick="document.getElementById('16').play();">
+          <audio id="16" src="https://quiz-20.github.io/originals/macboard/sounds/9+10=21.mp3"></audio>
+          <h3 class="name">9 + 10 = 21</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('71').play();">
+          <audio id="71" src="https://quiz-20.github.io/originals/macboard/sounds/afewmomentslater.mp3"></audio>
+          <h3 class="name">A Few Moments Later</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('6').play();">
+          <audio id="6" src="https://quiz-20.github.io/originals/macboard/sounds/airhorn.mp3"></audio>
+          <h3 class="name">Airhorn</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('601').play();">
+          <audio id="601" src="https://quiz-20.github.io/originals/macboard/sounds/all-my-fellas.mp3"></audio>
+          <h3 class="name">All My Fellas</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('13').play();">
+          <audio id="13" src="https://quiz-20.github.io/originals/macboard/sounds/imposter.mp3"></audio>
+          <h3 class="name">Among Us</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('58').play();">
+          <audio id="58" src="https://quiz-20.github.io/originals/macboard/sounds/amongus.mp3"></audio>
+          <h3 class="name">Among Us 2</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('59').play();">
+          <audio id="59" src="https://quiz-20.github.io/originals/macboard/sounds/reportedbody.mp3"></audio>
+          <h3 class="name">Among Us 3</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('b').play();">
+          <audio id="b" src="https://quiz-20.github.io/originals/macboard/sounds/android-notif.mp3"></audio>
+          <h3 class="name">Android Notification</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('844').play();">
+          <audio id="844" src="https://quiz-20.github.io/originals/macboard/sounds/ara-ara.mp3"></audio>
+          <h3 class="name">Ara Ara</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('84').play();">
+          <audio id="84" src="https://quiz-20.github.io/originals/macboard/sounds/nokieringtone.mp3"></audio>
+          <h3 class="name">Arabic Ringtone</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('116').play();">
+          <audio id="116" src="https://quiz-20.github.io/originals/macboard/sounds/areyouseriousrnbro.mp3"></audio>
+          <h3 class="name">Are You Serious Right Now Bro</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('112').play();">
+          <audio
+            id="112"
+            src="https://quiz-20.github.io/originals/macboard/sounds/are-you-stupid-or-something_TyCW2Af.mp3"
+          ></audio>
+          <h3 class="name">Are You Stupid or Something</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('33').play();">
+          <audio id="33" src="https://quiz-20.github.io/originals/macboard/sounds/AUUGHHH.mp3"></audio>
+          <h3 class="name">Aughhh</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('47').play();">
+          <audio id="47" src="https://quiz-20.github.io/originals/macboard/sounds/wii-sports-aww.mp3"></audio>
+          <h3 class="name">Awww</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('j').play();">
+          <audio id="j" src="https://quiz-20.github.io/originals/macboard/sounds/bababooey.mp3"></audio>
+          <h3 class="name">Bababooey</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('109').play();">
+          <audio
+            id="109"
+            src="https://quiz-20.github.io/originals/macboard/sounds/baby-shark-dance-sing-and-dance-animal-songs-pinkfong-songs-for-children-audiotrimmer.mp3"
+          ></audio>
+          <h3 class="name">Baby Shark</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('85').play();">
+          <audio id="85" src="https://quiz-20.github.io/originals/macboard/sounds/bananadontjigglejiggle.mp3"></audio>
+          <h3 class="name">Banana No Jiggle Jiggle</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('bazinga').play();">
+          <audio id="bazinga" src="https://quiz-20.github.io/originals/macboard/sounds/bazinga.mp3"></audio>
+          <h3 class="name">Bazinga</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('65').play();">
+          <audio id="65" src="https://quiz-20.github.io/originals/macboard/sounds/ben.mp3"></audio>
+          <h3 class="name">Ben</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('bonk').play();">
+          <audio id="bonk" src="https://quiz-20.github.io/originals/macboard/sounds/bonk.mp3"></audio>
+          <h3 class="name">Bonk</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('o').play();">
+          <audio id="o" src="https://quiz-20.github.io/originals/macboard/sounds/vine-boom.mp3"></audio>
+          <h3 class="name">Boom</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('64').play();">
+          <audio id="64" src="https://quiz-20.github.io/originals/macboard/sounds/whatthehellboy.mp3"></audio>
+          <h3 class="name">Boy What the Hell Boy</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('92000').play();">
+          <audio id="92000" src="https://quiz-20.github.io/originals/macboard/sounds/brawl-stars-loose-sound.mp3"></audio>
+          <h3 class="name">Brawl Stars</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('9200').play();">
+          <audio id="9200" src="https://quiz-20.github.io/originals/macboard/sounds/brawl-stars-loading-sound.mp3"></audio>
+          <h3 class="name">Brawl Stars 2</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('920').play();">
+          <audio id="920" src="https://quiz-20.github.io/originals/macboard/sounds/el-primo.mp3"></audio>
+          <h3 class="name">Brawl Stars 3</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('92').play();">
+          <audio id="92" src="https://quiz-20.github.io/originals/macboard/sounds/breathair.mp3"></audio>
+          <h3 class="name">Breath Air</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('bruh').play();">
+          <audio id="bruh" src="https://quiz-20.github.io/originals/macboard/sounds/bruh.mp3"></audio>
+          <h3 class="name">Bruh</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('l').play();">
+          <audio id="l" src="https://quiz-20.github.io/originals/macboard/sounds/bye-have-a-great-time.mp3"></audio>
+          <h3 class="name">Bye Have a Great Time</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('35').play();">
+          <audio id="35" src="https://quiz-20.github.io/originals/macboard/sounds/hiyah.mp3"></audio>
+          <h3 class="name">Can I Get a Hiyah</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('3555').play();">
+          <audio id="3555" src="https://quiz-20.github.io/originals/macboard/sounds/shrimp.mp3"></audio>
+          <h3 class="name">CaseOh</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('34').play();">
+          <audio id="34" src="https://quiz-20.github.io/originals/macboard/sounds/Censor-Beep-Sound-Effect.mp3"></audio>
+          <h3 class="name">Censor Beep</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('68').play();">
+          <audio id="68" src="https://quiz-20.github.io/originals/macboard/sounds/hoodclassic.mp3"></audio>
+          <h3 class="name">Certified Hood Classic</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('50').play();">
+          <audio id="50" src="https://quiz-20.github.io/originals/macboard/sounds/coc-intro.mp3"></audio>
+          <h3 class="name">Clash of Clans</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('51').play();">
+          <audio id="51" src="https://quiz-20.github.io/originals/macboard/sounds/cr-intro.mp3"></audio>
+          <h3 class="name">Clash Royale</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('66').play();">
+          <audio id="66" src="https://quiz-20.github.io/originals/macboard/sounds/hehehe.mp3"></audio>
+          <h3 class="name">Clash Royale 2</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('29').play();">
+          <audio id="29" src="https://quiz-20.github.io/originals/macboard/sounds/coffin-dance.mp3"></audio>
+          <h3 class="name">Coffin Dance</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('290').play();">
+          <audio id="290" src="https://quiz-20.github.io/originals/macboard/sounds/crab-rave.mp3"></audio>
+          <h3 class="name">Crab Rave</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('2900').play();">
+          <audio id="2900" src="https://quiz-20.github.io/originals/macboard/sounds/this-is-the-crazy-frog.mp3"></audio>
+          <h3 class="name">Crazy Frog</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('3').play();">
+          <audio id="3" src="https://quiz-20.github.io/originals/macboard/sounds/dababy-lets-go.mp3"></audio>
+          <h3 class="name">DaBaby Let's Go</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('9').play();">
+          <audio id="9" src="https://quiz-20.github.io/originals/macboard/sounds/sad_song.mp3"></audio>
+          <h3 class="name">Damaged Coda</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('72').play();">
+          <audio id="72" src="https://quiz-20.github.io/originals/macboard/sounds/danger-alarm.mp3"></audio>
+          <h3 class="name">Danger Alarm</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('r').play();">
+          <audio id="r" src="https://quiz-20.github.io/originals/macboard/sounds/deez-nutz.mp3"></audio>
+          <h3 class="name">Deez Nuts</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('57').play();">
+          <audio id="57" src="https://quiz-20.github.io/originals/macboard/sounds/boxingbell.mp3"></audio>
+          <h3 class="name">Ding Ding Ding</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('a').play();">
+          <audio id="a" src="https://quiz-20.github.io/originals/macboard/sounds/discord-notification.mp3"></audio>
+          <h3 class="name">Discord Notification</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('501').play();">
+          <audio id="501" src="https://quiz-20.github.io/originals/macboard/sounds/down-in-ohio.mp3"></audio>
+          <h3 class="name">Down in Ohio</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('7c').play();">
+          <audio id="7c" src="https://quiz-20.github.io/originals/macboard/sounds/driftveil-city.mp3"></audio>
+          <h3 class="name">Driftveil City</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('7').play();">
+          <audio id="7" src="https://quiz-20.github.io/originals/macboard/sounds/badumtss.mp3"></audio>
+          <h3 class="name">Drum</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('DUN_DUN').play();">
+          <audio id="DUN_DUN" src="https://quiz-20.github.io/originals/macboard/sounds/DUN_DUN.mp3"></audio>
+          <h3 class="name">Dun Dun</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('u').play();">
+          <audio id="u" src="https://quiz-20.github.io/originals/macboard/sounds/earape-base.mp3"></audio>
+          <h3 class="name">Ear Damage</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('x').play();">
+          <audio id="x" src="https://quiz-20.github.io/originals/macboard/sounds/fn-default-bb.mp3"></audio>
+          <h3 class="name">Ear Damage 2</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('81').play();">
+          <audio id="81" src="https://quiz-20.github.io/originals/macboard/sounds/scotlandforever.mp3"></audio>
+          <h3 class="name">Ear Damage 3</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('102').play();">
+          <audio id="102" src="https://quiz-20.github.io/originals/macboard/sounds/thomastankengine.mp3"></audio>
+          <h3 class="name">Ear Damage 4</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('170').play();">
+          <audio id="170" src="https://quiz-20.github.io/originals/macboard/sounds/emoji-death.mp3"></audio>
+          <h3 class="name">Emoji Death</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('17').play();">
+          <audio id="17" src="https://quiz-20.github.io/originals/macboard/sounds/emotional-damage.mp3"></audio>
+          <h3 class="name">Emotional Damage</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('fart').play();">
+          <audio id="fart" src="https://quiz-20.github.io/originals/macboard/sounds/fart.mp3"></audio>
+          <h3 class="name">Fart</h3>
+        </div>
+        <div
+          class="sound"
+          onclick="document.getElementById('fart-with-reverb').play();"
+        >
+          <audio
+            id="fart-with-reverb"
+            src="https://quiz-20.github.io/originals/macboard/sounds/fart-with-reverb.mp3"
+          ></audio>
+          <h3 class="name">Fart 2</h3>
+        </div>
+        <div
+          class="sound"
+          onclick="document.getElementById('sloppy-fart').play();"
+        >
+          <audio id="sloppy-fart" src="https://quiz-20.github.io/originals/macboard/sounds/sloppy-fart.mp3"></audio>
+          <h3 class="name">Fart 3</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('20').play();">
+          <audio id="20" src="https://quiz-20.github.io/originals/macboard/sounds/fbi-open-up.mp3"></audio>
+          <h3 class="name">FBI Open Up</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('y').play();">
+          <audio
+            id="y"
+            src="https://quiz-20.github.io/originals/macboard/sounds/five-nights-at-freddys-full-scream.mp3"
+          ></audio>
+          <h3 class="name">FNAF Jumpscare</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('111').play();">
+          <audio id="111" src="https://quiz-20.github.io/originals/macboard/sounds/fanfend.mp3"></audio>
+          <h3 class="name">FNAF Toreador March</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('80').play();">
+          <audio id="80" src="https://quiz-20.github.io/originals/macboard/sounds/fortnite-battlepass.mp3"></audio>
+          <h3 class="name">Fortnite Battlepass</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('4').play();">
+          <audio id="4" src="https://quiz-20.github.io/originals/macboard/sounds/gas-gas-gas.mp3"></audio>
+          <h3 class="name">Gas Gas Gas</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('26').play();">
+          <audio id="26" src="https://quiz-20.github.io/originals/macboard/sounds/goofy-yell.mp3"></audio>
+          <h3 class="name">Goofy Dog Yell</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('z').play();">
+          <audio id="z" src="https://quiz-20.github.io/originals/macboard/sounds/gta5-wasted.mp3"></audio>
+          <h3 class="name">GTA Wasted</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('49').play();">
+          <audio id="49" src="https://quiz-20.github.io/originals/macboard/sounds/guess-who-back.mp3"></audio>
+          <h3 class="name">Guess Who's Back</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('70').play();">
+          <audio id="70" src="https://quiz-20.github.io/originals/macboard/sounds/happy-happy-happy-song.mp3"></audio>
+          <h3 class="name">Happy Happy Happy</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('88').play();">
+          <audio id="88" src="https://quiz-20.github.io/originals/macboard/sounds/Voicy_Happy Monkey Circle.mp3"></audio>
+          <h3 class="name">Happy Monkey Circle</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('87').play();">
+          <audio
+            id="87"
+            src="https://quiz-20.github.io/originals/macboard/sounds/helicopter-helicopter-parakofer-parakofer.mp3"
+          ></audio>
+          <h3 class="name">Helicopter Helicopter</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('6969').play();">
+          <audio id="6969" src="https://quiz-20.github.io/originals/macboard/sounds/hello.mp3"></audio>
+          <h3 class="name">Hello</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('69').play();">
+          <audio id="69" src="https://quiz-20.github.io/originals/macboard/sounds/darknessmyoldfriend.mp3"></audio>
+          <h3 class="name">Hello Darkness</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('d').play();">
+          <audio id="d" src="https://quiz-20.github.io/originals/macboard/sounds/hello-there.mp3"></audio>
+          <h3 class="name">Hello There</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('79').play();">
+          <audio id="79" src="https://quiz-20.github.io/originals/macboard/sounds/helloyourcomputerhasvirus.mp3"></audio>
+          <h3 class="name">Hello Your Computer Has Virus</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('82').play();">
+          <audio id="82" src="https://quiz-20.github.io/originals/macboard/sounds/helpme.mp3"></audio>
+          <h3 class="name">Help Me</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('43').play();">
+          <audio id="43" src="https://quiz-20.github.io/originals/macboard/sounds/x-games-mode.mp3"></audio>
+          <h3 class="name">He On X Games Mode</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('40').play();">
+          <audio id="40" src="https://quiz-20.github.io/originals/macboard/sounds/hey-ya.mp3"></audio>
+          <h3 class="name">Hey Ya</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('18').play();">
+          <audio id="18" src="https://quiz-20.github.io/originals/macboard/sounds/hog-rider.mp3"></audio>
+          <h3 class="name">Hog Rider</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('37').play();">
+          <audio id="37" src="https://quiz-20.github.io/originals/macboard/sounds/talking-ben-ho-ho-ho.mp3"></audio>
+          <h3 class="name">Ho Ho Ho</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('62').play();">
+          <audio id="62" src="https://quiz-20.github.io/originals/macboard/sounds/iamtheone.mp3"></audio>
+          <h3 class="name">I Am the One</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('1').play();">
+          <audio id="1" src="https://quiz-20.github.io/originals/macboard/sounds/morgan-smell.mp3"></audio>
+          <h3 class="name">I Can Smell You</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('i').play();">
+          <audio id="i" src="https://quiz-20.github.io/originals/macboard/sounds/turtles.mp3"></audio>
+          <h3 class="name">I Like Turtles</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('10').play();">
+          <audio id="10" src="https://quiz-20.github.io/originals/macboard/sounds/cut-g.mp3"></audio>
+          <h3 class="name">I Like Your Cut G</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('11').play();">
+          <audio id="11" src="https://quiz-20.github.io/originals/macboard/sounds/i_love_refrigerators.mp3"></audio>
+          <h3 class="name">I Love Refrigerators</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('m').play();">
+          <audio id="m" src="https://quiz-20.github.io/originals/macboard/sounds/inception.mp3"></audio>
+          <h3 class="name">Inception</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('74').play();">
+          <audio id="74" src="https://quiz-20.github.io/originals/macboard/sounds/throwitbackay.mp3"></audio>
+          <h3 class="name">Industry Baby</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('89').play();">
+          <audio
+            id="89"
+            src="https://quiz-20.github.io/originals/macboard/sounds/i-put-my-armor-on-made-with-Voicemod-technology.mp3"
+          ></audio>
+          <h3 class="name">I Put My Armour On Meme</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('86').play();">
+          <audio id="86" src="https://quiz-20.github.io/originals/macboard/sounds/its-a-banana-next-to-a-banana.mp3"></audio>
+          <h3 class="name">It's a Bananana Next to a Bananana</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('h3').play();">
+          <audio id="h3" src="https://quiz-20.github.io/originals/macboard/sounds/beautiful-day.mp3"></audio>
+          <h3 class="name">It's a Beautiful Day</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('99').play();">
+          <audio id="99" src="https://quiz-20.github.io/originals/macboard/sounds/itscorn.mp3"></audio>
+          <h3 class="name">It's Corn</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('48').play();">
+          <audio id="48" src="https://quiz-20.github.io/originals/macboard/sounds/crona-time.mp3"></audio>
+          <h3 class="name">It's Corona Time</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('25').play();">
+          <audio id="25" src="https://quiz-20.github.io/originals/macboard/sounds/mario.mp3"></audio>
+          <h3 class="name">It's Me, Mario</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('101').play();">
+          <audio id="101" src="https://quiz-20.github.io/originals/macboard/sounds/quandale.mp3"></audio>
+          <h3 class="name">It's Quandale Dingle</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('12').play();">
+          <audio id="12" src="https://quiz-20.github.io/originals/macboard/sounds/i-will-send-you-to-jesus.mp3"></audio>
+          <h3 class="name">I Will Send You to Jesus</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('2').play();">
+          <audio id="2" src="https://quiz-20.github.io/originals/macboard/sounds/john-cena-intro.mp3"></audio>
+          <h3 class="name">John Cena Intro</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('95').play();">
+          <audio id="95" src="https://quiz-20.github.io/originals/macboard/sounds/jurassicpark.mp3"></audio>
+          <h3 class="name">Jurrasic Park Theme Song</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('115').play();">
+          <audio id="115" src="https://quiz-20.github.io/originals/macboard/sounds/kidsyay.mp3"></audio>
+          <h3 class="name">Kids Cheering</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('s').play();">
+          <audio id="s" src="https://quiz-20.github.io/originals/macboard/sounds/lebron-james.mp3"></audio>
+          <h3 class="name">LeBron James</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('ss').play();">
+          <audio id="ss" src="https://quiz-20.github.io/originals/macboard/sounds/indian.mp3"></audio>
+          <h3 class="name">Loud Indian Music</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('103').play();">
+          <audio id="103" src="https://quiz-20.github.io/originals/macboard/sounds/mariofalling.mp3"></audio>
+          <h3 class="name">Mario Falling</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('1700').play();">
+          <audio id="1700" src="https://quiz-20.github.io/originals/macboard/sounds/e_meme.mp3"></audio>
+          <h3 class="name">Markiplier E</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('funk').play();">
+          <audio id="funk" src="https://quiz-20.github.io/originals/macboard/sounds/masha-ultrafunk.mp3"></audio>
+          <h3 class="name">Masha Ultrafunk</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('110').play();">
+          <audio id="110" src="https://quiz-20.github.io/originals/macboard/sounds/mayonnaise.mp3"></audio>
+          <h3 class="name">Mayonnaise on an Escalator</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('100').play();">
+          <audio id="100" src="https://quiz-20.github.io/originals/macboard/sounds/mepersonally.mp3"></audio>
+          <h3 class="name">Me Personally</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('1000').play();">
+          <audio id="1000" src="https://quiz-20.github.io/originals/macboard/sounds/metamorphosis-donat.mp3"></audio>
+          <h3 class="name" style="word-break: break-all">Metamorphosis</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('46').play();">
+          <audio id="46" src="https://quiz-20.github.io/originals/macboard/sounds/mc-anvil.mp3"></audio>
+          <h3 class="name">Minecraft Anvil Sound</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('31').play();">
+          <audio id="31" src="https://quiz-20.github.io/originals/macboard/sounds/hit-marker.mp3"></audio>
+          <h3 class="name">MLG Hit Marker</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('310').play();">
+          <audio id="310" src="https://quiz-20.github.io/originals/macboard/sounds/mb-remix.mp3"></audio>
+          <h3 class="name">MrBeast Meme</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('320').play();">
+          <audio id="320" src="https://quiz-20.github.io/originals/macboard/sounds/munch.mp3"></audio>
+          <h3 class="name">Munch</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('90').play();">
+          <audio id="90" src="https://quiz-20.github.io/originals/macboard/sounds/nahjittrippin.mp3"></audio>
+          <h3 class="name">Nah Jit Tripping</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('30').play();">
+          <audio id="30" src="https://quiz-20.github.io/originals/macboard/sounds/nestle-crunch.mp3"></audio>
+          <h3 class="name">Nestle Crunch</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('105').play();">
+          <audio id="105" src="https://quiz-20.github.io/originals/macboard/sounds/noamountof.mp3"></audio>
+          <h3 class="name">No Amount of Therapy</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('10500').play();">
+          <audio id="10500" src="https://quiz-20.github.io/originals/macboard/sounds/no-chick-fil-a-sauce.mp3"></audio>
+          <h3 class="name">No Chick-fil-A Sauce</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('k').play();">
+          <audio id="k" src="https://quiz-20.github.io/originals/macboard/sounds/nice.mp3"></audio>
+          <h3 class="name">Noice</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('v').play();">
+          <audio id="v" src="https://quiz-20.github.io/originals/macboard/sounds/nomnomnomnom.mp3"></audio>
+          <h3 class="name">Nom Nom</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('83').play();">
+          <audio id="83" src="https://quiz-20.github.io/originals/macboard/sounds/nootnoot.mp3"></audio>
+          <h3 class="name">Noot Noot</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('nope').play();">
+          <audio id="nope" src="https://quiz-20.github.io/originals/macboard/sounds/nope.mp3"></audio>
+          <h3 class="name">Nope</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('nut').play();">
+          <audio id="nut" src="https://quiz-20.github.io/originals/macboard/sounds/nut.mp3"></audio>
+          <h3 class="name">Nut</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('41').play();">
+          <audio id="41" src="https://quiz-20.github.io/originals/macboard/sounds/oh-baby-a-triple.mp3"></audio>
+          <h3 class="name">Oh Baby a Triple</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('106').play();">
+          <audio id="106" src="https://quiz-20.github.io/originals/macboard/sounds/ohhellothereshreak.mp3"></audio>
+          <h3 class="name">Oh Hello There</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('75').play();">
+          <audio id="75" src="https://quiz-20.github.io/originals/macboard/sounds/ohhmygod.mp3"></audio>
+          <h3 class="name">Ohhh My God</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('53').play();">
+          <audio id="53" src="https://quiz-20.github.io/originals/macboard/sounds/ohmygod.mp3"></audio>
+          <h3 class="name">Oh My God</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('77').play();">
+          <audio id="77" src="https://quiz-20.github.io/originals/macboard/sounds/ohnoohnoohnonono.mp3"></audio>
+          <h3 class="name">Oh No Oh No</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('97').play();">
+          <audio id="97" src="https://quiz-20.github.io/originals/macboard/sounds/oldspice.mp3"></audio>
+          <h3 class="name">Old Spice Whistle</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('500').play();">
+          <audio id="500" src="https://quiz-20.github.io/originals/macboard/sounds/one-two-buckle-my-shoe.mp3"></audio>
+          <h3 class="name">One Two Buckle My Shoe</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('5').play();">
+          <audio id="5" src="https://quiz-20.github.io/originals/macboard/sounds/full-table-broken.mp3"></audio>
+          <h3 class="name">Our Table Is Broken</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('520d').play();">
+          <audio id="520d" src="https://quiz-20.github.io/originals/macboard/sounds/pedro-song.mp3"></audio>
+          <h3 class="name">Pedro Pedro Pedro</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('520').play();">
+          <audio id="520" src="https://quiz-20.github.io/originals/macboard/sounds/peaches.mp3"></audio>
+          <h3 class="name">Princess Peach</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('52').play();">
+          <audio id="52" src="https://quiz-20.github.io/originals/macboard/sounds/psst.mp3"></audio>
+          <h3 class="name">Pssst</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('15').play();">
+          <audio id="15" src="https://quiz-20.github.io/originals/macboard/sounds/radio-beep.mp3"></audio>
+          <h3 class="name">Radio Beep</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('f').play();">
+          <audio id="f" src="https://quiz-20.github.io/originals/macboard/sounds/rick-roll.mp3"></audio>
+          <h3 class="name">Rickroll</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('45').play();">
+          <audio id="45" src="https://quiz-20.github.io/originals/macboard/sounds/roblox-num-num.mp3"></audio>
+          <h3 class="name">Roblox Num Num Num</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('e').play();">
+          <audio id="e" src="https://quiz-20.github.io/originals/macboard/sounds/oof.mp3"></audio>
+          <h3 class="name">Roblox Oof</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('14').play();">
+          <audio id="14" src="https://quiz-20.github.io/originals/macboard/sounds/run.mp3"></audio>
+          <h3 class="name">Run</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('14000').play();">
+          <audio id="14000" src="https://quiz-20.github.io/originals/macboard/sounds/rush-e.mp3"></audio>
+          <h3 class="name">Rush E</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('32').play();">
+          <audio id="32" src="https://quiz-20.github.io/originals/macboard/sounds/sad-violin.mp3"></audio>
+          <h3 class="name">Sad Violin</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('23').play();">
+          <audio id="23" src="https://quiz-20.github.io/originals/macboard/sounds/sans.mp3"></audio>
+          <h3 class="name">Sans Voice</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('67').play();">
+          <audio id="67" src="https://quiz-20.github.io/originals/macboard/sounds/screamemoji.mp3"></audio>
+          <h3 class="name">Scream</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('93').play();">
+          <audio id="93" src="https://quiz-20.github.io/originals/macboard/sounds/bluekidscream.mp3"></audio>
+          <h3 class="name">Scream 2</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('94').play();">
+          <audio
+            id="94"
+            src="https://quiz-20.github.io/originals/macboard/sounds/kid-on-crack-full-vine-original-mp3cut.mp3"
+          ></audio>
+          <h3 class="name">Scream 3</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('c').play();">
+          <audio id="c" src="https://quiz-20.github.io/originals/macboard/sounds/sheep.mp3"></audio>
+          <h3 class="name">Scream 4</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('noo').play();">
+          <audio id="noo" src="https://quiz-20.github.io/originals/macboard/sounds/shreksophone.mp3"></audio>
+          <h3 class="name">Shreksophone</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('n').play();">
+          <audio id="n" src="https://quiz-20.github.io/originals/macboard/sounds/sicko.mp3"></audio>
+          <h3 class="name">Sicko Mode Beginning</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('27').play();">
+          <audio id="27" src="https://quiz-20.github.io/originals/macboard/sounds/sike.mp3"></audio>
+          <h3 class="name">Sike</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('107').play();">
+          <audio id="107" src="https://quiz-20.github.io/originals/macboard/sounds/skibidi-dop-dop-yes-yes.mp3"></audio>
+          <h3 class="name">Skibidi Dop Dop</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('1070').play();">
+          <audio id="1070" src="https://quiz-20.github.io/originals/macboard/sounds/skibidi2.mp3"></audio>
+          <h3 class="name">Skibidi Dop Dop Wednesday</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('108').play();">
+          <audio id="108" src="https://quiz-20.github.io/originals/macboard/sounds/skibidi-toilet.mp3"></audio>
+          <h3 class="name">Skibidi Toilet</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('1080').play();">
+          <audio id="1080" src="https://quiz-20.github.io/originals/macboard/sounds/skibidi-mine.mp3"></audio>
+          <h3 class="name">Skibidi Toilet Will be Mine</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('24').play();">
+          <audio id="24" src="https://quiz-20.github.io/originals/macboard/sounds/skull-trumpet.mp3"></audio>
+          <h3 class="name">Skull Trumpet Doot Doot</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('240').play();">
+          <audio id="240" src="https://quiz-20.github.io/originals/macboard/sounds/smurf-cat.mp3"></audio>
+          <h3 class="name">Smurf Cat</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('36').play();">
+          <audio id="36" src="https://quiz-20.github.io/originals/macboard/sounds/soviet.mp3"></audio>
+          <h3 class="name">Soviet Union Anthem</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('w').play();">
+          <audio id="w" src="https://quiz-20.github.io/originals/macboard/sounds/spongebob-dolphin.mp3"></audio>
+          <h3 class="name">Spongebob Dolphin</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('q').play();">
+          <audio id="q" src="https://quiz-20.github.io/originals/macboard/sounds/yummy.mp3"></audio>
+          <h3 class="name">Spongebob Yummy</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('qww').play();">
+          <audio id="qww" src="https://quiz-20.github.io/originals/macboard/sounds/squid-games-pink-soldiers.mp3"></audio>
+          <h3 class="name">Squid Game Pink Soldiers</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('39').play();">
+          <audio id="39" src="https://quiz-20.github.io/originals/macboard/sounds/stop-the-cap.mp3"></audio>
+          <h3 class="name">Stop the Cap</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('63').play();">
+          <audio id="63" src="https://quiz-20.github.io/originals/macboard/sounds/superidol.mp3"></audio>
+          <h3 class="name">Super Idol</h3>
+        </div>
+        <div
+          class="sound"
+          onclick="document.getElementById('taco-bell').play();"
+        >
+          <audio id="taco-bell" src="https://quiz-20.github.io/originals/macboard/sounds/taco-bell.mp3"></audio>
+          <h3 class="name">Taco Bell</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('113').play();">
+          <audio id="113" src="https://quiz-20.github.io/originals/macboard/sounds/notevenclose.mp3"></audio>
+          <h3 class="name">Technoblade 🫡</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('114').play();">
+          <audio id="114" src="https://quiz-20.github.io/originals/macboard/sounds/technoneverdies.mp3"></audio>
+          <h3 class="name">Technoblade 2</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('56').play();">
+          <audio id="56" src="https://quiz-20.github.io/originals/macboard/sounds/telephonedial.mp3"></audio>
+          <h3 class="name">Telephone Dial</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('76').play();">
+          <audio id="76" src="https://quiz-20.github.io/originals/macboard/sounds/tetristheme.mp3"></audio>
+          <h3 class="name">Tetris Theme</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('h').play();">
+          <audio id="h" src="https://quiz-20.github.io/originals/macboard/sounds/damage.mp3"></audio>
+          <h3 class="name">That's a Lot of Damage</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('980').play();">
+          <audio id="980" src="https://quiz-20.github.io/originals/macboard/sounds/digital.mp3"></audio>
+          <h3 class="name">The Amazing Digital Circus</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('98').play();">
+          <audio id="98" src="https://quiz-20.github.io/originals/macboard/sounds/thefatratxenogenesis.mp3"></audio>
+          <h3 class="name">TheFatRat Xenogenesis</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('21').play();">
+          <audio id="21" src="https://quiz-20.github.io/originals/macboard/sounds/to-be-continued.mp3"></audio>
+          <h3 class="name">To Be Countinued</h3>
+        </div>
+
+        <div class="sound" onclick="document.getElementById('73').play();">
+          <audio id="73" src="https://quiz-20.github.io/originals/macboard/sounds/hotpizzarolls.mp3"></audio>
+          <h3 class="name">Totino's Hot Pizza Rolls</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('g').play();">
+          <audio id="g" src="https://quiz-20.github.io/originals/macboard/sounds/trololo.mp3"></audio>
+          <h3 class="name">Trololo</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('19').play();">
+          <audio id="19" src="https://quiz-20.github.io/originals/macboard/sounds/sprite-cranberry.mp3"></audio>
+          <h3 class="name">Want a Sprite Cranberry</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('104').play();">
+          <audio id="104" src="https://quiz-20.github.io/originals/macboard/sounds/watchyojet.mp3"></audio>
+          <h3 class="name">Watch Your Jet</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('what').play();">
+          <audio id="what" src="https://quiz-20.github.io/originals/macboard/sounds/what-the-dog-doin.mp3"></audio>
+          <h3 class="name">What the Dog Doing</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('96').play();">
+          <audio id="96" src="https://quiz-20.github.io/originals/macboard/sounds/wedonotcare.mp3"></audio>
+          <h3 class="name">We Do Not Care</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('91').play();">
+          <audio id="91" src="https://quiz-20.github.io/originals/macboard/sounds/wewillberightback.mp3"></audio>
+          <h3 class="name">We'll Be Right Back</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('6000').play();">
+          <audio id="6000" src="https://quiz-20.github.io/originals/macboard/sounds/sigma.mp3"></audio>
+          <h3 class="name">What the Sigma</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('60').play();">
+          <audio id="60" src="https://quiz-20.github.io/originals/macboard/sounds/damnwheredidyoufindthis.mp3"></audio>
+          <h3 class="name">Where'd You Find This</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('42').play();">
+          <audio id="42" src="https://quiz-20.github.io/originals/macboard/sounds/who-touch-my.mp3"></audio>
+          <h3 class="name">Who Toucha My Spaghetti</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('28').play();">
+          <audio id="28" src="https://quiz-20.github.io/originals/macboard/sounds/why-are-you-running.mp3"></audio>
+          <h3 class="name">Why Are You Running</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('55').play();">
+          <audio id="55" src="https://quiz-20.github.io/originals/macboard/sounds/wiimusic.mp3"></audio>
+          <h3 class="name">Wii Theme Song</h3>
+        </div>
+        <div
+          class="sound"
+          onclick="document.getElementById('WinError').play();"
+        >
+          <audio id="WinError" src="https://quiz-20.github.io/originals/macboard/sounds/WinError.mp3"></audio>
+          <h3 class="name">Windows Error</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('38').play();">
+          <audio id="38" src="https://quiz-20.github.io/originals/macboard/sounds/winxpshutdown.mp3"></audio>
+          <h3 class="name">Windows Shutdown</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('78').play();">
+          <audio id="78" src="https://quiz-20.github.io/originals/macboard/sounds/woahcalmdownjamal.mp3"></audio>
+          <h3 class="name">Woah Calm Down Jamal</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('pads').play();">
+          <audio id="pads" src="https://quiz-20.github.io/originals/macboard/sounds/downer_noise.mp3"></audio>
+          <h3 class="name">Womp Womp</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('t').play();">
+          <audio id="t" src="https://quiz-20.github.io/originals/macboard/sounds/woody-woodpecker-laugh.mp3"></audio>
+          <h3 class="name">Woodpecker Laugh</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('p').play();">
+          <audio id="p" src="https://quiz-20.github.io/originals/macboard/sounds/anime-wow.mp3"></audio>
+          <h3 class="name">Wow</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('22').play();">
+          <audio id="22" src="https://quiz-20.github.io/originals/macboard/sounds/yeah.mp3"></audio>
+          <h3 class="name">Yeah</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('440').play();">
+          <audio id="440" src="https://quiz-20.github.io/originals/macboard/sounds/yee.mp3"></audio>
+          <h3 class="name">Yee</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('yeet').play();">
+          <audio id="yeet" src="https://quiz-20.github.io/originals/macboard/sounds/yeet.mp3"></audio>
+          <h3 class="name">Yeet</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('44').play();">
+          <audio id="44" src="https://quiz-20.github.io/originals/macboard/sounds/ben-yes.mp3"></audio>
+          <h3 class="name">Yes</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('8').play();">
+          <audio id="8" src="https://quiz-20.github.io/originals/macboard/sounds/yoda-laugh.mp3"></audio>
+          <h3 class="name">Yoda Laugh</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('800').play();">
+          <audio id="800" src="https://quiz-20.github.io/originals/macboard/sounds/my-stick.mp3"></audio>
+          <h3 class="name">Yoda My Stick</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('60000').play();">
+          <audio
+            id="60000"
+            src="https://quiz-20.github.io/originals/macboard/sounds/you-are-my-sunshine-lebron-james.mp3"
+          ></audio>
+          <h3 class="name">You Are My Sunshine</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('600').play();">
+          <audio id="600" src="https://quiz-20.github.io/originals/macboard/sounds/you-didnt-have-to-cut-me-off.mp3"></audio>
+          <h3 class="name">You Didn't Have to Cut Me Off</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('61').play();">
+          <audio id="61" src="https://quiz-20.github.io/originals/macboard/sounds/yougotjebaited.mp3"></audio>
+          <h3 class="name">You Got Jebaited</h3>
+        </div>
+        <div class="sound" onclick="document.getElementById('54').play();">
+          <audio id="54" src="https://quiz-20.github.io/originals/macboard/sounds/yourmom-deep.mp3"></audio>
+          <h3 class="name">Your Mom</h3>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+     <center>
+     <caption>HouseLearning SafeLibrary || Audio Library</caption><br>
+     <a href="https://houselearning.github.io">Visit HouseLearning</a>
+     </center>
+    </footer>
+    <script src="/macvg/app.js"></script>
+    <style>
+    html{
+    background-image:url("https://houselearning.github.io/safe-library/programs/assets/background-main.jpeg");
+    }
+  background-repeat: no-repeat;
+    </style>
+  </body>
+</html>
