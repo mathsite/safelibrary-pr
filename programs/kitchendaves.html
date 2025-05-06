@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5ive Nights At Kitchen Daves</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-image 0.5s ease;
+            background-image: url('https://houselearning.github.io/safe-library/programs/assets/kichendaves/home.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            position: relative; /* Needed for absolute positioning of the overlay */
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(''); /* Path to your static GIF */
+            background-size: cover;
+            opacity: 0.6; /* Adjust for desired faintness */
+            pointer-events: none; /* Allows clicks to go through */
+            z-index: 1; /* Ensure it's above the main background */
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+        }
+        .magic-button {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        #start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        #start-screen button {
+            font-family: 'Press Start 2P', cursive;
+        }
+        .hidden {
+            display: none;
+        }
+        .floating-image {
+            animation: float 3s infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="start-screen">
+        <h1 class="game-title text-4xl sm:text-6xl font-bold text-red-500 mb-4">5ive Nights At Kitchen Daves</h1>
+        <img src="https://houselearning.github.io/safe-library/programs/assets/kichendaves/kitchen_dave.jpeg" alt="Kitchen Daves" class="floating-image w-64 h-auto mb-8 rounded-lg shadow-lg" />
+        <button id="start-game-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-lg">Start Game</button>
+    </div>
+
+    <div id="game-container" class="min-h-screen flex flex-col items-center justify-start p-4 bg-cover bg-center hidden" style="background-image: url('');">
+        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-2xl font-bold text-white z-40 bg-black/50 backdrop-blur-md px-4 py-2 rounded-lg shadow-lg" id="timer">
+            <span>0</span> <span>seconds</span>
+        </div>
+
+        <button
+            id="magic-button"
+            class="absolute top-4 right-4 p-4 rounded-full shadow-lg bg-gradient-to-br from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all duration-300 w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center magic-button"
+            aria-label="Change background image"
+        >
+            <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/video.svg" alt="CCTV Camera" class="w-8 h-8 sm:w-10 sm:h-10" />
+        </button>
+
+        <div id="menu" class="absolute top-24 sm:top-32 mt-4 p-4 sm:p-6 rounded-2xl shadow-2xl bg-white/5 backdrop-blur-md border border-white/10 space-y-4 max-w-[90vw] sm:max-w-md z-50 hidden">
+            <div class="flex justify-end">
+                <button id="close-menu-button" class="text-gray-400 hover:text-gray-300" aria-label="Close menu">
+                    <img src="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/x.svg" alt="Close" class="w-5 h-5" />
+                </button>
+            </div>
+            <h2 class="text-lg sm:text-xl font-semibold text-white mb-4">CAMERAS</h2>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3" id="background-options">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const backgroundOptions = [
+            { name: 'OUTSIDE CAM 2', value: 'OUTSIDE CAM 2', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/outside_cam_2.jpeg', duration: 10 },
+            { name: 'OUTSIDE CAM 1', value: 'OUTSIDE CAM 1', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/outside_cam_1.jpeg', duration: 15 },
+            { name: 'SINK', value: 'SINK', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/sink.jpeg', duration: 12 },
+            { name: 'STOVE 2', value: 'STOVE 2', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/stove_2.jpeg', duration: 18 },
+            { name: 'FRIDGE', value: 'FRIDGE', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/fridge.jpeg', duration: 20 },
+            { name: 'OVEN', value: 'OVEN', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/oven.jpeg', duration: 25 },
+            { name: 'PANTRY', value: 'PANTRY', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/pantry.jpeg', duration: 14 },
+            { name: 'STOVE 1', value: 'STOVE 1', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/stove_1.jpeg', duration: 17 },
+            { name: 'SINK 1', value: 'SINK 1', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/sink_1.jpeg', duration: 22 },
+            { name: 'RECIPE 1', value: 'RECIPE 1', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/recipe_1.jpeg', duration: 13 },
+            { name: 'RECIPE 2', value: 'RECIPE 2', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/recipe_2.jpeg', duration: 13 },
+            { name: 'RECIPE 3', value: 'RECIPE 3', imageUrl: 'https://houselearning.github.io/safe-library/programs/assets/kichendaves/recipe_3.jpeg', duration: 13 },
+
+        ];
+
+        const magicButton = document.getElementById('magic-button');
+        const menu = document.getElementById('menu');
+        const closeMenuButton = document.getElementById('close-menu-button');
+        const backgroundOptionsContainer = document.getElementById('background-options');
+        const body = document.body;
+        const timerDisplay = document.getElementById('timer');
+        const startScreen = document.getElementById('start-screen');
+        const startGameButton = document.getElementById('start-game-button');
+        const gameContainer = document.getElementById('game-container');
+
+        let isMenuOpen = false;
+        let seconds = 0;
+        let currentBackgroundIndex = 0;
+        let intervalId;
+        let currentImages = []; // Array to hold currently displayed images
+        let imageButtons = []; // Array to hold the image buttons
+
+        // Add images ending in letters to all intervals
+        const alwaysShow = [4, 6]; // FRIDGE, PANTRY
+
+        // Function to handle background change
+        function handleBackgroundChange(imageUrl) {
+            body.style.backgroundImage = `url(${imageUrl})`;
+            body.style.backgroundSize = 'cover';
+            body.style.backgroundPosition = 'center';
+            body.style.backgroundRepeat = 'no-repeat';
+            body.style.minHeight = '100vh';
+            isMenuOpen = false;
+            menu.classList.add('hidden');
+        }
+
+        // Menu toggle handler
+        function toggleMenu() {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('mousedown', (event) => {
+            if (isMenuOpen && !menu.contains(event.target) && event.target !== magicButton && !menu.contains(event.target)) {
+                isMenuOpen = false;
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Event listeners
+        magicButton.addEventListener('click', toggleMenu);
+        closeMenuButton.addEventListener('click', toggleMenu);
+        startGameButton.addEventListener('click', startGame);
+
+
+        function startGame() {
+            startScreen.style.display = 'none';
+            gameContainer.classList.remove('hidden');
+            seconds = 0; //reset timer.
+            startInterval();
+            //displayImages(); //show images.
+        }
+
+        // Add background options to the menu
+        backgroundOptions.forEach((bgOption, index) => {
+            const bgOptionButton = document.createElement('button');
+            bgOptionButton.classList.add('w-12', 'h-12', 'sm:w-16', 'sm:h-16', 'rounded-full', 'transition-all', 'duration-200', 'flex', 'items-center', 'justify-content', 'shadow-md', 'hover:shadow-lg', 'border-2', 'border-white/20', 'focus:outline-none', 'focus:ring-2', 'relative');
+            bgOptionButton.style.backgroundImage = `url('${bgOption.imageUrl}')`;
+            bgOptionButton.style.backgroundSize = 'cover';
+            bgOptionButton.style.backgroundPosition = 'center';
+            bgOptionButton.setAttribute('aria-label', `Set background to ${bgOption.name}`);
+            bgOptionButton.dataset.index = index; // Store the index
+
+            const camNumber = document.createElement('p');
+            camNumber.classList.add('text-xs', 'sm:text-sm', 'text-white', 'mt-1');
+            camNumber.textContent = `CAM ${index + 1} ${bgOption.name}`;
+
+
+
+            bgOptionButton.addEventListener('click', () => {
+                let clickedIndex = parseInt(bgOptionButton.dataset.index);
+                handleImageChange(clickedIndex);
+
+            });
+            const container = document.createElement('div');
+            container.classList.add('flex', 'flex-col', 'items-center');
+            container.appendChild(bgOptionButton);
+            container.appendChild(camNumber);
+            backgroundOptionsContainer.appendChild(container);
+            imageButtons.push(bgOptionButton); // Store button for later manipulation
+        });
+
+
+
+        function handleImageChange(clickedIndex) {
+            displayImages();
+            // Check if clickedIndex is valid
+            if (clickedIndex >= 0 && clickedIndex < backgroundOptions.length) {
+                const clickedImageUrl = backgroundOptions[clickedIndex].imageUrl;
+                handleBackgroundChange(clickedImageUrl);
+            } else {
+                handleBackgroundChange('https://houselearning.github.io/safe-library/programs/assets/kichendaves/home.jpeg');
+            }
+        }
+
+        function displayImages(clickedIndex) {
+
+            // Loop through all image buttons and set display style
+            imageButtons.forEach((button, index) => {
+                button.style.display = 'none'; // Default to hidden
+            });
+
+            if (seconds >= 0 && seconds <= 75) {
+                imageButtons[7].style.display = 'flex'; // STOVE 1
+                imageButtons[4].style.display = 'flex'; // FRIDGE
+                imageButtons[6].style.display = 'flex'; // PANTRY
+                imageButtons[9].style.display = 'flex'; // SINK
+                imageButtons[5].style.display = 'flex'; // OVEN
+                imageButtons[1].style.display = 'flex'; // OUTSIDE CAM 1
+                imageButtons[10].style.display = 'flex'; // Recipe 1
+                imageButtons[11].style.display = 'none'; // Recipe 
+            } else if (seconds > 75 && seconds <= 200) {
+                //Hide images for the first interval
+                imageButtons[7].style.display = 'none'; // STOVE 1
+                imageButtons[1].style.display = 'none'; // OUTSIDE CAM 1
+                imageButtons[11].style.display = 'none'; // Recipe 1
+
+                //Display images for the second interval
+                imageButtons[4].style.display = 'flex'; // FRIDGE
+                imageButtons[6].style.display = 'flex'; // PANTRY
+                imageButtons[5].style.display = 'flex'; // OVEN
+                imageButtons[9].style.display = 'flex'; // SINK
+                imageButtons[4].style.display = 'flex'; //Stove 2
+                imageButtons[2].style.display = 'flex'; // OUTSIDE CAM 2
+                imageButtons[11].style.display = 'flex'; // Recipe 2
+            } else if (seconds > 200 && seconds <= 275) {
+                //Hide images for the second interval
+                imageButtons[4].style.display = 'none'; //Stove 2
+                imageButtons[2].style.display = 'none'; // OUTSIDE CAM 2
+                imageButtons[11].style.display = 'none'; // Recipe 2
+                //Display images for the third interval
+                imageButtons[7].style.display = 'flex'; // STOVE 1
+                imageButtons[4].style.display = 'flex'; // FRIDGE
+                imageButtons[6].style.display = 'flex'; // PANTRY
+                imageButtons[9].style.display = 'flex'; // SINK
+                imageButtons[5].style.display = 'flex'; // OVEN
+                imageButtons[1].style.display = 'flex'; // OUTSIDE CAM 1
+                imageButtons[10].style.display = 'flex'; // Recipe 1
+            }
+        }
+
+        function startInterval() {
+            clearInterval(intervalId); // Clear any existing interval
+            intervalId = setInterval(() => {
+                seconds++;
+                timerDisplay.textContent = `${seconds} seconds`;
+                displayImages();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
