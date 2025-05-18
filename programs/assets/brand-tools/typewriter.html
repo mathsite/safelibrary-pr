@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SafeLibrary Typewriter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    #header {
+      display: flex;
+      align-items: center;
+      background: #222;
+      color: #fff;
+      padding: 10px 20px;
+    }
+    #header img {
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    #toolbar {
+      background: #f0f0f0;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    #editor {
+      padding: 20px;
+      min-height: 90vh;
+      outline: none;
+    }
+    button, select {
+      padding: 5px 10px;
+    }
+    #imageInput {
+      display: none;
+    }
+    .resize-handle {
+      width: 8px;
+      height: 8px;
+      background-color: blue;
+      border-radius: 50%;
+      position: absolute;
+      cursor: pointer;
+      display: none;
+      z-index: 10; /* Ensure handles are above the image */
+    }
+    .resize-handle.top-left {
+      top: -4px;
+      left: -4px;
+    }
+    .resize-handle.top-right {
+      top: -4px;
+      right: -4px;
+    }
+    .resize-handle.bottom-left {
+      bottom: -4px;
+      left: -4px;
+    }
+    .resize-handle.bottom-right {
+      bottom: -4px;
+      right: -4px;
+    }
+    .selected-image {
+      border: 2px solid blue;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header">
+    <a href="https://houselearning.github.io/safe-library/programs/">
+      <img src="https://houselearning.github.io/safe-library/programs/assets/typewriter-ico.png" alt="icon">
+    </a>
+    <h2>SafeLibrary Typewriter</h2>
+  </div>
+
+  <div id="toolbar">
+    <button onclick="document.execCommand('bold')"><b>B</b></button>
+    <button onclick="document.execCommand('italic')"><i>I</i></button>
+    <button onclick="document.execCommand('underline')"><u>U</u></button>
+
+    <select id="fontSelect" onchange="document.execCommand('fontName', false, this.value)">
+      <option value="Arial">Arial</option>
+      <option value="Verdana">Verdana</option>
+      <option value="Times New Roman">Times New Roman</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Courier New">Courier New</option>
+      <option value="Impact">Impact</option>
+      <option value="Comic Sans MS">Comic Sans MS</option>
+      <option value="Trebuchet MS">Trebuchet MS</option>
+      <option value="Lucida Console">Lucida Console</option>
+      <option value="Tahoma">Tahoma</option>
+      <option value="Palatino Linotype">Palatino Linotype</option>
+      <option value="Garamond">Garamond</option>
+      <option value="Bookman">Bookman</option>
+      <option value="Candara">Candara</option>
+      <option value="Calibri">Calibri</option>
+      <option value="Century Gothic">Century Gothic</option>
+      <option value="Franklin Gothic Medium">Franklin Gothic Medium</option>
+      <option value="Gill Sans">Gill Sans</option>
+      <option value="Helvetica">Helvetica</option>
+      <option value="Rockwell">Rockwell</option>
+      <option value="Segoe UI">Segoe UI</option>
+      <option value="Symbol">Symbol</option>
+      <option value="Monospace">Monospace</option>
+      <option value="Futura">Futura</option>
+      <option value="Optima">Optima</option>
+    </select>
+
+    <select id="fontSizeSelect" onchange="changeFontSize(this.value)">
+      <option value="12px">12</option>
+      <option value="14px">14</option>
+      <option value="16px">16</option>
+      <option value="18px">18</option>
+      <option value="20px">20</option>
+      <option value="24px">24</option>
+      <option value="28px">28</option>
+      <option value="32px">32</option>
+      <option value="36px">36</option>
+    </select>
+
+    <button onclick="document.execCommand('insertUnorderedList')">• List</button>
+    <button onclick="document.execCommand('insertOrderedList')">1. List</button>
+    <button onclick="document.execCommand('createLink', false, prompt('Enter link URL:'))">🔗</button>
+    <button onclick="document.execCommand('unlink')">❌ Link</button>
+    <button onclick="document.execCommand('undo')">↶</button>
+    <button onclick="document.execCommand('redo')">↷</button>
+    <button onclick="document.getElementById('imageInput').click();">🖼️ Image</button>
+    <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(this)">
+    <select onchange="handleSaveOption(this.value)">
+      <option value="">💾 Save</option>
+      <option value="html">Save as HTML</option>
+      <option value="markdown">Save as Markdown</option>
+      <option value="pdf">Save as PDF</option>
+      <option value="word">Save as Word Document</option>
+      <option value="txt">Save as TXT</option>
+    </select>
+  </div>
+
+  <div id="editor" contenteditable="true" placeholder="Start typing here..."></div>
+
+  <script>
+    let selectedImage = null;
+    let startX, startY, initialWidth, initialHeight;
+
+    function changeFontSize(size) {
+      const span = document.createElement("span");
+      span.style.fontSize = size;
+      span.appendChild(document.createTextNode(window.getSelection().toString()));
+      document.execCommand("insertHTML", false, span.outerHTML);
+      saveEditorContent();
+    }
+
+    function handleSaveOption(type) {
+      const content = document.getElementById('editor').innerHTML;
+      let blob;
+      switch (type) {
+        case 'html':
+          blob = new Blob([content], { type: 'text/html' });
+          downloadBlob(blob, 'document.html');
+          break;
+        case 'markdown':
+          const markdown = content
+            .replace(/<b>(.*?)<\/b>/g, '**$1**')
+            .replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+            .replace(/<i>(.*?)<\/i>/g, '_$1_')
+            .replace(/<u>(.*?)<\/u>/g, '__$1__')
+            .replace(/<li>(.*?)<\/li>/g, '* $1')
+            .replace(/<[^>]+>/g, '');
+          blob = new Blob([markdown], { type: 'text/markdown' });
+          downloadBlob(blob, 'document.md');
+          break;
+        case 'pdf':
+          html2canvas(document.getElementById('editor')).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jspdf.jsPDF();
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save('document.pdf');
+          });
+          break;
+        case 'word':
+          blob = new Blob(['\ufeff' + content], { type: 'application/msword' });
+          downloadBlob(blob, 'document.doc');
+          break;
+        case 'txt':
+          const plain = document.getElementById('editor').innerText;
+          blob = new Blob([plain], { type: 'text/plain' });
+          downloadBlob(blob, 'document.txt');
+          break;
+      }
+    }
+
+    function downloadBlob(blob, filename) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+
+    function saveEditorContent() {
+      const content = document.getElementById('editor').innerHTML;
+      document.cookie = "editorContent=" + encodeURIComponent(content) + ";path=/";
+    }
+
+    function loadEditorContent() {
+      const name = "editorContent=";
+      const decodedCookie = decodeURIComponent(document.cookie);
+      const ca = decodedCookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          const content = c.substring(name.length, c.length);
+          document.getElementById('editor').innerHTML = content;
+          return;
+        }
+      }
+    }
+
+    function handleImageSelect(input) {
+      const file = input.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          img.style.maxWidth = "100%";
+          img.style.height = "auto";
+          img.onload = function() {
+            const selection = window.getSelection();
+            if (selection.rangeCount) {
+              const range = selection.getRangeAt(0);
+              range.deleteContents();
+              range.insertNode(img);
+              range.insertNode(document.createTextNode(" "));
+              saveEditorContent();
+            } else {
+              document.getElementById('editor').appendChild(img);
+              saveEditorContent();
+            }
+            attachResizeHandles(img);
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function attachResizeHandles(img) {
+      if (selectedImage) {
+        removeResizeHandles(selectedImage);
+      }
+      selectedImage = img;
+      selectedImage.classList.add('selected-image');
+
+      const container = document.createElement('div');
+      container.style.position = 'relative';
+      container.style.display = 'inline-block';
+      img.parentNode.insertBefore(container, img);
+      container.appendChild(img);
+
+      const topLeft = document.createElement('div');
+      topLeft.className = 'resize-handle top-left';
+      topLeft.style.display = 'block';
+      topLeft.addEventListener('mousedown', startResize);
+      container.appendChild(topLeft);
+
+      const topRight = document.createElement('div');
+      topRight.className = 'resize-handle top-right';
+      topRight.style.display = 'block';
+      topRight.addEventListener('mousedown', startResize);
+      container.appendChild(topRight);
+
+      const bottomLeft = document.createElement('div');
+      bottomLeft.className = 'resize-handle bottom-left';
+      bottomLeft.style.display = 'block';
+      bottomLeft.addEventListener('mousedown', startResize);
+      container.appendChild(bottomLeft);
+
+      const bottomRight = document.createElement('div');
+      bottomRight.className = 'resize-handle bottom-right';
+      bottomRight.style.display = 'block';
+      bottomRight.addEventListener('mousedown', startResize);
+      container.appendChild(bottomRight);
+
+      document.addEventListener('mousedown', handleDocumentClick);
+      img.addEventListener('click', handleImageClick);
+      
+      img.draggable = true;
+      img.addEventListener('dragstart', handleDragStart);
+      img.addEventListener('drag', handleDrag);
+      img.addEventListener('dragend', handleDragEnd);
+    }
+
+    function removeResizeHandles(img) {
+      const container = img.parentNode;
+      if (!container) return;
+      
+      const handles = container.querySelectorAll('.resize-handle');
+      handles.forEach(handle => handle.remove());
+      
+      img.classList.remove('selected-image');
+      
+      //  IMPORTANT:  Move image *back* into the container.
+      container.appendChild(img); // Keep image in container
+     // container.parentNode.insertBefore(img, container);  <-  WRONG
+      
+      // Remove the handles from the container.
+      const handlesToRemove = container.querySelectorAll('.resize-handle');
+      handlesToRemove.forEach(h => h.remove());
+      
+      if (container.childNodes.length === 0) {
+        container.parentNode.removeChild(container);
+      }
+
+
+      document.removeEventListener('mousedown', handleDocumentClick);
+      img.removeEventListener('click', handleImageClick);
+      
+      img.draggable = false;
+      img.removeEventListener('dragstart', handleDragStart);
+      img.removeEventListener('drag', handleDrag);
+      img.removeEventListener('dragend', handleDragEnd);
+
+      selectedImage = null;
+    }
+
+
+    function handleImageClick(event) {
+      event.stopPropagation();
+    }
+
+    function handleDocumentClick(event) {
+      if (selectedImage && !event.target.classList.contains('resize-handle') && event.target !== selectedImage) {
+        removeResizeHandles(selectedImage);
+        saveEditorContent();
+      }
+    }
+
+    function startResize(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      startX = event.clientX;
+      startY = event.clientY;
+      initialWidth = selectedImage.offsetWidth;
+      initialHeight = selectedImage.offsetHeight;
+
+      document.addEventListener('mousemove', resizeImage);
+      document.addEventListener('mouseup', stopResize);
+    }
+
+    function resizeImage(event) {
+      const deltaX = event.clientX - startX;
+      const deltaY = event.clientY - startY;
+
+      let newWidth = initialWidth;
+      let newHeight = initialHeight;
+
+      if (event.target.classList.contains('top-left') || event.target.classList.contains('bottom-left')) {
+        newWidth -= deltaX;
+      } else if (event.target.classList.contains('top-right') || event.target.classList.contains('bottom-right')) {
+        newWidth += deltaX;
+      }
+
+      if (event.target.classList.contains('top-left') || event.target.classList.contains('top-right')) {
+        newHeight -= deltaY;
+      } else if (event.target.classList.contains('bottom-left') || event.target.classList.contains('bottom-right')) {
+        newHeight += deltaY;
+      }
+
+      newWidth = Math.max(20, newWidth);
+      newHeight = Math.max(20, newHeight);
+      selectedImage.style.width = newWidth + 'px';
+      selectedImage.style.height = newHeight + 'px';
+    }
+
+    function stopResize() {
+      document.removeEventListener('mousemove', resizeImage);
+      document.removeEventListener('mouseup', stopResize);
+      saveEditorContent();
+    }
+    
+    // Dragging
+    function handleDragStart(event) {
+      event.dataTransfer.setData('text/plain', '');
+      startX = event.clientX - selectedImage.offsetLeft;
+      startY = event.clientY - selectedImage.offsetTop;
+    }
+
+    function handleDrag(event) {
+      if (event.clientX === 0 && event.clientY === 0) return;
+      const newX = event.clientX - startX;
+      const newY = event.clientY - startY;
+      selectedImage.style.left = newX + 'px';
+      selectedImage.style.top = newY + 'px';
+    }
+
+    function handleDragEnd(event) {
+      saveEditorContent();
+    }
+
+    window.onload = function() {
+      loadEditorContent();
+      document.getElementById('editor').addEventListener('input', saveEditorContent);
+    };
+  </script>
+</body>
+</html>
