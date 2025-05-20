@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAFELIBRARY | Draw That, Guess It</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        canvas {
+            border: 2px solid #cbd5e0; /* border-gray-300 */
+            background-color: #ffffff;
+            cursor: crosshair;
+            touch-action: none; /* Prevent scrolling on touch devices while drawing */
+            border-radius: 0.75rem; /* rounded-lg */
+            width: 100%; /* Make canvas responsive */
+            max-width: 500px; /* Max width for canvas */
+            height: 350px; /* Fixed height for drawing area */
+        }
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background-color: #4f46e5; /* indigo-600 */
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca; /* indigo-700 */
+        }
+        .btn-secondary {
+            background-color: #e2e8f0; /* gray-200 */
+            color: #334155; /* slate-700 */
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0; /* gray-300 */
+        }
+        .message {
+            min-height: 2rem; /* To prevent layout shifts */
+            text-align: center;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #4f46e5; /* Blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hidden by default */
+            margin: 1rem auto; /* Center spinner */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ef4444; /* Red-500 */
+            margin-bottom: 1rem;
+        }
+        .llm-feature-button {
+            background-color: #f97316; /* Orange-500 */
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .llm-feature-button:hover {
+            background-color: #ea580c; /* Orange-600 */
+            transform: translateY(-2px);
+        }
+        .llm-feature-button:active {
+            transform: translateY(0);
+        }
+        .ai-vision-container, .overlap-vision-container, .debug-container {
+            margin-top: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .ai-vision-image, .overlap-vision-image, .debug-image {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #cbd5e0;
+            border-radius: 0.75rem;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Draw That, Guess It!</h1>
+        <div class="text-lg text-gray-700 font-semibold mb-2" id="instructions">
+            Get ready to draw!
+        </div>
+        <div class="timer-display" id="timerDisplay"></div>
+        <canvas id="drawingCanvas"></canvas>
+        <div class="button-group">
+            <button id="clearCanvasBtn" class="btn-secondary">Clear Canvas</button>
+            <button id="submitDrawingBtn" class="btn-primary">Submit Drawing</button>
+            <button id="nextRoundBtn" class="btn-primary" disabled>Next Round</button>
+        </div>
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <div class="message text-center text-gray-800 font-medium" id="gameMessage"></div>
+
+        <div class="button-group mt-4">
+            <button id="tellMeMoreBtn" class="llm-feature-button" disabled>✨ Tell me more about this! ✨</button>
+            <button id="showAIVisionBtn" class="llm-feature-button" disabled>✨ Show AI's Vision! ✨</button>
+            <button id="overlapImagesBtn" class="llm-feature-button" disabled>✨ Overlap Images! ✨</button>
+            <button id="critiqueDrawingBtn" class="llm-feature-button" disabled>✨ Critique my drawing! ✨</button>
+        </div>
+
+        <div class="ai-vision-container">
+            <p id="aiVisionLabel" class="text-gray-700 font-semibold hidden">AI's interpretation of "<span id="aiVisionObjectName"></span>":</p>
+            <img id="aiVisionImage" class="ai-vision-image" alt="AI's generated image of the object">
+        </div>
+
+        <div class="overlap-vision-container">
+            <p id="overlapVisionLabel" class="text-gray-700 font-semibold hidden">Overlap of your drawing and AI's vision:</p>
+            <img id="overlapVisionImage" class="overlap-vision-image" alt="Overlap of user drawing and AI vision">
+        </div>
+
+        <div class="debug-container">
+            <p class="text-gray-700 font-semibold hidden" id="debugLabel">Image sent to AI (inverted for processing):</p>
+            <img id="debugImage" class="debug-image" alt="Debug captured user drawing (inverted)">
+        </div>
+
+        <div class="text-xl font-bold text-gray-800 mt-2">Score: <span id="scoreDisplay">0</span></div>
+        <div class="text-sm text-gray-500 mt-4">User ID: <span id="userIdDisplay">Loading...</span></div>
+    </div>
+
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase variables
+        let app;
+        let db;
+        let auth;
+        let userId = 'anonymous'; // Default userId
+
+        // Game state variables
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let score = 0;
+        let currentObjectToDraw = '';
+        let aiLastGuessedObject = ''; // Store the last object AI guessed for "Show AI's Vision"
+        let userDrawingDataUrl = ''; // Store the user's drawing for overlap feature (original colors)
+        let aiVisionImageDataUrl = ''; // Store the AI's generated image for overlap feature
+        let roundCount = 0;
+        const maxRounds = 10; // Limit rounds for a shorter game
+
+        // Timer variables
+        const drawingTimeLimit = 15; // seconds
+        let drawingTimer = null; // Stores the setInterval ID for the countdown
+        let timeRemaining = drawingTimeLimit;
+        let isTimerRunning = false;
+
+        // Continuous AI guessing variables
+        let continuousGuessInterval = null; // Stores the setInterval ID for continuous AI guessing
+        const minGuessInterval = 1500; // Minimum time (ms) between AI guess attempts while drawing
+
+        // DOM elements
+        const instructionsDisplay = document.getElementById('instructions');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const gameMessage = document.getElementById('gameMessage');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const clearCanvasBtn = document.getElementById('clearCanvasBtn');
+        const submitDrawingBtn = document.getElementById('submitDrawingBtn');
+        const nextRoundBtn = document.getElementById('nextRoundBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const tellMeMoreBtn = document.getElementById('tellMeMoreBtn');
+        const showAIVisionBtn = document.getElementById('showAIVisionBtn');
+        const overlapImagesBtn = document.getElementById('overlapImagesBtn');
+        const critiqueDrawingBtn = document.getElementById('critiqueDrawingBtn');
+        const aiVisionImage = document.getElementById('aiVisionImage');
+        const aiVisionLabel = document.getElementById('aiVisionLabel');
+        const aiVisionObjectName = document.getElementById('aiVisionObjectName');
+        const overlapVisionImage = document.getElementById('overlapVisionImage');
+        const overlapVisionLabel = document.getElementById('overlapVisionLabel');
+        // Debugging elements
+        const debugImage = document.getElementById('debugImage');
+        const debugLabel = document.getElementById('debugLabel');
+
+        // List of 50 drawable objects
+        const drawableObjects = [
+            "apple", "tree", "house", "car", "boat", "sun", "moon", "star", "cloud", "flower",
+            "cat", "dog", "bird", "fish", "snake", "book", "chair", "table", "lamp", "cup",
+            "shoe", "hat", "shirt", "pants", "sock", "ball", "kite", "umbrella", "door", "window",
+            "mountain", "river", "road", "bridge", "train", "plane", "rocket", "robot", "camera", "phone",
+            "key", "pencil", "scissors", "clock", "banana", "grape", "pizza", "burger", "ice cream", "cake"
+        ];
+
+        /**
+         * Initializes Firebase and sets up authentication.
+         * This function should be called once when the application starts.
+         */
+        async function initializeFirebase() {
+            try {
+                // Retrieve Firebase configuration from global variable
+                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+                // Retrieve app ID from global variable
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                // Initialize Firebase app
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Set up authentication state listener
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        // User is signed in
+                        userId = user.uid;
+                        userIdDisplay.textContent = userId;
+                        console.log("Firebase initialized. User ID:", userId);
+                        // Start the game after Firebase is ready
+                        startGame();
+                    } else {
+                        // User is signed out or not yet authenticated
+                        console.log("No user signed in. Attempting anonymous sign-in.");
+                        try {
+                            // Attempt to sign in with custom token if available, otherwise anonymously
+                            if (typeof __initial_auth_token !== 'undefined') {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Firebase authentication error:", error);
+                            userIdDisplay.textContent = "Auth Error";
+                            gameMessage.textContent = "Error initializing game. Please try again.";
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to initialize Firebase:", error);
+                gameMessage.textContent = "Failed to load game services. Please check your connection.";
+            }
+        }
+
+        /**
+         * Sets up the canvas for drawing.
+         */
+        function setupCanvas() {
+            // Set canvas resolution for better drawing quality (important for AI input)
+            // The CSS will scale it visually, but the internal resolution should be higher.
+            canvas.width = 500;
+            canvas.height = 350;
+
+            ctx.lineWidth = 8; // Increased line width for better visibility
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000'; // Black color for drawing
+            ctx.globalAlpha = 1.0; // Ensure full opacity for drawing
+
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                const touch = e.touches[0];
+                startDrawing({ clientX: touch.clientX, clientY: touch.clientY });
+            });
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // Prevent scrolling
+                const touch = e.touches[0];
+                draw({ clientX: touch.clientX, clientY: touch.clientY });
+            });
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+        }
+
+        /**
+         * Starts the drawing process when mouse/touch is pressed down.
+         * @param {MouseEvent|TouchEvent} e - The event object.
+         */
+        function startDrawing(e) {
+            if (!isTimerRunning) return; // Only allow drawing if timer is active
+            isDrawing = true;
+            [lastX, lastY] = getCanvasCoordinates(e);
+            startContinuousGuessing(); // Start AI guessing while drawing
+        }
+
+        /**
+         * Draws on the canvas as the mouse/touch moves.
+         * @param {MouseEvent|TouchEvent} e - The event object.
+         */
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            [lastX, lastY] = getCanvasCoordinates(e);
+            ctx.lineTo(lastX, lastY);
+            ctx.stroke();
+        }
+
+        /**
+         * Stops the drawing process when mouse/touch is released or leaves the canvas.
+         */
+        function stopDrawing() {
+            isDrawing = false;
+            // Continuous guessing will stop automatically if isDrawing is false in its interval check
+        }
+
+        /**
+         * Gets the coordinates relative to the canvas.
+         * @param {MouseEvent|TouchEvent} e - The event object.
+         * @returns {number[]} - An array containing [x, y] coordinates.
+         */
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+            const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+            // Scale coordinates from CSS pixels to canvas internal resolution pixels
+            const x = (clientX - rect.left) * (canvas.width / rect.width);
+            const y = (clientY - rect.top) * (canvas.height / rect.height);
+            return [x, y];
+        }
+
+        /**
+         * Clears the entire canvas.
+         */
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            gameMessage.textContent = '';
+            submitDrawingBtn.disabled = false;
+            nextRoundBtn.disabled = true;
+            tellMeMoreBtn.disabled = true; // Disable "Tell me more" button
+            showAIVisionBtn.disabled = true; // Disable "Show AI's Vision" button
+            overlapImagesBtn.disabled = true; // Disable "Overlap Images" button
+            critiqueDrawingBtn.disabled = true; // Disable "Critique my drawing" button
+            hideAIVisionImage(); // Hide the image
+            hideOverlapImage(); // Hide the overlap image
+            hideDebugImage(); // Hide the debug image
+            stopCountdown(); // Stop timer if cleared manually
+            stopContinuousGuessing(); // Stop continuous guessing
+            timerDisplay.textContent = ''; // Clear timer display
+        }
+
+        /**
+         * Converts the canvas content to a base64 image data URL.
+         * This function now inverts the colors for AI processing.
+         * @returns {string} - Base64 encoded image data (inverted colors).
+         */
+        function getCanvasImageData() {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // Draw original canvas content onto temporary canvas
+            tempCtx.drawImage(canvas, 0, 0);
+
+            // Get image data
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+
+            // Invert colors (black lines on white background -> white lines on black background)
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = 255 - data[i];     // Red
+                data[i + 1] = 255 - data[i + 1]; // Green
+                data[i + 2] = 255 - data[i + 2]; // Blue
+                // Alpha channel (data[i + 3]) remains unchanged
+            }
+
+            // Put inverted image data back to temporary canvas
+            tempCtx.putImageData(imageData, 0, 0);
+
+            // Return base64 data from inverted canvas
+            return tempCanvas.toDataURL('image/png').split(',')[1];
+        }
+
+        /**
+         * Selects a random object from the drawableObjects list.
+         * @returns {string} - The selected object name.
+         */
+        function selectRandomObject() {
+            const randomIndex = Math.floor(Math.random() * drawableObjects.length);
+            return drawableObjects[randomIndex];
+        }
+
+        /**
+         * Uses the Web Speech API to speak a given text.
+         * @param {string} text - The text to be spoken.
+         */
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US'; // Set language
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn("Speech Synthesis not supported in this browser.");
+            }
+        }
+
+        /**
+         * Starts a new game.
+         */
+        function startGame() {
+            score = 0;
+            roundCount = 0;
+            scoreDisplay.textContent = score;
+            nextRoundBtn.textContent = "Next Round";
+            nextRound();
+        }
+
+        /**
+         * Advances to the next round, clears canvas, and sets new object to draw.
+         */
+        function nextRound() {
+            roundCount++;
+            if (roundCount > maxRounds) {
+                endGame();
+                return;
+            }
+            clearCanvas(); // Also stops existing timers/intervals and disables buttons
+            currentObjectToDraw = selectRandomObject();
+            const instructionsText = `Round ${roundCount}/${maxRounds}: Draw a "${currentObjectToDraw.toUpperCase()}"`;
+            instructionsDisplay.textContent = instructionsText;
+            speak(instructionsText); // Read out instructions
+            gameMessage.textContent = '';
+            submitDrawingBtn.disabled = false;
+            clearCanvasBtn.disabled = false;
+            nextRoundBtn.disabled = true;
+            startCountdown(drawingTimeLimit); // Start the 15-second timer
+        }
+
+        /**
+         * Ends the game and displays final score.
+         */
+        function endGame() {
+            instructionsDisplay.textContent = "Game Over!";
+            const finalMessage = `You scored ${score} out of ${maxRounds} drawings!`;
+            gameMessage.textContent = finalMessage;
+            speak(`Game Over! ${finalMessage}`); // Read out final score
+            submitDrawingBtn.disabled = true;
+            clearCanvasBtn.disabled = true;
+            nextRoundBtn.textContent = "Play Again";
+            nextRoundBtn.disabled = false;
+            tellMeMoreBtn.disabled = true; // Disable "Tell me more" button at game end
+            showAIVisionBtn.disabled = true; // Disable "Show AI's Vision" button at game end
+            overlapImagesBtn.disabled = true; // Disable "Overlap Images" button at game end
+            critiqueDrawingBtn.disabled = true; // Disable "Critique my drawing" button at game end
+            hideAIVisionImage(); // Hide the image
+            hideOverlapImage(); // Hide the overlap image
+            hideDebugImage(); // Hide the debug image
+            stopCountdown();
+            stopContinuousGuessing();
+            timerDisplay.textContent = '';
+            nextRoundBtn.onclick = () => {
+                clearCanvasBtn.disabled = false;
+                nextRoundBtn.textContent = "Next Round";
+                startGame();
+            };
+        }
+
+        /**
+         * Starts the 15-second countdown timer.
+         * @param {number} duration - The duration of the timer in seconds.
+         */
+        function startCountdown(duration) {
+            stopCountdown(); // Clear any existing timer
+            timeRemaining = duration;
+            isTimerRunning = true;
+            updateTimerDisplay();
+
+            drawingTimer = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                if (timeRemaining <= 0) {
+                    stopCountdown();
+                    submitDrawing(true); // Auto-submit when timer runs out
+                }
+            }, 1000);
+        }
+
+        /**
+         * Stops the countdown timer.
+         */
+        function stopCountdown() {
+            if (drawingTimer) {
+                clearInterval(drawingTimer);
+                drawingTimer = null;
+            }
+            isTimerRunning = false;
+        }
+
+        /**
+         * Updates the timer display on the UI.
+         */
+        function updateTimerDisplay() {
+            timerDisplay.textContent = `Time: ${timeRemaining}s`;
+            if (timeRemaining <= 5 && timeRemaining > 0) {
+                timerDisplay.style.color = '#ef4444'; // Red for last 5 seconds
+            } else {
+                timerDisplay.style.color = '#ef4444'; // Default red color
+            }
+        }
+
+        /**
+         * Starts the continuous AI guessing interval.
+         */
+        function startContinuousGuessing() {
+            stopContinuousGuessing(); // Ensure only one interval is running
+            continuousGuessInterval = setInterval(() => {
+                // Only guess if drawing is active and there's still time
+                if (isDrawing && timeRemaining > 0) {
+                    sendDrawingForLiveGuess();
+                } else if (!isDrawing) {
+                    // If drawing stops, but interval is still running, clear it
+                    stopContinuousGuessing();
+                }
+            }, minGuessInterval);
+        }
+
+        /**
+         * Stops the continuous AI guessing interval.
+         */
+        function stopContinuousGuessing() {
+            if (continuousGuessInterval) {
+                clearInterval(continuousGuessInterval);
+                continuousGuessInterval = null;
+            }
+        }
+
+        /**
+         * Sends the current drawing for a live AI guess (updates message, not score).
+         */
+        async function sendDrawingForLiveGuess() {
+            const imageData = getCanvasImageData(); // This now returns inverted data
+            // Only send if there's actual drawing data (not just a blank canvas)
+            if (imageData.length < 100) { // Arbitrary threshold for "empty" image
+                gameMessage.textContent = "Start drawing!";
+                return;
+            }
+
+            try {
+                const guessedObject = await guessDrawingWithAI(imageData, true); // Pass true for live guess
+                if (guessedObject) {
+                    const liveGuessText = `AI thinks: "${guessedObject.toUpperCase()}"`;
+                    gameMessage.textContent = liveGuessText;
+                    // Only speak if the guess is different or significant
+                    if (gameMessage.dataset.lastSpokenGuess !== guessedObject) {
+                        speak(liveGuessText);
+                        gameMessage.dataset.lastSpokenGuess = guessedObject;
+                    }
+                }
+            } catch (error) {
+                console.error("Error during live AI guessing:", error);
+                // Don't show error message for live guess to avoid cluttering UI
+            }
+        }
+
+        /**
+         * Submits the drawing to the AI for final guessing.
+         * @param {boolean} [autoSubmit=false] - True if submitted automatically by timer.
+         */
+        async function submitDrawing(autoSubmit = false) {
+            // Prevent multiple submissions
+            if (submitDrawingBtn.disabled && !autoSubmit) return;
+
+            stopCountdown(); // Stop the timer
+            stopContinuousGuessing(); // Stop continuous guessing
+            isDrawing = false; // Disable further drawing
+            canvas.style.pointerEvents = 'none'; // Disable canvas interaction
+
+            submitDrawingBtn.disabled = true;
+            clearCanvasBtn.disabled = true;
+            loadingSpinner.style.display = 'block';
+            gameMessage.textContent = 'AI is making its final guess...';
+            speak('AI is making its final guess.');
+            timerDisplay.textContent = ''; // Clear timer display
+            hideAIVisionImage(); // Hide any previously shown AI vision image
+            hideOverlapImage(); // Hide any previously shown overlap image
+            hideDebugImage(); // Hide any previous debug image
+
+            userDrawingDataUrl = canvas.toDataURL('image/png'); // Store user's original drawing
+
+            const imageDataForAI = getCanvasImageData(); // Get inverted image data for AI
+            // Debugging: Show captured image (inverted)
+            debugImage.src = `data:image/png;base64,${imageDataForAI}`;
+            debugImage.style.display = 'block';
+            debugLabel.classList.remove('hidden');
+
+
+            try {
+                const guessedObject = await guessDrawingWithAI(imageDataForAI, false); // Pass false for final guess
+                loadingSpinner.style.display = 'none';
+                aiLastGuessedObject = guessedObject; // Store the AI's final guess
+
+                if (guessedObject && guessedObject.toLowerCase() === currentObjectToDraw.toLowerCase()) {
+                    score++;
+                    scoreDisplay.textContent = score;
+                    const correctMessage = `Correct! You drew a "${guessedObject.toUpperCase()}"!`;
+                    gameMessage.textContent = correctMessage;
+                    speak(correctMessage);
+                } else {
+                    const incorrectMessage = `Oops! AI guessed "${guessedObject ? guessedObject.toUpperCase() : 'something else'}". It was "${currentObjectToDraw.toUpperCase()}".`;
+                    gameMessage.textContent = incorrectMessage;
+                    speak(incorrectMessage);
+                }
+                tellMeMoreBtn.disabled = false; // Enable "Tell me more" button after guess
+                showAIVisionBtn.disabled = false; // Enable "Show AI's Vision" button
+                critiqueDrawingBtn.disabled = false; // Enable "Critique my drawing" button
+                // Overlap button will be enabled after AI vision image is generated in showAIVision
+            } catch (error) {
+                console.error("Error during AI guessing:", error);
+                gameMessage.textContent = "Error communicating with AI. Please try again.";
+                speak("Error communicating with AI. Please try again.");
+                loadingSpinner.style.display = 'none';
+            } finally {
+                submitDrawingBtn.disabled = true; // Keep disabled until next round
+                clearCanvasBtn.disabled = false;
+                nextRoundBtn.disabled = false;
+                canvas.style.pointerEvents = 'auto'; // Re-enable canvas interaction for next round
+                gameMessage.dataset.lastSpokenGuess = ''; // Reset for next round
+            }
+        }
+
+        /**
+         * Calls the Gemini API to guess the drawing.
+         * @param {string} base64ImageData - Base64 encoded image data of the drawing (now inverted).
+         * @param {boolean} isLiveGuess - True if this is a continuous, non-final guess.
+         * @returns {Promise<string>} - A promise that resolves with the AI's guessed object name.
+         */
+        async function guessDrawingWithAI(base64ImageData, isLiveGuess) {
+            console.log(`[Guessing AI] Sending image data length (inverted): ${base64ImageData.length} for guess.`);
+            // Updated prompt to reflect inverted colors
+            const prompt = `You are an expert at identifying simple line drawings. Analyze the provided sketch, which features white lines on a black background. Your task is to identify the object depicted. You MUST choose one exact word from the following list of objects: ${drawableObjects.join(', ')}. Do not use any other words or phrases, or any descriptions. Focus solely on the visual features of the sketch. If the drawing is unclear or ambiguous, select the single most visually plausible object from the list, even if your confidence is low.`;
+
+            const chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: prompt },
+                            {
+                                inlineData: {
+                                    mimeType: "image/png",
+                                    data: base64ImageData
+                                }
+                            }
+                        ]
+                    }
+                ],
+            };
+
+            const apiKey = ""; // Canvas will provide this at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("[Guessing AI] Raw AI response:", result);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    let guessed = text.trim().toLowerCase();
+
+                    if (!drawableObjects.includes(guessed)) {
+                        let foundPartial = false;
+                        for (const obj of drawableObjects) {
+                            if (guessed.includes(obj.toLowerCase())) {
+                                guessed = obj;
+                                foundPartial = true;
+                                break;
+                            }
+                        }
+                        if (!foundPartial) {
+                            guessed = drawableObjects[Math.floor(Math.random() * drawableObjects.length)];
+                            console.warn(`[Guessing AI] AI's response "${text}" was not an exact match. Randomly picked "${guessed}" from the list.`);
+                        }
+                    }
+                    return guessed;
+                } else {
+                    console.warn("[Guessing AI] AI response structure unexpected or empty:", result);
+                    return drawableObjects[Math.floor(Math.random() * drawableObjects.length)];
+                }
+            } catch (error) {
+                console.error("[Guessing AI] Error during AI guessing API call:", error);
+                throw error; // Re-throw to be caught by calling function
+            }
+        }
+
+        /**
+         * Fetches and displays more information about the current object using Gemini API.
+         */
+        async function getMoreInfoAboutObject() {
+            tellMeMoreBtn.disabled = true;
+            showAIVisionBtn.disabled = true;
+            overlapImagesBtn.disabled = true;
+            critiqueDrawingBtn.disabled = true; // Disable other buttons during this operation
+            loadingSpinner.style.display = 'block';
+            gameMessage.textContent = `Getting more info about "${currentObjectToDraw.toUpperCase()}"...`;
+            speak(`Getting more info about ${currentObjectToDraw}.`);
+            hideAIVisionImage(); // Hide image if visible
+            hideOverlapImage(); // Hide overlap image if visible
+            hideDebugImage(); // Hide debug image if visible
+
+            const prompt = `Tell me a brief, interesting fact or a short description about a "${currentObjectToDraw}". Keep it concise, around 1-2 sentences.`;
+
+            const chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = {
+                contents: chatHistory,
+            };
+
+            const apiKey = ""; // Canvas will provide this at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("[Tell Me More AI] Raw AI response:", result);
+
+                loadingSpinner.style.display = 'none';
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const infoText = result.candidates[0].content.parts[0].text;
+                    gameMessage.textContent = infoText;
+                    speak(infoText);
+                } else {
+                    gameMessage.textContent = "Could not fetch more information at this time.";
+                    speak("Could not fetch more information at this time.");
+                    console.warn("[Tell Me More AI] Gemini API response for 'Tell me more' was unexpected:", result);
+                }
+            } catch (error) {
+                console.error("[Tell Me More AI] Error fetching more info from Gemini API:", error);
+                gameMessage.textContent = "Failed to get more information. Please try again.";
+                speak("Failed to get more information. Please try again.");
+                loadingSpinner.style.display = 'none';
+            } finally {
+                // Re-enable buttons if it's not the end of the game
+                if (roundCount <= maxRounds) {
+                    tellMeMoreBtn.disabled = false;
+                    showAIVisionBtn.disabled = false;
+                    overlapImagesBtn.disabled = false;
+                    critiqueDrawingBtn.disabled = false;
+                }
+            }
+        }
+
+        /**
+         * Hides the AI vision image and its label.
+         */
+        function hideAIVisionImage() {
+            aiVisionImage.style.display = 'none';
+            aiVisionImage.src = ''; // Clear the image source
+            aiVisionLabel.classList.add('hidden');
+            aiVisionObjectName.textContent = '';
+        }
+
+        /**
+         * Hides the overlapped image and its label.
+         */
+        function hideOverlapImage() {
+            overlapVisionImage.style.display = 'none';
+            overlapVisionImage.src = ''; // Clear the image source
+            overlapVisionLabel.classList.add('hidden');
+        }
+
+        /**
+         * Hides the debug image and its label.
+         */
+        function hideDebugImage() {
+            debugImage.style.display = 'none';
+            debugImage.src = ''; // Clear the image source
+            debugLabel.classList.add('hidden');
+        }
+
+        /**
+         * Generates and displays an image of what the AI thinks the object looks like.
+         */
+        async function showAIVision() {
+            showAIVisionBtn.disabled = true;
+            tellMeMoreBtn.disabled = true;
+            overlapImagesBtn.disabled = true;
+            critiqueDrawingBtn.disabled = true; // Disable other buttons during this operation
+            loadingSpinner.style.display = 'block';
+            gameMessage.textContent = `Generating AI's vision of "${aiLastGuessedObject.toUpperCase()}"...`;
+            speak(`Generating AI's vision of ${aiLastGuessedObject}.`);
+            hideAIVisionImage(); // Hide any previous image
+            hideOverlapImage(); // Hide overlap image if visible
+            hideDebugImage(); // Hide debug image if visible
+
+            const prompt = `A simple, clear line drawing of a "${aiLastGuessedObject}". The drawing should be minimalist, black lines on a white background, suitable for a quick drawing game.`;
+
+            const payload = { instances: { prompt: prompt }, parameters: { "sampleCount": 1} };
+            const apiKey = ""; // Canvas will provide this at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("[AI Vision AI] Raw AI response:", result);
+
+                loadingSpinner.style.display = 'none';
+
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    aiVisionImageDataUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`; // Store AI vision image
+                    aiVisionImage.src = aiVisionImageDataUrl;
+                    aiVisionImage.style.display = 'block'; // Show the image
+                    aiVisionObjectName.textContent = aiLastGuessedObject.toUpperCase();
+                    aiVisionLabel.classList.remove('hidden'); // Show the label
+                    gameMessage.textContent = `Here's AI's vision of "${aiLastGuessedObject.toUpperCase()}".`;
+                    speak(`Here's AI's vision of ${aiLastGuessedObject}.`);
+                } else {
+                    gameMessage.textContent = "Could not generate AI vision at this time.";
+                    speak("Could not generate AI vision at this time.");
+                    console.warn("[AI Vision AI] Imagen API response for 'Show AI Vision' was unexpected:", result);
+                }
+            } catch (error) {
+                console.error("[AI Vision AI] Error generating AI vision from Imagen API:", error);
+                gameMessage.textContent = "Failed to generate AI vision. Please try again.";
+                speak("Failed to generate AI vision. Please try again.");
+                loadingSpinner.style.display = 'none';
+            } finally {
+                // Re-enable buttons if it's not the end of the game
+                if (roundCount <= maxRounds) {
+                    showAIVisionBtn.disabled = false;
+                    tellMeMoreBtn.disabled = false;
+                    critiqueDrawingBtn.disabled = false;
+                    // Only enable overlap if both user drawing and AI vision are available
+                    if (userDrawingDataUrl && aiVisionImageDataUrl) {
+                        overlapImagesBtn.disabled = false;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Overlaps the user's drawing with the AI's generated image.
+         */
+        async function overlapImages() {
+            if (!userDrawingDataUrl || !aiVisionImageDataUrl) {
+                gameMessage.textContent = "Please draw and generate AI vision first.";
+                return;
+            }
+
+            overlapImagesBtn.disabled = true;
+            tellMeMoreBtn.disabled = true;
+            showAIVisionBtn.disabled = true;
+            critiqueDrawingBtn.disabled = true; // Disable other buttons during this operation
+            loadingSpinner.style.display = 'block';
+            gameMessage.textContent = "Overlapping images...";
+            speak("Overlapping images.");
+            hideAIVisionImage(); // Hide single AI vision image
+            hideOverlapImage(); // Ensure overlap image is hidden before redrawing
+            hideDebugImage(); // Hide debug image if visible
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            const userImg = new Image();
+            const aiImg = new Image();
+
+            let imagesLoaded = 0;
+            const totalImages = 2;
+
+            function imageLoadHandler() {
+                imagesLoaded++;
+                if (imagesLoaded === totalImages) {
+                    // Draw user's drawing (bottom layer)
+                    tempCtx.drawImage(userImg, 0, 0, tempCanvas.width, tempCanvas.height);
+
+                    // Draw AI's image on top with transparency
+                    tempCtx.globalAlpha = 0.6; // Adjust transparency as needed
+                    tempCtx.drawImage(aiImg, 0, 0, tempCanvas.width, tempCanvas.height);
+                    tempCtx.globalAlpha = 1.0; // Reset globalAlpha
+
+                    overlapVisionImage.src = tempCanvas.toDataURL('image/png');
+                    overlapVisionImage.style.display = 'block';
+                    overlapVisionLabel.classList.remove('hidden');
+                    gameMessage.textContent = "Here's the overlap!";
+                    speak("Here's the overlap!");
+                    loadingSpinner.style.display = 'none';
+
+                    // Re-enable buttons
+                    if (roundCount <= maxRounds) {
+                        overlapImagesBtn.disabled = false;
+                        tellMeMoreBtn.disabled = false;
+                        showAIVisionBtn.disabled = false;
+                        critiqueDrawingBtn.disabled = false;
+                    }
+                }
+            }
+
+            userImg.onload = imageLoadHandler;
+            aiImg.onload = imageLoadHandler;
+
+            userImg.onerror = () => {
+                console.error("Error loading user drawing image for overlap.");
+                gameMessage.textContent = "Failed to load user drawing for overlap.";
+                speak("Failed to load user drawing for overlap.");
+                loadingSpinner.style.display = 'none';
+                if (roundCount <= maxRounds) {
+                    overlapImagesBtn.disabled = false;
+                    tellMeMoreBtn.disabled = false;
+                    showAIVisionBtn.disabled = false;
+                    critiqueDrawingBtn.disabled = false;
+                }
+            };
+            aiImg.onerror = () => {
+                console.error("Error loading AI vision image for overlap.");
+                gameMessage.textContent = "Failed to load AI vision for overlap.";
+                speak("Failed to load AI vision for overlap.");
+                loadingSpinner.style.display = 'none';
+                if (roundCount <= maxRounds) {
+                    overlapImagesBtn.disabled = false;
+                    tellMeMoreBtn.disabled = false;
+                    showAIVisionBtn.disabled = false;
+                    critiqueDrawingBtn.disabled = false;
+                }
+            };
+
+            userImg.src = userDrawingDataUrl;
+            aiImg.src = aiVisionImageDataUrl;
+        }
+
+        /**
+         * Provides a critique of the user's drawing using the Gemini API.
+         */
+        async function critiqueDrawing() {
+            if (!userDrawingDataUrl || !currentObjectToDraw) {
+                gameMessage.textContent = "Please complete a drawing round first.";
+                return;
+            }
+
+            critiqueDrawingBtn.disabled = true;
+            tellMeMoreBtn.disabled = true;
+            showAIVisionBtn.disabled = true;
+            overlapImagesBtn.disabled = true; // Disable other buttons during this operation
+            loadingSpinner.style.display = 'block';
+            gameMessage.textContent = "AI is critiquing your drawing...";
+            speak("AI is critiquing your drawing.");
+            hideAIVisionImage(); // Hide image if visible
+            hideOverlapImage(); // Hide overlap image if visible
+            hideDebugImage(); // Hide debug image if visible
+
+            // Refined prompt for critique
+            const prompt = `Analyze the provided simple black-and-white line drawing. The intended object was a "${currentObjectToDraw}". Provide a concise (1-2 sentences) art critique. Comment on its clarity and resemblance to the intended object. Suggest one specific, actionable improvement for future drawings of this object.`;
+
+            const chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            { text: prompt },
+                            {
+                                inlineData: {
+                                    mimeType: "image/png",
+                                    data: userDrawingDataUrl.split(',')[1] // Send original user drawing data
+                                }
+                            }
+                        ]
+                    }
+                ],
+            };
+
+            const apiKey = ""; // Canvas will provide this at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log("[Critique AI] Raw AI response:", result);
+
+                loadingSpinner.style.display = 'none';
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const critiqueText = result.candidates[0].content.parts[0].text;
+                    gameMessage.textContent = critiqueText;
+                    speak(critiqueText);
+                } else {
+                    gameMessage.textContent = "Could not generate critique at this time.";
+                    speak("Could not generate critique at this time.");
+                    console.warn("[Critique AI] Gemini API response for 'Critique drawing' was unexpected:", result);
+                }
+            } catch (error) {
+                console.error("[Critique AI] Error fetching critique from Gemini API:", error);
+                gameMessage.textContent = "Failed to get drawing critique. Please try again.";
+                speak("Failed to get drawing critique. Please try again.");
+                loadingSpinner.style.display = 'none';
+            } finally {
+                // Re-enable buttons if it's not the end of the game
+                if (roundCount <= maxRounds) {
+                    critiqueDrawingBtn.disabled = false;
+                    tellMeMoreBtn.disabled = false;
+                    showAIVisionBtn.disabled = false;
+                    overlapImagesBtn.disabled = false;
+                }
+            }
+        }
+
+
+        // Event Listeners for buttons
+        clearCanvasBtn.addEventListener('click', clearCanvas);
+        submitDrawingBtn.addEventListener('click', () => submitDrawing(false)); // Manual submit
+        nextRoundBtn.addEventListener('click', nextRound);
+        tellMeMoreBtn.addEventListener('click', getMoreInfoAboutObject);
+        showAIVisionBtn.addEventListener('click', showAIVision);
+        overlapImagesBtn.addEventListener('click', overlapImages);
+        critiqueDrawingBtn.addEventListener('click', critiqueDrawing);
+
+        // Initialize the game when the window loads
+        window.onload = function() {
+            setupCanvas();
+            initializeFirebase(); // This will call startGame() after auth is ready
+        };
+    </script>
+</body>
+</html>
