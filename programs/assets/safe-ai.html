@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase AI Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the chat application */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as specified */
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px; /* Add padding for smaller screens */
+            box-sizing: border-box;
+        }
+        .chat-container {
+            background-color: #ffffff;
+            border-radius: 1rem; /* Rounded corners for the container */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 70vh; /* Ensure enough height */
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: #f9fafb;
+        }
+        .message-bubble {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem; /* Rounded corners for message bubbles */
+            margin-bottom: 0.75rem;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #3b82f6; /* Blue for user messages */
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .ai-message {
+            background-color: #e5e7eb; /* Light grey for AI messages */
+            color: #374151;
+            align-self: flex-start;
+            margin-right: auto;
+        }
+        .input-area {
+            display: flex;
+            padding: 1.5rem;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        .input-area input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem; /* Rounded corners for input */
+            border: 1px solid #d1d5db;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-area input:focus {
+            border-color: #3b82f6;
+        }
+        .input-area button {
+            background-color: #2563eb; /* Darker blue for button */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem; /* Rounded corners for button */
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .input-area button:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .input-area button:active {
+            transform: translateY(0);
+        }
+        .loading-indicator {
+            display: none; /* Hidden by default */
+            text-align: center;
+            padding: 1rem;
+            color: #6b7280;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="p-4 bg-blue-600 text-white text-center text-lg font-semibold rounded-t-xl">
+            SafeLibrary AI
+        </div>
+        <div id="user-id-display" class="p-2 text-sm text-gray-600 bg-gray-100 text-center">
+            Loading user ID...
+        </div>
+        <div id="chat-messages" class="chat-messages flex flex-col">
+            <p class="text-center text-gray-500">Start chatting with the AI!</p>
+        </div>
+        <div id="loading-indicator" class="loading-indicator">
+            <div class="flex justify-center items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                AI is thinking...
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type your message..." class="flex-grow">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <p id="modal-message"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports from CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Firebase instances
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false; // Flag to ensure auth is ready before Firestore operations
+
+        // DOM elements
+        const chatMessagesDiv = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const userIdDisplay = document.getElementById('user-id-display');
+
+        // Modal elements
+        const modal = document.getElementById('myModal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseBtn = document.getElementsByClassName('modal-close')[0];
+
+        // Function to show custom modal
+        function showModal(message) {
+            modalMessage.textContent = message;
+            modal.style.display = 'flex'; // Use flex to center
+        }
+
+        // Close modal when 'x' is clicked
+        modalCloseBtn.onclick = function() {
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Initialize Firebase and set up authentication listener
+        window.onload = async () => {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for authentication state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = `Your User ID: ${userId}`;
+                        isAuthReady = true;
+                        setupRealtimeChatListener(); // Set up listener once authenticated
+                    } else {
+                        // If no user is signed in, attempt to sign in using custom token or anonymously
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            console.error("Error during authentication:", error);
+                            showModal(`Authentication failed: ${error.message}. You might not be able to save messages.`);
+                            // Fallback to a random ID if anonymous sign-in also fails
+                            userId = crypto.randomUUID();
+                            userIdDisplay.textContent = `Your User ID: ${userId} (Anonymous, Limited Access)`;
+                            isAuthReady = true; // Still allow app to try and function
+                            setupRealtimeChatListener(); // Try to set up listener even with limited auth
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                chatMessagesDiv.innerHTML = `<p class="text-red-500 text-center">Error initializing Firebase. Check console for details.</p>`;
+                showModal(`Failed to initialize Firebase: ${error.message}`);
+            }
+        };
+
+        /**
+         * Sets up a real-time listener for chat messages from Firestore.
+         * Messages are ordered by their timestamp and displayed in the chat area.
+         */
+        function setupRealtimeChatListener() {
+            if (!isAuthReady || !db) {
+                console.warn("Firestore not ready or not authenticated. Cannot set up listener.");
+                return;
+            }
+
+            // Define the collection path for public data
+            const chatCollectionRef = collection(db, `artifacts/${appId}/public/data/chatMessages`);
+            const q = query(chatCollectionRef, orderBy('timestamp', 'asc'));
+
+            onSnapshot(q, (snapshot) => {
+                chatMessagesDiv.innerHTML = ''; // Clear existing messages
+                if (snapshot.empty) {
+                    chatMessagesDiv.innerHTML = '<p class="text-center text-gray-500">Start chatting with the AI!</p>';
+                }
+                snapshot.forEach((doc) => {
+                    const message = doc.data();
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message-bubble');
+
+                    if (message.senderId === userId) {
+                        messageElement.classList.add('user-message');
+                        messageElement.textContent = `You: ${message.text}`;
+                    } else if (message.senderId === 'AI') {
+                        messageElement.classList.add('ai-message');
+                        messageElement.textContent = `AI: ${message.text}`;
+                    } else {
+                        // For messages from other users in a collaborative setting
+                        messageElement.classList.add('ai-message'); // Use AI message style for others for simplicity
+                        messageElement.textContent = `${message.senderId.substring(0, 8)}...: ${message.text}`;
+                    }
+                    chatMessagesDiv.appendChild(messageElement);
+                });
+                // Scroll to the bottom of the chat
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+            }, (error) => {
+                console.error("Error listening to messages:", error);
+                showModal(`Error loading messages: ${error.message}`);
+            });
+        }
+
+        /**
+         * Sends a user message to Firestore and then triggers the AI response.
+         */
+        async function sendMessage() {
+            const messageText = userInput.value.trim();
+            if (messageText === '') return;
+
+            if (!isAuthReady || !db || !userId) {
+                showModal("Authentication not ready. Please wait or refresh.");
+                return;
+            }
+
+            userInput.value = ''; // Clear input immediately
+
+            try {
+                // Add user message to Firestore
+                await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                    text: messageText,
+                    senderId: userId,
+                    timestamp: serverTimestamp() // Use server timestamp for consistent ordering
+                });
+
+                // Call the Gemini API for AI response
+                await callGeminiAPI(messageText);
+
+            } catch (error) {
+                console.error("Error sending message or calling AI:", error);
+                showModal(`Error: ${error.message}`);
+            }
+        }
+
+        /**
+         * Calls the Gemini API with the user's prompt and adds the AI's response to Firestore.
+         * @param {string} prompt The user's message to send to the AI.
+         */
+        async function callGeminiAPI(prompt) {
+            loadingIndicator.style.display = 'block'; // Show loading indicator
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Leave as empty string; Canvas will provide it at runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const aiResponseText = result.candidates[0].content.parts[0].text;
+
+                    // Add AI response to Firestore
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                        text: aiResponseText,
+                        senderId: 'AI', // Mark sender as AI
+                        timestamp: serverTimestamp()
+                    });
+                } else {
+                    console.warn("Gemini API returned an unexpected response structure or no content.");
+                    showModal("AI couldn't generate a response. Please try again.");
+                    // Add a placeholder message if AI fails to respond
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                        text: "AI failed to generate a response.",
+                        senderId: 'AI',
+                        timestamp: serverTimestamp()
+                    });
+                }
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                showModal(`AI response error: ${error.message}`);
+                // Add an error message to chat if AI call fails
+                await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                    text: `AI encountered an error: ${error.message.substring(0, 100)}...`,
+                    senderId: 'AI',
+                    timestamp: serverTimestamp()
+                });
+            } finally {
+                loadingIndicator.style.display = 'none'; // Hide loading indicator
+            }
+        }
+
+        // Event listeners for sending messages
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+        Powered by    <img src="https://houselearning.github.io/safe-library/programs/assets/firebase-brand.png" width="100" height="80">
+</body>
+</html>
