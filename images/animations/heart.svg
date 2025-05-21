@@ -1,0 +1,125 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define colors */
+        :root {
+            --heart-color-start: #e74c3c; /* Red */
+            --heart-color-end: #c0392b; /* Darker Red */
+        }
+
+        /* Keyframes for the beating/growing effect */
+        @keyframes heart-beat {
+            0% {
+                transform: scale(0.9) translateY(0px);
+                fill: var(--heart-color-start);
+            }
+            25% {
+                transform: scale(1.05) translateY(-5px); /* Grow slightly larger and move up */
+                fill: var(--heart-color-end); /* Darken color */
+            }
+            50% {
+                transform: scale(0.95) translateY(0px); /* Shrink slightly */
+                fill: var(--heart-color-start); /* Return to original color */
+            }
+            75% {
+                transform: scale(1.05) translateY(-5px); /* Grow again */
+                fill: var(--heart-color-end);
+            }
+            100% {
+                transform: scale(0.9) translateY(0px); /* Return to start size */
+                fill: var(--heart-color-start);
+            }
+        }
+
+        /* Heart path styling and animation */
+        #heart-path {
+            transform-origin: center center; /* Ensure scaling is from the center */
+            animation: heart-beat 2s ease-in-out infinite; /* 2 seconds per beat, smooth, infinite loop */
+            cursor: pointer; /* Indicate it's clickable */
+        }
+    </style>
+
+    <path id="heart-path"
+          d="M100 180 C 130 150, 170 110, 170 80 C 170 50, 150 30, 120 30 C 100 30, 80 50, 80 80 C 80 110, 120 150, 100 180 Z M100 180 C 70 150, 30 110, 30 80 C 30 50, 50 30, 80 30 C 100 30, 120 50, 120 80 C 120 110, 70 150, 100 180 Z"
+          fill="var(--heart-color-start)" />
+
+    <script type="text/ecmascript">
+        <![CDATA[
+        let synth;
+        let heartbeatLoop;
+        let isPlaying = false;
+        const heartPath = document.getElementById('heart-path');
+
+        // Dynamically load Tone.js
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js";
+        script.onload = () => {
+            console.log("Tone.js loaded.");
+            // Initialize audio context and synth after Tone.js is loaded
+            initializeAudio();
+            // Add click event listener to the heart path ONLY after Tone.js is loaded and initialized
+            heartPath.addEventListener('click', toggleHeartbeat);
+        };
+        document.head.appendChild(script);
+
+        async function initializeAudio() {
+            if (!Tone) {
+                console.error("Tone.js is not available.");
+                return;
+            }
+
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+                console.log("Audio context started.");
+            }
+
+            if (!synth) {
+                synth = new Tone.MembraneSynth({
+                    pitchDecay: 0.05,
+                    octaves: 8,
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.4,
+                        sustain: 0.01,
+                        release: 0.8,
+                        attackCurve: "exponential"
+                    },
+                    oscillator: {
+                        type: "sine"
+                    },
+                    noise: {
+                        type: "pink"
+                    },
+                    filter: {
+                        Q: 10,
+                        type: "lowpass",
+                        rolloff: -24
+                    }
+                }).toDestination();
+
+                // Create a loop to play the heartbeat sound
+                // The visual animation is 2s per beat, so the sound should also be 2s per beat.
+                heartbeatLoop = new Tone.Loop(time => {
+                    synth.triggerAttackRelease("C2", "0.5s", time); // Low frequency thud
+                    // Optionally, a second, slightly higher frequency sound for a "lub-dub"
+                    // synth.triggerAttackRelease("G2", "0.3s", time + 0.3);
+                }, "2n"); // "2n" means every 2 whole notes, which at default tempo is 2 seconds.
+            }
+        }
+
+        function toggleHeartbeat() {
+            if (isPlaying) {
+                heartbeatLoop.stop();
+                isPlaying = false;
+                console.log("Heartbeat stopped.");
+            } else {
+                // Ensure audio context is started on user interaction
+                initializeAudio().then(() => {
+                    heartbeatLoop.start(0); // Start immediately
+                    isPlaying = true;
+                    console.log("Heartbeat started.");
+                }).catch(e => console.error("Error starting audio context:", e));
+            }
+        }
+        ]]>
+    </script>
+</svg>
