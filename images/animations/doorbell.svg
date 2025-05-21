@@ -1,0 +1,225 @@
+<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define colors based on Ring Doorbell aesthetics */
+        :root {
+            --doorbell-body-color: #2c2c2c; /* Dark charcoal/black */
+            --doorbell-accent-color: #6a6a6a; /* Metallic grey for top/bottom */
+            --button-color: #1a1a1a; /* Even darker for the button */
+            --button-glow-color: #2ecc71; /* Emerald Green for ring glow */
+            --ripple-color: rgba(46, 204, 113, 0.5); /* Semi-transparent Emerald Green */
+            --text-color: #ecf0f1; /* Off-white */
+            --camera-lens-color: #111111; /* Dark for lens */
+            --camera-highlight-color: #ffffff; /* Small highlight */
+            --speaker-grille-color: #444444; /* Dark grey for grille */
+        }
+
+        /* Overall doorbell container */
+        #doorbell-container {
+            transform-origin: center center;
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Doorbell body styling */
+        #doorbell-body {
+            fill: var(--doorbell-body-color);
+            stroke: var(--doorbell-accent-color); /* Subtle border */
+            stroke-width: 2;
+        }
+
+        /* Top and bottom accent styling */
+        #doorbell-top-accent, #doorbell-bottom-accent {
+            fill: var(--doorbell-accent-color);
+        }
+
+        /* Camera lens styling */
+        #camera-lens {
+            fill: var(--camera-lens-color);
+            stroke: #000000;
+            stroke-width: 1;
+        }
+
+        #camera-highlight {
+            fill: var(--camera-highlight-color);
+            opacity: 0.2;
+        }
+
+        /* Speaker grille styling */
+        .speaker-hole {
+            fill: var(--speaker-grille-color);
+        }
+
+        /* Button styling */
+        #doorbell-button {
+            fill: var(--button-color);
+            stroke: var(--doorbell-accent-color);
+            stroke-width: 2;
+            cursor: pointer; /* Indicate it's clickable */
+            transition: transform 0.1s ease-out; /* Smooth press effect */
+        }
+
+        /* Button text/icon styling */
+        #button-text {
+            fill: var(--text-color);
+            font-family: 'Inter', sans-serif; /* Using Inter for a modern look */
+            font-size: 30px; /* Slightly smaller */
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none; /* Allow click to pass through to button */
+        }
+
+        /* Initial state for ripple circles */
+        .ripple {
+            fill: var(--ripple-color);
+            opacity: 0;
+            transform-origin: center center;
+            transform: scale(0);
+        }
+
+        /* Animation for button press */
+        @keyframes button-press {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); } /* Press in */
+            100% { transform: scale(1); }
+        }
+
+        /* Animation for button glow/ring indicator */
+        @keyframes button-glow {
+            0%, 100% { fill: var(--button-color); }
+            50% { fill: var(--button-glow-color); }
+        }
+
+        /* Animation for ripple effect */
+        @keyframes ripple-expand {
+            0% { transform: scale(0); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        /* Class to trigger button press animation */
+        .pressed {
+            animation: button-press 0.2s ease-out forwards;
+        }
+
+        /* Class to trigger button glow animation */
+        .ringing {
+            animation: button-glow 0.5s ease-in-out forwards;
+        }
+
+        /* Classes for individual ripple animations */
+        .ripple.active-1 {
+            animation: ripple-expand 1s ease-out forwards;
+        }
+        .ripple.active-2 {
+            animation: ripple-expand 1s ease-out forwards;
+            animation-delay: 0.2s;
+        }
+        .ripple.active-3 {
+            animation: ripple-expand 1s ease-out forwards;
+            animation-delay: 0.4s;
+        }
+    </style>
+
+    <g id="doorbell-container">
+        <rect id="doorbell-body" x="75" y="20" width="150" height="360" rx="15" ry="15" />
+
+        <rect id="doorbell-top-accent" x="80" y="25" width="140" height="70" rx="10" ry="10" />
+
+        <circle id="camera-lens" cx="150" cy="55" r="25" />
+        <circle id="camera-highlight" cx="165" cy="45" r="5" />
+
+        <circle id="doorbell-button" cx="150" cy="240" r="60" />
+
+        <text id="button-text" x="150" y="240">
+            <tspan>RING</tspan>
+        </text>
+
+        <g id="speaker-grille">
+            <rect class="speaker-hole" x="100" y="320" width="100" height="5" rx="2" ry="2" />
+            <rect class="speaker-hole" x="100" y="330" width="100" height="5" rx="2" ry="2" />
+            <rect class="speaker-hole" x="100" y="340" width="100" height="5" rx="2" ry="2" />
+        </g>
+
+        <circle id="ripple1" class="ripple" cx="150" cy="240" r="60" />
+        <circle id="ripple2" class="ripple" cx="150" cy="240" r="60" />
+        <circle id="ripple3" class="ripple" cx="150" cy="240" r="60" />
+    </g>
+
+    <script type="text/ecmascript">
+        <![CDATA[
+        // Load Tone.js dynamically within the script block
+        const script = document.createElement('script');
+        script.src = "https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js";
+        script.onload = () => {
+            // Once Tone.js is loaded, initialize audio and set up event listener
+            initializeAudio();
+            doorbellButton.addEventListener('click', ringDoorbell);
+        };
+        document.head.appendChild(script);
+
+        const doorbellButton = document.getElementById('doorbell-button');
+        const buttonText = document.getElementById('button-text');
+        const ripple1 = document.getElementById('ripple1');
+        const ripple2 = document.getElementById('ripple2');
+        const ripple3 = document.getElementById('ripple3');
+
+        let synth; // Declare synth globally to avoid re-initialization
+
+        // Function to initialize Tone.js components
+        async function initializeAudio() {
+            if (!synth) {
+                // Create a simple synth for the doorbell sound
+                synth = new Tone.Synth({
+                    oscillator: {
+                        type: "sine"
+                    },
+                    envelope: {
+                        attack: 0.005,
+                        decay: 0.1,
+                        sustain: 0.05,
+                        release: 0.5
+                    }
+                }).toDestination();
+                await Tone.start(); // Start the audio context
+                console.log("Audio context started");
+            }
+        }
+
+        function ringDoorbell() {
+            // Ensure audio context is started before playing sound
+            initializeAudio().then(() => {
+                // Play a "ding-dong" sound
+                synth.triggerAttackRelease("C4", "8n", Tone.now());
+                synth.triggerAttackRelease("G3", "8n", Tone.now() + 0.2); // Play G3 after 0.2 seconds
+
+                // Apply visual animations
+                doorbellButton.classList.add('pressed');
+                doorbellButton.classList.add('ringing'); // For button glow
+                buttonText.classList.add('ringing'); // For text glow (if desired, currently same as button)
+
+                ripple1.classList.add('active-1');
+                ripple2.classList.add('active-2');
+                ripple3.classList.add('active-3');
+
+                // Reset animations after they complete
+                setTimeout(() => {
+                    doorbellButton.classList.remove('pressed');
+                    doorbellButton.classList.remove('ringing');
+                    buttonText.classList.remove('ringing');
+
+                    ripple1.classList.remove('active-1');
+                    ripple2.classList.remove('active-2');
+                    ripple3.classList.remove('active-3');
+
+                    // Re-add them briefly to ensure the animation can restart on next click
+                    void ripple1.offsetWidth; // Trigger reflow
+                    void ripple2.offsetWidth;
+                    void ripple3.offsetWidth;
+
+                }, 1000); // Duration of the longest ripple animation
+            }).catch(e => console.error("Error starting audio context:", e));
+        }
+
+        // The event listener is now added after Tone.js is loaded
+        ]]>
+    </script>
+</svg>
