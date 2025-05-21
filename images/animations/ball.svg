@@ -1,0 +1,104 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define keyframes for the primary pulsating shape */
+        @keyframes pulse-morph {
+            0% {
+                transform: scale(0.8) rotate(0deg);
+                fill: #6366f1; /* Indigo 500 */
+                stroke-dasharray: 0 200;
+                stroke-dashoffset: 0;
+            }
+            25% {
+                transform: scale(1.0) rotate(45deg);
+                fill: #8b5cf6; /* Violet 500 */
+                stroke-dasharray: 100 100;
+                stroke-dashoffset: 0;
+            }
+            50% {
+                transform: scale(0.8) rotate(90deg);
+                fill: #ec4899; /* Pink 500 */
+                stroke-dasharray: 0 200;
+                stroke-dashoffset: -200;
+            }
+            75% {
+                transform: scale(1.0) rotate(135deg);
+                fill: #ef4444; /* Red 500 */
+                stroke-dasharray: 100 100;
+                stroke-dashoffset: -100;
+            }
+            100% {
+                transform: scale(0.8) rotate(180deg); /* Rotate to 180 and then reset for seamless loop */
+                fill: #6366f1; /* Back to Indigo 500 */
+                stroke-dasharray: 0 200;
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Define keyframes for the secondary rotating circles */
+        @keyframes rotate-circles {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Define keyframes for the background grid lines */
+        @keyframes grid-fade {
+            0% { opacity: 0.2; stroke-width: 1; }
+            50% { opacity: 0.6; stroke-width: 2; }
+            100% { opacity: 0.2; stroke-width: 1; }
+        }
+
+        /* Apply animations */
+        #main-shape {
+            transform-origin: center center; /* Ensure rotation and scaling are from the center */
+            animation: pulse-morph 8s ease-in-out infinite alternate; /* 8s duration, ease-in-out, infinite, alternate direction */
+        }
+
+        #rotating-group {
+            transform-origin: center center;
+            animation: rotate-circles 15s linear infinite; /* Slower, continuous rotation */
+        }
+
+        .grid-line {
+            animation: grid-fade 6s ease-in-out infinite alternate;
+        }
+
+        /* Individual delays for grid lines for a wave effect */
+        .grid-line:nth-child(1) { animation-delay: 0s; }
+        .grid-line:nth-child(2) { animation-delay: 0.5s; }
+        .grid-line:nth-child(3) { animation-delay: 1s; }
+        .grid-line:nth-child(4) { animation-delay: 1.5s; }
+        .grid-line:nth-child(5) { animation-delay: 2s; }
+        .grid-line:nth-child(6) { animation-delay: 2.5s; }
+        .grid-line:nth-child(7) { animation-delay: 3s; }
+        .grid-line:nth-child(8) { animation-delay: 3.5s; }
+    </style>
+
+    <g id="grid-lines" stroke="#cbd5e1" stroke-linecap="round">
+        <line class="grid-line" x1="20" y1="20" x2="180" y2="20" />
+        <line class="grid-line" x1="20" y1="50" x2="180" y2="50" />
+        <line class="grid-line" x1="20" y1="80" x2="180" y2="80" />
+        <line class="grid-line" x1="20" y1="110" x2="180" y2="110" />
+        <line class="grid-line" x1="20" y1="140" x2="180" y2="140" />
+        <line class="grid-line" x1="20" y1="170" x2="180" y2="170" />
+
+        <line class="grid-line" x1="20" y1="20" x2="20" y2="180" />
+        <line class="grid-line" x1="50" y1="20" x2="50" y2="180" />
+        <line class="grid-line" x1="80" y1="20" x2="80" y2="180" />
+        <line class="grid-line" x1="110" y1="20" x2="110" y2="180" />
+        <line class="grid-line" x1="140" y1="20" x2="140" y2="180" />
+        <line class="grid-line" x1="170" y1="20" x2="170" y2="180" />
+    </g>
+
+    <path id="main-shape"
+          d="M100 20 C140 20, 180 60, 180 100 C180 140, 140 180, 100 180 C60 180, 20 140, 20 100 C20 60, 60 20, 100 20 Z"
+          fill="#6366f1" stroke="#4f46e5" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />
+
+    <g id="rotating-group">
+        <circle cx="100" cy="50" r="10" fill="#a78bfa" />
+        <circle cx="150" cy="100" r="10" fill="#f472b6" />
+        <circle cx="100" cy="150" r="10" fill="#f87171" />
+        <circle cx="50" cy="100" r="10" fill="#a5b4fc" />
+    </g>
+
+    <circle cx="100" cy="100" r="15" fill="#e0e7ff" stroke="#6366f1" stroke-width="2" />
+</svg>
