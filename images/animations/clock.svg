@@ -1,0 +1,135 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define colors */
+        :root {
+            --clock-face-color: #ecf0f1; /* Light grey */
+            --clock-border-color: #34495e; /* Dark blue-grey */
+            --hour-hand-color: #2c3e50; /* Darker blue-grey */
+            --minute-hand-color: #2c3e50;
+            --second-hand-color: #e74c3c; /* Red */
+            --alarm-hand-color: #f1c40f; /* Yellow */
+            --center-dot-color: #34495e;
+            --shadow-color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Overall clock container for pseudo-3D effect */
+        #clock-container {
+            transform-origin: center center;
+            /* Removed 3D tilt for a 2D appearance */
+            /* transform: perspective(500px) rotateX(15deg) rotateY(-15deg); */
+            transition: transform 0.5s ease-out; /* Smooth transition on hover (if applied externally) */
+        }
+
+        /* Clock face styling */
+        #clock-face {
+            fill: var(--clock-face-color);
+            stroke: var(--clock-border-color);
+            stroke-width: 5;
+            filter: drop-shadow(5px 5px 10px var(--shadow-color)); /* Subtle shadow for depth */
+        }
+
+        /* Hand styling */
+        .hand {
+            transform-origin: 200px 200px; /* Center of the clock */
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        #hour-hand {
+            stroke: var(--hour-hand-color);
+            stroke-width: 8;
+        }
+
+        #minute-hand {
+            stroke: var(--minute-hand-color);
+            stroke-width: 6;
+        }
+
+        #second-hand {
+            stroke: var(--second-hand-color);
+            stroke-width: 2;
+        }
+
+        #alarm-hand {
+            stroke: var(--alarm-hand-color);
+            stroke-width: 4;
+            transform-origin: 200px 200px; /* Center of the clock */
+            /* Animation for alarm hand - subtle pulse/glow */
+            animation: alarm-pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes alarm-pulse {
+            0% { opacity: 0.8; stroke-width: 4; }
+            100% { opacity: 1; stroke-width: 5; }
+        }
+
+        /* Center dot styling */
+        #center-dot {
+            fill: var(--center-dot-color);
+        }
+
+        /* Hour markers */
+        .hour-marker {
+            fill: var(--clock-border-color);
+        }
+
+        /* Minute markers */
+        .minute-marker {
+            fill: var(--clock-border-color);
+            opacity: 0.6;
+        }
+    </style>
+
+    <g id="clock-container">
+        <circle id="clock-face" cx="200" cy="200" r="180" />
+
+        <circle class="hour-marker" cx="200" cy="30" r="5" /> <circle class="hour-marker" cx="350" cy="200" r="5" /> <circle class="hour-marker" cx="200" cy="370" r="5" /> <circle class="hour-marker" cx="50" cy="200" r="5" /> <circle class="hour-marker" cx="286.6" cy="65.3" r="4" /> <circle class="hour-marker" cx="334.7" cy="113.4" r="4" /> <circle class="hour-marker" cx="334.7" cy="286.6" r="4" /> <circle class="hour-marker" cx="286.6" cy="334.7" r="4" /> <circle class="hour-marker" cx="113.4" cy="334.7" r="4" /> <circle class="hour-marker" cx="65.3" cy="286.6" r="4" /> <circle class="hour-marker" cx="65.3" cy="113.4" r="4" /> <circle class="hour-marker" cx="113.4" cy="65.3" r="4" /> <line id="alarm-hand" x1="200" y1="200" x2="300" y2="200" />
+
+        <line id="hour-hand" class="hand" x1="200" y1="200" x2="200" y2="120" />
+
+        <line id="minute-hand" class="hand" x1="200" y1="200" x2="200" y2="90" />
+
+        <line id="second-hand" class="hand" x1="200" y1="200" x2="200" y2="70" />
+
+        <circle id="center-dot" cx="200" cy="200" r="8" />
+    </g>
+
+    <script type="text/ecmascript">
+        <![CDATA[
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            const hourHand = document.getElementById('hour-hand');
+            const minuteHand = document.getElementById('minute-hand');
+            const secondHand = document.getElementById('second-hand');
+
+            // Calculate rotation degrees
+            // 12 hours * 30 degrees/hour = 360 degrees
+            // 60 minutes * 6 degrees/minute = 360 degrees
+            // 60 seconds * 6 degrees/second = 360 degrees
+
+            // Hour hand moves 360 degrees in 12 hours, plus minute contribution
+            const hourDegrees = (hours % 12) * 30 + (minutes / 60) * 30;
+            // Minute hand moves 360 degrees in 60 minutes, plus second contribution
+            const minuteDegrees = minutes * 6 + (seconds / 60) * 6;
+            // Second hand moves 360 degrees in 60 seconds
+            const secondDegrees = seconds * 6;
+
+            // Apply transformations
+            // The transform-origin is set in CSS for the .hand class
+            hourHand.setAttribute('transform', `rotate(${hourDegrees})`);
+            minuteHand.setAttribute('transform', `rotate(${minuteDegrees})`);
+            secondHand.setAttribute('transform', `rotate(${secondDegrees})`);
+        }
+
+        // Update the clock every second
+        setInterval(updateClock, 1000);
+
+        // Initial call to set the clock immediately
+        updateClock();
+        ]]>
+    </script>
+</svg>
