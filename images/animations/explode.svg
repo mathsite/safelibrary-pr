@@ -1,0 +1,148 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define colors */
+        :root {
+            --dynamite-red: #e74c3c; /* Vibrant Red */
+            --dynamite-band: #f1c40f; /* Yellow */
+            --fuse-color: #8B4513; /* Brown */
+            --fuse-glow: #ffa500; /* Orange */
+            --explosion-flash: #f1c40f; /* Yellow */
+            --explosion-debris: #7f8c8d; /* Grey */
+            --explosion-smoke: rgba(127, 140, 141, 0.7); /* Semi-transparent grey */
+            --sparkle-color: #ffff00; /* Bright Yellow for sparkle */
+        }
+
+        /* Keyframes for fuse burning */
+        @keyframes fuse-burn {
+            0% { stroke-dashoffset: 0; stroke: var(--fuse-color); }
+            80% { stroke-dashoffset: 100; stroke: var(--fuse-glow); } /* Fuse burns */
+            100% { stroke-dashoffset: 100; opacity: 0; } /* Fuse disappears */
+        }
+
+        /* Keyframes for explosion flash */
+        @keyframes explosion-flash {
+            0%, 80% { transform: scale(0); opacity: 0; } /* Hidden until explosion starts */
+            81% { transform: scale(0.1); opacity: 1; } /* Quick flash */
+            85% { transform: scale(2); opacity: 0; } /* Expands and fades */
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* Keyframes for debris scattering */
+        @keyframes debris-scatter {
+            0%, 80% { transform: translate(0, 0); opacity: 0; }
+            82% { opacity: 1; }
+            100% {
+                transform: translate(var(--dx), var(--dy)); /* Custom translation for each debris */
+                opacity: 0;
+            }
+        }
+
+        /* Keyframes for smoke expansion */
+        @keyframes smoke-expand {
+            0%, 85% { transform: scale(0); opacity: 0; }
+            86% { transform: scale(0.1); opacity: 0.5; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        /* Keyframes for sparkle flicker */
+        @keyframes sparkle-flicker {
+            0%, 70% { opacity: 0; transform: scale(0); } /* Hidden for most of the time */
+            70.5% { opacity: 1; transform: scale(1); } /* Appears quickly */
+            72% { opacity: 0.5; transform: scale(0.8); }
+            74% { opacity: 1; transform: scale(1.2); }
+            76% { opacity: 0.5; transform: scale(0.9); }
+            78% { opacity: 1; transform: scale(1.1); }
+            80% { opacity: 0; transform: scale(0); } /* Disappears as explosion starts */
+        }
+
+        /* Keyframes for dynamite disappearance */
+        @keyframes dynamite-disappear {
+            0%, 80% { opacity: 1; transform: scale(1); } /* Visible until explosion */
+            81% { opacity: 0; transform: scale(0); } /* Disappears instantly */
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* Dynamite stick styling and animation */
+        #dynamite-stick {
+            fill: var(--dynamite-red);
+            stroke: #c0392b; /* Darker red border */
+            stroke-width: 2;
+            transform-origin: center center; /* Ensure scaling is from center */
+            animation: dynamite-disappear 5s linear infinite;
+        }
+
+        /* Dynamite bands styling and animation */
+        .dynamite-band {
+            fill: var(--dynamite-band);
+            transform-origin: center center; /* Ensure scaling is from center */
+            animation: dynamite-disappear 5s linear infinite;
+        }
+
+        /* Fuse styling and animation */
+        #fuse {
+            stroke: var(--fuse-color);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-dasharray: 100; /* Length of the fuse path */
+            animation: fuse-burn 5s linear infinite; /* Fuse burns over 5 seconds */
+        }
+
+        /* Explosion flash styling and animation */
+        #explosion-flash {
+            fill: var(--explosion-flash);
+            transform-origin: center center;
+            animation: explosion-flash 5s ease-out infinite;
+        }
+
+        /* Debris styling and animation */
+        .debris {
+            fill: var(--explosion-debris);
+            transform-origin: center center;
+            animation: debris-scatter 5s ease-out infinite;
+        }
+        /* Individual debris animation offsets and directions */
+        #debris1 { --dx: -50px; --dy: -50px; animation-delay: 0s; }
+        #debris2 { --dx: 50px; --dy: -50px; animation-delay: 0.1s; }
+        #debris3 { --dx: -70px; --dy: 0px; animation-delay: 0.2s; }
+        #debris4 { --dx: 70px; --dy: 0px; animation-delay: 0.3s; }
+        #debris5 { --dx: -50px; --dy: 50px; animation-delay: 0.4s; }
+        #debris6 { --dx: 50px; --dy: 50px; animation-delay: 0.5s; }
+
+        /* Smoke styling and animation */
+        #explosion-smoke {
+            fill: var(--explosion-smoke);
+            transform-origin: center center;
+            animation: smoke-expand 5s ease-out infinite;
+        }
+
+        /* Sparkle styling and animation */
+        #sparkle {
+            fill: var(--sparkle-color);
+            transform-origin: center center;
+            animation: sparkle-flicker 5s linear infinite;
+        }
+    </style>
+
+    <rect id="dynamite-stick" x="150" y="100" width="100" height="50" rx="10" ry="10" />
+
+    <rect class="dynamite-band" x="155" y="110" width="10" height="30" />
+    <rect class="dynamite-band" x="175" y="110" width="10" height="30" />
+    <rect class="dynamite-band" x="215" y="110" width="10" height="30" />
+    <rect class="dynamite-band" x="235" y="110" width="10" height="30" />
+
+    <path id="fuse" d="M250 125 C260 100, 280 100, 290 80" fill="none" />
+
+    <circle id="sparkle" cx="290" cy="80" r="3" />
+
+    <g transform="translate(200, 125)"> <circle id="explosion-flash" cx="0" cy="0" r="10" />
+
+        <circle class="debris" id="debris1" cx="0" cy="0" r="3" />
+        <circle class="debris" id="debris2" cx="0" cy="0" r="3" />
+        <circle class="debris" id="debris3" cx="0" cy="0" r="3" />
+        <circle class="debris" id="debris4" cx="0" cy="0" r="3" />
+        <circle class="debris" id="debris5" cx="0" cy="0" r="3" />
+        <circle class="debris" id="debris6" cx="0" cy="0" r="3" />
+
+        <circle id="explosion-smoke" cx="0" cy="0" r="20" />
+    </g>
+</svg>
