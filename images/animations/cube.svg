@@ -1,0 +1,78 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define keyframes for the 3D rotation effect */
+        @keyframes rotate3D {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+            25% {
+                transform: rotateX(90deg) rotateY(45deg);
+            }
+            50% {
+                transform: rotateX(180deg) rotateY(90deg);
+            }
+            75% {
+                transform: rotateX(270deg) rotateY(135deg);
+            }
+            100% {
+                transform: rotateX(360deg) rotateY(180deg); /* Rotate Y only halfway for a continuous, non-repeating look */
+            }
+        }
+
+        /* Apply animation to the group containing the cube elements */
+        #cube-group {
+            transform-origin: 100px 100px; /* Center of the SVG viewBox */
+            animation: rotate3D 10s linear infinite; /* 10s duration, linear, infinite loop */
+            transform-box: fill-box; /* Important for correct transform-origin with SVG elements */
+        }
+
+        /* Styling for the cube lines - enhanced */
+        .cube-line {
+            stroke: #4ade80; /* Green 400 - vibrant green */
+            stroke-width: 4; /* Thicker lines */
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Styling for the corner circles - enhanced */
+        .corner-dot {
+            fill: #facc15; /* Yellow 400 - bright yellow */
+            r: 4; /* Slightly larger radius for dots */
+            stroke: #fbbf24; /* Yellow 500 border */
+            stroke-width: 1;
+        }
+
+        /* New style for the cube faces */
+        .cube-face {
+            fill: #ef4444; /* Vibrant Red 500 */
+            opacity: 0.7; /* Semi-transparent to see through */
+            stroke: none; /* No stroke for the faces themselves */
+        }
+    </style>
+
+    <g id="cube-group">
+        <polygon class="cube-face" points="60,60 140,60 140,140 60,140" /> <polygon class="cube-face" points="40,40 120,40 120,120 40,120" /> <polygon class="cube-face" points="60,60 140,60 120,40 40,40" /> <polygon class="cube-face" points="60,140 140,140 120,120 40,120" /> <polygon class="cube-face" points="60,60 40,40 40,120 60,140" /> <polygon class="cube-face" points="140,60 120,40 120,120 140,140" /> <line class="cube-line" x1="60" y1="60" x2="140" y2="60" />
+        <line class="cube-line" x1="140" y1="60" x2="140" y2="140" />
+        <line class="cube-line" x1="140" y1="140" x2="60" y2="140" />
+        <line class="cube-line" x1="60" y1="140" x2="60" y2="60" />
+
+        <line class="cube-line" x1="40" y1="40" x2="120" y2="40" />
+        <line class="cube-line" x1="120" y1="40" x2="120" y2="120" />
+        <line class="cube-line" x1="120" y1="120" x2="40" y2="120" />
+        <line class="cube-line" x1="40" y1="120" x2="40" y2="40" />
+
+        <line class="cube-line" x1="60" y1="60" x2="40" y2="40" />
+        <line class="cube-line" x1="140" y1="60" x2="120" y2="40" />
+        <line class="cube-line" x1="140" y1="140" x2="120" y2="120" />
+        <line class="cube-line" x1="60" y1="140" x2="40" y2="120" />
+
+        <circle class="corner-dot" cx="60" cy="60" />
+        <circle class="corner-dot" cx="140" cy="60" />
+        <circle class="corner-dot" cx="140" cy="140" />
+        <circle class="corner-dot" cx="60" cy="140" />
+        <circle class="corner-dot" cx="40" cy="40" />
+        <circle class="corner-dot" cx="120" cy="40" />
+        <circle class="corner-dot" cx="120" cy="120" />
+        <circle class="corner-dot" cx="40" cy="120" />
+    </g>
+</svg>
