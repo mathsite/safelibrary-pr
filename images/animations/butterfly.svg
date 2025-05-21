@@ -1,0 +1,119 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Define colors for Monarch butterfly */
+        :root {
+            --body-color: #333333; /* Dark Grey/Black for body */
+            --wing-base-color: #FF8C00; /* Dark Orange for Monarch wings */
+            --wing-pattern-color: #000000; /* Black for veins and borders */
+            --white-spot-color: #FFFFFF; /* White for spots */
+            --antenna-color: #333333; /* Dark Grey */
+        }
+
+        /* Keyframes for wing flapping - adjusted for more "clapping" */
+        @keyframes flap-left-wing {
+            0%, 100% { transform: rotateY(0deg) translateZ(0px); } /* Flat */
+            50% { transform: rotateY(100deg) translateZ(20px); } /* Flapped inward more, slightly forward */
+        }
+
+        @keyframes flap-right-wing {
+            0%, 100% { transform: rotateY(0deg) translateZ(0px); } /* Flat */
+            50% { transform: rotateY(-100deg) translateZ(20px); } /* Flapped inward more, slightly forward (opposite direction) */
+        }
+
+        /* Butterfly body styling */
+        #butterfly-body {
+            fill: var(--body-color);
+            stroke: #000000;
+            stroke-width: 2;
+        }
+
+        /* Antenna styling */
+        .antenna {
+            stroke: var(--antenna-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        /* Wing styling and animation */
+        .wing {
+            fill: var(--wing-base-color);
+            stroke: var(--wing-pattern-color); /* Black border for wings */
+            stroke-width: 2;
+            transform-origin: center center; /* Pivot point for flapping */
+            transform-box: fill-box; /* Ensures consistent transform origin */
+        }
+
+        #left-top-wing, #left-bottom-wing {
+            animation: flap-left-wing 1s ease-in-out infinite alternate; /* Flap animation */
+            transform-origin: 200px 150px; /* Pivot from body center */
+        }
+
+        #right-top-wing, #right-bottom-wing {
+            animation: flap-right-wing 1s ease-in-out infinite alternate; /* Flap animation */
+            transform-origin: 200px 150px; /* Pivot from body center */
+        }
+
+        /* Wing patterns (veins and spots) */
+        .wing-pattern-vein {
+            fill: none; /* Veins are strokes */
+            stroke: var(--wing-pattern-color);
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        .wing-pattern-spot {
+            fill: var(--white-spot-color);
+            stroke: var(--wing-pattern-color);
+            stroke-width: 1;
+        }
+
+        /* Overall butterfly group for fixed 3D tilt */
+        #butterfly-group {
+            transform-origin: center center;
+            transform: perspective(800px) rotateX(15deg) rotateY(-10deg); /* Fixed 3D tilt */
+        }
+    </style>
+
+    <g id="butterfly-group">
+        <ellipse id="butterfly-body" cx="200" cy="150" rx="15" ry="80" />
+
+        <circle cx="200" cy="70" r="12" fill="var(--body-color)" stroke="#000000" stroke-width="2" />
+
+        <line class="antenna" x1="195" y1="60" x2="180" y2="30" />
+        <circle cx="180" cy="30" r="3" fill="var(--antenna-color)" />
+        <line class="antenna" x1="205" y1="60" x2="220" y2="30" />
+        <circle cx="220" cy="30" r="3" fill="var(--antenna-color)" />
+
+        <g id="left-wings">
+            <path id="left-top-wing" class="wing"
+                  d="M200 150 Q120 100, 100 50 Q80 100, 150 150 Z" />
+            <path class="wing-pattern-vein" d="M190 140 L150 100 L120 70" />
+            <path class="wing-pattern-vein" d="M190 140 L160 120 L130 100" />
+            <circle class="wing-pattern-spot" cx="105" cy="60" r="3" />
+            <circle class="wing-pattern-spot" cx="95" cy="80" r="3" />
+
+            <path id="left-bottom-wing" class="wing"
+                  d="M200 150 Q120 200, 100 250 Q80 200, 150 150 Z" />
+            <path class="wing-pattern-vein" d="M190 160 L150 200 L120 230" />
+            <path class="wing-pattern-vein" d="M190 160 L160 180 L130 200" />
+            <circle class="wing-pattern-spot" cx="105" cy="240" r="3" />
+            <circle class="wing-pattern-spot" cx="95" cy="220" r="3" />
+        </g>
+
+        <g id="right-wings">
+            <path id="right-top-wing" class="wing"
+                  d="M200 150 Q280 100, 300 50 Q320 100, 250 150 Z" />
+            <path class="wing-pattern-vein" d="M210 140 L250 100 L280 70" />
+            <path class="wing-pattern-vein" d="M210 140 L240 120 L270 100" />
+            <circle class="wing-pattern-spot" cx="295" cy="60" r="3" />
+            <circle class="wing-pattern-spot" cx="305" cy="80" r="3" />
+
+            <path id="right-bottom-wing" class="wing"
+                  d="M200 150 Q280 200, 300 250 Q320 200, 250 150 Z" />
+            <path class="wing-pattern-vein" d="M210 160 L250 200 L280 230" />
+            <path class="wing-pattern-vein" d="M210 160 L240 180 L270 200" />
+            <circle class="wing-pattern-spot" cx="295" cy="240" r="3" />
+            <circle class="wing-pattern-spot" cx="305" cy="220" r="3" />
+        </g>
+    </g>
+</svg>
