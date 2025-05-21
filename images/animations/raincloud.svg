@@ -1,0 +1,82 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        /* Background color for the storm sky */
+        rect.sky {
+            fill: #2c3e50; /* Dark blue-grey */
+        }
+
+        /* Keyframes for cloud movement */
+        @keyframes cloud-move {
+            0% { transform: translateX(0px); }
+            50% { transform: translateX(20px); }
+            100% { transform: translateX(0px); }
+        }
+
+        /* Keyframes for lightning flash */
+        @keyframes lightning-flash {
+            0%, 100% { opacity: 0; }
+            1% { opacity: 1; } /* Quick flash */
+            2% { opacity: 0; }
+            3% { opacity: 1; }
+            4% { opacity: 0; }
+        }
+
+        /* Keyframes for rain falling */
+        @keyframes rain-fall {
+            0% { transform: translateY(-10px) translateX(0px); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(100px) translateX(20px); opacity: 0; }
+        }
+
+        /* Styling for clouds */
+        .cloud {
+            fill: #7f8c8d; /* Grey cloud color */
+            animation: cloud-move 10s ease-in-out infinite alternate;
+        }
+
+        /* Specific cloud animations for variety */
+        #cloud1 { animation-delay: 0s; }
+        #cloud2 { animation-delay: 2s; }
+        #cloud3 { animation-delay: 4s; }
+
+        /* Styling for lightning */
+        #lightning {
+            fill: #f1c40f; /* Yellow lightning */
+            opacity: 0; /* Start hidden */
+            animation: lightning-flash 5s steps(1, end) infinite; /* Fast, step-like flash */
+            transform-origin: center;
+        }
+
+        /* Styling for rain drops */
+        .rain-drop {
+            fill: #ecf0f1; /* Light grey/white for rain */
+            animation: rain-fall 1.5s linear infinite; /* Consistent falling */
+        }
+
+        /* Staggered delays for rain drops */
+        .rain-drop:nth-child(1) { animation-delay: 0s; }
+        .rain-drop:nth-child(2) { animation-delay: 0.3s; }
+        .rain-drop:nth-child(3) { animation-delay: 0.6s; }
+        .rain-drop:nth-child(4) { animation-delay: 0.9s; }
+        .rain-drop:nth-child(5) { animation-delay: 1.2s; }
+    </style>
+
+    <rect class="sky" x="0" y="0" width="400" height="300" />
+
+    <g id="clouds">
+        <path id="cloud1" class="cloud" d="M 50 100 Q 80 50, 150 70 T 250 90 Q 280 140, 200 150 T 100 130 Q 70 150, 50 100 Z" />
+        <path id="cloud2" class="cloud" d="M 200 80 Q 230 30, 300 50 T 380 70 Q 350 120, 280 130 T 200 100 Q 170 120, 200 80 Z" />
+        <path id="cloud3" class="cloud" d="M 100 150 Q 130 100, 200 120 T 280 140 Q 250 190, 180 200 T 100 170 Q 70 190, 100 150 Z" />
+    </g>
+
+    <polygon id="lightning" points="180,150 200,200 190,200 210,250 200,250 220,300 200,300 190,250 180,250 190,200 180,200" />
+
+    <g id="rain">
+        <rect class="rain-drop" x="150" y="200" width="2" height="10" />
+        <rect class="rain-drop" x="170" y="210" width="2" height="10" />
+        <rect class="rain-drop" x="190" y="220" width="2" height="10" />
+        <rect class="rain-drop" x="210" y="230" width="2" height="10" />
+        <rect class="rain-drop" x="230" y="240" width="2" height="10" />
+    </g>
+</svg>
