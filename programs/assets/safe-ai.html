@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase AI Chat</title>
+    <title>Firebase AI Chat (GitHub Pages)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles for the chat application */
@@ -133,7 +133,7 @@
 <body>
     <div class="chat-container">
         <div class="p-4 bg-blue-600 text-white text-center text-lg font-semibold rounded-t-xl">
-            SafeLibrary AI
+            Firebase AI Chat
         </div>
         <div id="user-id-display" class="p-2 text-sm text-gray-600 bg-gray-100 text-center">
             Loading user ID...
@@ -166,20 +166,38 @@
     <script type="module">
         // Firebase imports from CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE PROJECT CONFIGURATION
+        // You can find this in your Firebase project settings -> Project settings -> General -> Your apps -> Web app -> Firebase SDK snippet -> Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMsnn5QTXgUuUMLX8MDgZ-L8_o3_CNK70",
+            authDomain: "gorj-ppb.firebaseapp.com",
+            projectId: "gorj-ppb",
+            storageBucket: "gorj-ppb.firebasestorage.app",
+            messagingSenderId: "278478870117",
+            appId: "1:278478870117:web:87e99dea1f3893c0ea588c",
+            measurementId: "G-GKY0STDFLH"
+        };
 
-        // Global variables provided by the Canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // IMPORTANT SECURITY WARNING: EXPOSING YOUR GEMINI API KEY IN CLIENT-SIDE CODE
+        // IS NOT SECURE FOR PRODUCTION APPLICATIONS.
+        // For production, use a secure backend (e.g., Firebase Cloud Functions, Google Cloud Run)
+        // to make calls to the Gemini API.
+        // Replace "YOUR_GEMINI_API_KEY" with your actual API key from Google AI Studio.
+        const GEMINI_API_KEY = "AIzaSyAIb3UjmG6FGu79dpL4dvba1Ze-hoLTDDo";
+
+        // --- FOR DEBUGGING: Log the firebaseConfig being used ---
+        console.log("Firebase Config object being used:", firebaseConfig);
+        // --- END DEBUGGING ---
 
         // Firebase instances
         let app;
         let db;
         let auth;
         let userId = null;
-        let isAuthReady = false; // Flag to ensure auth is ready before Firestore operations
+        let isAuthReady = false;
 
         // DOM elements
         const chatMessagesDiv = document.getElementById('chat-messages');
@@ -196,7 +214,7 @@
         // Function to show custom modal
         function showModal(message) {
             modalMessage.textContent = message;
-            modal.style.display = 'flex'; // Use flex to center
+            modal.style.display = 'flex';
         }
 
         // Close modal when 'x' is clicked
@@ -214,6 +232,15 @@
         // Initialize Firebase and set up authentication listener
         window.onload = async () => {
             try {
+                // Validate Firebase config has minimal required info
+                if (!firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID" ||
+                    !firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_FIREBASE_API_KEY") {
+                    throw new Error("Firebase configuration is incomplete or uses placeholder values. Please update `firebaseConfig` object in the script with your actual Firebase project details.");
+                }
+                if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY") {
+                    throw new Error("Gemini API Key is missing or uses a placeholder value. Please update `GEMINI_API_KEY` in the script with your actual API key from Google AI Studio.");
+                }
+
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
@@ -224,30 +251,33 @@
                         userId = user.uid;
                         userIdDisplay.textContent = `Your User ID: ${userId}`;
                         isAuthReady = true;
-                        setupRealtimeChatListener(); // Set up listener once authenticated
+                        setupRealtimeChatListener();
                     } else {
-                        // If no user is signed in, attempt to sign in using custom token or anonymously
                         try {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
+                            // Sign in anonymously for simple access on GitHub Pages
+                            await signInAnonymously(auth);
                         } catch (error) {
-                            console.error("Error during authentication:", error);
-                            showModal(`Authentication failed: ${error.message}. You might not be able to save messages.`);
+                            console.error("Error during anonymous authentication:", error);
+                            let errorMessage = `Authentication failed: ${error.message}. Messages may not be saved.`;
+                            if (error.code === 'auth/configuration-not-found') {
+                                errorMessage = `Authentication failed: Firebase configuration not found. This usually means:
+                                1. Your 'firebaseConfig' object in the code does NOT exactly match the one from your Firebase project settings (Project settings -> Your apps -> Web app -> Config).
+                                2. Your web app is NOT correctly registered in your Firebase project.
+                                3. Anonymous authentication is NOT enabled in your Firebase project's Authentication section (Authentication -> Sign-in method).`;
+                            }
+                            showModal(errorMessage);
                             // Fallback to a random ID if anonymous sign-in also fails
                             userId = crypto.randomUUID();
                             userIdDisplay.textContent = `Your User ID: ${userId} (Anonymous, Limited Access)`;
-                            isAuthReady = true; // Still allow app to try and function
-                            setupRealtimeChatListener(); // Try to set up listener even with limited auth
+                            isAuthReady = true;
+                            setupRealtimeChatListener(); // Still try to set up listener
                         }
                     }
                 });
             } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                chatMessagesDiv.innerHTML = `<p class="text-red-500 text-center">Error initializing Firebase. Check console for details.</p>`;
-                showModal(`Failed to initialize Firebase: ${error.message}`);
+                console.error("Initialization failed:", error);
+                chatMessagesDiv.innerHTML = `<p class="text-red-500 text-center">Initialization error: ${error.message}</p>`;
+                showModal(`Initialization failed: ${error.message}`);
             }
         };
 
@@ -261,8 +291,11 @@
                 return;
             }
 
-            // Define the collection path for public data
-            const chatCollectionRef = collection(db, `artifacts/${appId}/public/data/chatMessages`);
+            // Define the collection path for public data.
+            // Using firebaseConfig.projectId for the appId part of the path.
+            const chatCollectionPath = `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`;
+            console.log("Firestore Collection Path being used:", chatCollectionPath); // Debugging log
+            const chatCollectionRef = collection(db, chatCollectionPath);
             const q = query(chatCollectionRef, orderBy('timestamp', 'asc'));
 
             onSnapshot(q, (snapshot) => {
@@ -282,8 +315,8 @@
                         messageElement.classList.add('ai-message');
                         messageElement.textContent = `AI: ${message.text}`;
                     } else {
-                        // For messages from other users in a collaborative setting
-                        messageElement.classList.add('ai-message'); // Use AI message style for others for simplicity
+                        // For messages from other anonymous users (their UID will be displayed partially)
+                        messageElement.classList.add('ai-message');
                         messageElement.textContent = `${message.senderId.substring(0, 8)}...: ${message.text}`;
                     }
                     chatMessagesDiv.appendChild(messageElement);
@@ -312,10 +345,10 @@
 
             try {
                 // Add user message to Firestore
-                await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
                     text: messageText,
                     senderId: userId,
-                    timestamp: serverTimestamp() // Use server timestamp for consistent ordering
+                    timestamp: serverTimestamp()
                 });
 
                 // Call the Gemini API for AI response
@@ -332,14 +365,13 @@
          * @param {string} prompt The user's message to send to the AI.
          */
         async function callGeminiAPI(prompt) {
-            loadingIndicator.style.display = 'block'; // Show loading indicator
+            loadingIndicator.style.display = 'block';
 
             let chatHistory = [];
             chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
             const payload = { contents: chatHistory };
-            const apiKey = ""; // Leave as empty string; Canvas will provide it at runtime
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -361,16 +393,15 @@
                     const aiResponseText = result.candidates[0].content.parts[0].text;
 
                     // Add AI response to Firestore
-                    await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                    await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
                         text: aiResponseText,
-                        senderId: 'AI', // Mark sender as AI
+                        senderId: 'AI',
                         timestamp: serverTimestamp()
                     });
                 } else {
                     console.warn("Gemini API returned an unexpected response structure or no content.");
                     showModal("AI couldn't generate a response. Please try again.");
-                    // Add a placeholder message if AI fails to respond
-                    await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                    await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
                         text: "AI failed to generate a response.",
                         senderId: 'AI',
                         timestamp: serverTimestamp()
@@ -379,14 +410,13 @@
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
                 showModal(`AI response error: ${error.message}`);
-                // Add an error message to chat if AI call fails
-                await addDoc(collection(db, `artifacts/${appId}/public/data/chatMessages`), {
+                await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
                     text: `AI encountered an error: ${error.message.substring(0, 100)}...`,
                     senderId: 'AI',
                     timestamp: serverTimestamp()
                 });
             } finally {
-                loadingIndicator.style.display = 'none'; // Hide loading indicator
+                loadingIndicator.style.display = 'none';
             }
         }
 
@@ -398,6 +428,6 @@
             }
         });
     </script>
-        Powered by    <img src="https://houselearning.github.io/safe-library/programs/assets/firebase-brand.png" width="100" height="80">
+    <img src="https://houselearning.github.io/safe-library/programs/assets/firebase-brand.png" width="100" height="80" alt="Powered by Firebase" style="position: absolute; bottom: 20px; right: 20px;">
 </body>
 </html>
