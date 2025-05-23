@@ -61,24 +61,52 @@
             overflow-y: auto;
         }
         .chat-history-item {
+            display: flex; /* Use flexbox for alignment */
+            align-items: center;
+            justify-content: space-between; /* Space out title and delete button */
             width: 100%;
             padding: 0.75rem 1rem;
             background-color: transparent;
             color: #e0e0e0;
             border: none;
             border-radius: 0.5rem;
-            cursor: pointer;
-            text-align: left;
             margin-bottom: 0.5rem;
             transition: background-color 0.2s;
-            white-space: nowrap; /* Prevent title from wrapping */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis for overflow */
+        }
+        .chat-history-item:hover {
+            background-color: #444654;
         }
         .chat-history-item.active {
             background-color: #444654; /* Active chat background */
             font-weight: bold;
         }
+        .chat-title-text {
+            flex-grow: 1; /* Allow title to take available space */
+            cursor: pointer; /* Indicate it's clickable */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 0.5rem; /* Space between title and button */
+        }
+        .delete-chat-button {
+            background-color: transparent;
+            border: none;
+            color: #e0e0e0;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s, color 0.2s;
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+        .delete-chat-button:hover {
+            background-color: #6a0000; /* Darker red on hover */
+            color: white;
+        }
+        .delete-chat-button svg {
+            width: 1rem;
+            height: 1rem;
+        }
+
         #settings-button {
             width: 100%;
             padding: 0.75rem 1rem;
@@ -163,6 +191,12 @@
             border-radius: 0.3em;
             font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
             font-size: 0.9em;
+        }
+        .ai-message img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
         }
 
         .input-area {
@@ -433,6 +467,148 @@
             background-color: #2563eb;
         }
 
+        /* Edit Code Modal Styles */
+        #edit-code-modal {
+            display: none;
+            position: fixed;
+            z-index: 1005; /* Highest z-index */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #edit-code-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #edit-code-modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+            min-height: 100px;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+        #edit-code-modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+            align-self: flex-end; /* Align button to the right */
+        }
+        #edit-code-modal-content button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Verification Modal Styles */
+        #verification-modal {
+            display: none;
+            position: fixed;
+            z-index: 1006; /* Higher than other modals */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #verification-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #verification-modal-content .verification-status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        #verification-modal-content .verified {
+            color: #10b981; /* Green */
+        }
+        #verification-modal-content .not-verified {
+            color: #ef4444; /* Red */
+        }
+
+        /* Two-Factor Auth Modal Styles */
+        #two-factor-auth-modal {
+            display: none;
+            position: fixed;
+            z-index: 1007;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #two-factor-auth-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Specific styles for 2FA modal inputs/buttons */
+        #two-factor-auth-modal-content input {
+            padding: 10px;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #two-factor-auth-modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+        #two-factor-auth-modal-content button:hover {
+            background-color: #2563eb;
+        }
+
+        /* reCAPTCHA container style */
+        #recaptcha-container {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
 
         /* Responsive adjustments */
         @media (max-width: 768px) {
@@ -471,6 +647,14 @@
                 </svg>
                 Settings
             </button>
+            <a href="https://houselearning.github.io/safe-library/programs/assets/safe-ai-docs/" target="_blank">
+            <button id="view-ai-docs-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                </svg>
+                View SafeLibrary AI Docs
+            </button>
+            </a>
         </div>
 
         <div id="main-chat-area">
@@ -479,6 +663,20 @@
             </div>
             <div id="chat-messages" class="chat-messages flex flex-col">
                 <p class="text-center text-gray-500">Start chatting with the AI!</p>
+            </div>
+            <div class="flex justify-center gap-2 p-2 bg-gray-50 border-t border-b border-gray-200">
+                <button id="summarize-chat-button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                    Summarize Chat ✨
+                </button>
+                <button id="suggest-questions-button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
+                    Suggest Questions ✨
+                </button>
+                <button id="generate-image-button" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors">
+                    Generate Image 🖼️
+                </button>
+                <button id="edit-code-button" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors">
+                    Edit Code 📝
+                </button>
             </div>
             <div id="loading-indicator" class="loading-indicator">
                 <div class="flex justify-center items-center">
@@ -523,6 +721,12 @@
                 </svg>
                 Create Password
             </button>
+            <button id="verification-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                Verification
+            </button>
             <button id="logout-button" class="settings-option-button">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
@@ -532,7 +736,7 @@
             <button id="delete-account-button" class="settings-option-button">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.14.994.28l2.58 2.22c.287.246.345.689.11 1.054L18.12 19.338c-.287.46-.78.77-1.328.77H9.25a2.25 2.25 0 0 1-2.244-2.077L4.772 5.05c-.157-.756.12-1.543.72-1.996.402-.293.907-.42 1.413-.42h4.5c.49 0 .964.217 1.286.586l.775.876c.159.18.3.364.426.554L14.74 9Z" />
-                </svg>
+                    </svg>
                 Delete All My Chats & Account
             </button>
             <button id="more-options-button" class="settings-option-button">
@@ -541,12 +745,12 @@
                 </svg>
                 More Options (Coming Soon)
             </button>
-            <a href="https://houselearning.github.io/safe-library/programs/assets/safe-ai-docs/">
-            <button id="more-options-button" class="settings-option-button">
+            <a href="https://houselearning.github.io/safe-library/programs/assets/safe-ai-docs/" target="_blank">
+            <button id="view-ai-docs-button" class="settings-option-button">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
                 </svg>
-View SafeLibrary AI Docs
+                View SafeLibrary AI Docs
             </button>
             </a>
         </div>
@@ -574,10 +778,55 @@ View SafeLibrary AI Docs
         </div>
     </div>
 
+    <div id="edit-code-modal" class="modal">
+        <div id="edit-code-modal-content" class="modal-content">
+            <span class="modal-close edit-code-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800">Edit Code with AI</h2>
+            <p class="text-gray-600">Paste your code below and tell the AI how to modify it.</p>
+            <textarea id="original-code-input" placeholder="Paste your code here..."></textarea>
+            <textarea id="edit-instructions-input" placeholder="Tell the AI what to do (e.g., 'Add comments', 'Refactor this function', 'Fix bugs')..."></textarea>
+            <button id="submit-code-edit-button">Submit for AI Edit</button>
+        </div>
+    </div>
+
+    <div id="verification-modal" class="modal">
+        <div id="verification-modal-content" class="modal-content">
+            <span class="modal-close verification-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800">Account Verification</h2>
+            <p class="text-gray-600">Ensure your account is secure and verified.</p>
+            <p id="email-verification-status" class="verification-status">Email Verified: <span class="not-verified">No</span></p>
+            <button id="verify-email-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 9v.906a2.25 2.25 0 0 1-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 0 0 1.183 1.981l6.478 3.488m8.66-5.607a2.25 2.25 0 1 1-2.523 3.863L12 18l-2.523-4.146a2.25 2.25 0 0 1-2.523-3.863M12 21.75V15" />
+                </svg>
+                Verify Email
+            </button>
+            <button id="add-2fa-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+                Add 2FA
+            </button>
+        </div>
+    </div>
+
+    <div id="two-factor-auth-modal" class="modal">
+        <div id="two-factor-auth-modal-content" class="modal-content">
+            <span class="modal-close two-factor-auth-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800">Two-Factor Authentication (2FA)</h2>
+            <p class="text-gray-600" id="twofa-instruction-text">Enter your phone number to receive a verification code:</p>
+            <input type="tel" id="twofa-phone-input" placeholder="+15551234567" class="p-2 border rounded-md">
+            <button id="send-twofa-code-button">Send Code</button>
+            <div id="recaptcha-container" class="mt-4"></div> <input type="text" id="twofa-code-input" placeholder="Enter verification code" class="p-2 border rounded-md mt-4" style="display:none;">
+            <button id="verify-twofa-code-button" class="mt-2" style="display:none;">Verify Code</button>
+            <p id="twofa-status-message" class="text-sm text-red-500 mt-2"></p>
+        </div>
+    </div>
+
     <script type="module">
         // Firebase imports from CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, linkWithCredential, EmailAuthProvider, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, linkWithCredential, EmailAuthProvider, signInWithEmailAndPassword, deleteUser, sendEmailVerification, multiFactor, PhoneAuthProvider, PhoneMultiFactorGenerator, RecaptchaVerifier } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import * as firestore from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE PROJECT CONFIGURATION
@@ -586,7 +835,7 @@ View SafeLibrary AI Docs
             apiKey: "AIzaSyDMsnn5QTXgUuUMLX8MDgZ-L8_o3_CNK70",
             authDomain: "gorj-ppb.firebaseapp.com",
             projectId: "gorj-ppb",
-            storageBucket: "gorj-ppb.firebasestorage.app",
+            storageBucket: "gorj-ppb.firebaseapp.com",
             messagingSenderId: "278478870117",
             appId: "1:278478870117:web:87e99dea1f38993c0ea588c",
             measurementId: "G-GKY0STDFLH"
@@ -628,6 +877,10 @@ View SafeLibrary AI Docs
         const chatHistoryList = document.getElementById('chat-history-list');
         const currentChatTitleDisplay = document.getElementById('current-chat-title');
         const settingsButton = document.getElementById('settings-button'); // New settings button
+        const summarizeChatButton = document.getElementById('summarize-chat-button'); // New
+        const suggestQuestionsButton = document.getElementById('suggest-questions-button'); // New
+        const generateImageButton = document.getElementById('generate-image-button'); // New
+        const editCodeButton = document.getElementById('edit-code-button'); // New
 
         // Modal elements (general alert modal)
         const modal = document.getElementById('myModal');
@@ -645,7 +898,9 @@ View SafeLibrary AI Docs
         const createPasswordButton = document.getElementById('create-password-button'); // New
         const logoutButton = document.getElementById('logout-button');
         const deleteAccountButton = document.getElementById('delete-account-button');
-        const moreOptionsButton = document.getElementById('more-options-button');
+        const moreOptionsButton = document.getElementById('more-options-button'); // Renamed to view-ai-docs-button
+        const viewAiDocsButton = document.getElementById('view-ai-docs-button'); // New element
+        const verificationButton = document.getElementById('verification-button'); // New
 
         // Create Password Modal elements
         const createPasswordModal = document.getElementById('create-password-modal');
@@ -662,10 +917,39 @@ View SafeLibrary AI Docs
         const submitLoginPasswordButton = document.getElementById('submit-login-password-button');
         const loginSwitchUserButton = document.getElementById('login-switch-user-button');
 
+        // Edit Code Modal elements
+        const editCodeModal = document.getElementById('edit-code-modal');
+        const editCodeCloseBtn = document.getElementsByClassName('edit-code-close-btn')[0];
+        const originalCodeInput = document.getElementById('original-code-input');
+        const editInstructionsInput = document.getElementById('edit-instructions-input');
+        const submitCodeEditButton = document.getElementById('submit-code-edit-button');
+
+        // Verification Modal elements
+        const verificationModal = document.getElementById('verification-modal');
+        const verificationCloseBtn = document.getElementsByClassName('verification-close-btn')[0];
+        const emailVerificationStatus = document.getElementById('email-verification-status');
+        const verifyEmailButton = document.getElementById('verify-email-button');
+        const add2FAButton = document.getElementById('add-2fa-button');
+
+        // Two-Factor Auth Modal elements
+        const twoFactorAuthModal = document.getElementById('two-factor-auth-modal');
+        const twoFactorAuthCloseBtn = document.getElementsByClassName('two-factor-auth-close-btn')[0];
+        const twofaInstructionText = document.getElementById('twofa-instruction-text');
+        const twofaPhoneInput = document.getElementById('twofa-phone-input');
+        const sendTwofaCodeButton = document.getElementById('send-twofa-code-button');
+        const twofaCodeInput = document.getElementById('twofa-code-input');
+        const verifyTwofaCodeButton = document.getElementById('verify-twofa-code-button');
+        const twofaStatusMessage = document.getElementById('twofa-status-message');
+        const recaptchaContainer = document.getElementById('recaptcha-container'); // New reCAPTCHA container
+
+        // State for 2FA enrollment
+        let verificationId = null; // Stores the verificationId from Firebase for 2FA
+        let appVerifier; // reCAPTCHA verifier instance
+
 
         // Function to show custom modal (for alerts/confirmations)
         function showModal(message, isConfirm = false, onConfirm = null) {
-            modalMessage.textContent = message;
+            modalMessage.innerHTML = typeof marked !== 'undefined' ? marked.parse(message) : message; // Render Markdown if marked.js is available
             // Clear previous confirmation buttons if any
             let confirmBtn = document.getElementById('modal-confirm-btn');
             let cancelBtn = document.getElementById('modal-cancel-btn');
@@ -695,17 +979,15 @@ View SafeLibrary AI Docs
             modal.style.display = 'flex';
         }
 
-        // Close general alert modal when 'x' is clicked
-        modalCloseBtn.onclick = function() {
-            modal.style.display = 'none';
-        }
-
         // Close general alert modal when clicking outside of it
         window.addEventListener('click', function(event) {
-            if (event.target == modal && event.target !== welcomeModal && event.target !== settingsModal && event.target !== createPasswordModal && event.target !== loginPasswordModal) {
+            // Only close if the click is directly on the modal backdrop, not its content
+            if (event.target === modal) {
                 modal.style.display = 'none';
             }
         });
+        modalCloseBtn.onclick = () => { modal.style.display = 'none'; };
+
 
         // Function to show the welcome/login modal
         function showWelcomeModal() {
@@ -741,26 +1023,21 @@ View SafeLibrary AI Docs
 
         // Function to show settings modal
         function showSettingsModal() {
+            console.log("showSettingsModal called.");
             settingsModal.style.display = 'flex';
         }
 
         // Function to hide settings modal
         function hideSettingsModal() {
+            console.log("hideSettingsModal called.");
             settingsModal.style.display = 'none';
         }
-
-        // Close settings modal when 'x' is clicked
         settingsCloseBtn.onclick = hideSettingsModal;
 
-        // Close settings modal when clicking outside of it
-        window.addEventListener('click', function(event) {
-            if (event.target == settingsModal) {
-                hideSettingsModal();
-            }
-        });
 
         // Function to show create password modal
         function showCreatePasswordModal() {
+            console.log("showCreatePasswordModal called.");
             hideSettingsModal(); // Hide settings modal first
             createPasswordModal.style.display = 'flex';
             createEmailInput.focus();
@@ -768,23 +1045,17 @@ View SafeLibrary AI Docs
 
         // Function to hide create password modal
         function hideCreatePasswordModal() {
+            console.log("hideCreatePasswordModal called.");
             createPasswordModal.style.display = 'none';
             createEmailInput.value = '';
             createPasswordInput.value = '';
         }
-
-        // Close create password modal when 'x' is clicked
         createPasswordCloseBtn.onclick = hideCreatePasswordModal;
 
-        // Close create password modal when clicking outside of it
-        window.addEventListener('click', function(event) {
-            if (event.target == createPasswordModal) {
-                hideCreatePasswordModal();
-            }
-        });
 
         // Function to show login password modal
         function showLoginPasswordModal() {
+            console.log("showLoginPasswordModal called.");
             loginPasswordModal.style.display = 'flex';
             loginDisplayUserIdText.textContent = displayUserId;
             loginPasswordInput.focus();
@@ -792,19 +1063,112 @@ View SafeLibrary AI Docs
 
         // Function to hide login password modal
         function hideLoginPasswordModal() {
+            console.log("hideLoginPasswordModal called.");
             loginPasswordModal.style.display = 'none';
             loginPasswordInput.value = '';
         }
-
-        // Close login password modal when 'x' is clicked
         loginPasswordCloseBtn.onclick = hideLoginPasswordModal;
 
-        // Close login password modal when clicking outside of it
-        window.addEventListener('click', function(event) {
-            if (event.target == loginPasswordModal) {
-                hideLoginPasswordModal();
+
+        // Function to show edit code modal
+        function showEditCodeModal() {
+            console.log("showEditCodeModal called.");
+            editCodeModal.style.display = 'flex';
+            originalCodeInput.focus();
+        }
+
+        // Function to hide edit code modal
+        function hideEditCodeModal() {
+            console.log("hideEditCodeModal called.");
+            editCodeModal.style.display = 'none';
+            originalCodeInput.value = '';
+            editInstructionsInput.value = '';
+        }
+        editCodeCloseBtn.onclick = hideEditCodeModal;
+
+
+        // Function to show verification modal
+        function showVerificationModal() {
+            console.log("showVerificationModal called.");
+            hideSettingsModal(); // Hide settings modal first
+            verificationModal.style.display = 'flex';
+            updateEmailVerificationStatus(); // Update status when modal opens
+        }
+
+        // Function to hide verification modal
+        function hideVerificationModal() {
+            console.log("hideVerificationModal called.");
+            verificationModal.style.display = 'none';
+        }
+        verificationCloseBtn.onclick = hideVerificationModal;
+
+
+        // Helper to fully reset 2FA modal state and reCAPTCHA
+        function resetTwoFactorAuthModal() {
+            twofaInstructionText.textContent = "Enter your phone number to receive a verification code:";
+            twofaPhoneInput.style.display = 'block';
+            sendTwofaCodeButton.style.display = 'block';
+            twofaCodeInput.style.display = 'none';
+            verifyTwofaCodeButton.style.display = 'none';
+            twofaStatusMessage.textContent = '';
+            twofaPhoneInput.value = '';
+            twofaCodeInput.value = '';
+            recaptchaContainer.style.display = 'flex';
+            sendTwofaCodeButton.disabled = false;
+            verifyTwofaCodeButton.disabled = false;
+            verificationId = null;
+            // Remove any previous reCAPTCHA if present
+            recaptchaContainer.innerHTML = '';
+            if (appVerifier && appVerifier.clear) {
+                appVerifier.clear();
             }
+            appVerifier = null;
+        }
+
+        // Function to show 2FA modal
+        function showTwoFactorAuthModal() {
+    console.log("showTwoFactorAuthModal called.");
+    hideVerificationModal(); // Hide verification modal first
+    twoFactorAuthModal.style.display = 'flex';
+    resetTwoFactorAuthModal();
+    twofaPhoneInput.focus();
+
+    // Always re-create reCAPTCHA
+    try {
+        // FIX: Ensure 'auth' is defined
+        if (!auth) {
+            twofaStatusMessage.textContent = "Firebase Auth is not initialized. Please reload the page.";
+            return;
+        }
+        appVerifier = new RecaptchaVerifier('recaptcha-container', {
+            'size': 'invisible',
+            'callback': (response) => {
+                console.log("reCAPTCHA solved:", response);
+            },
+            'expired-callback': () => {
+                console.warn("reCAPTCHA expired.");
+                twofaStatusMessage.textContent = "reCAPTCHA expired. Please try again.";
+                sendTwofaCodeButton.disabled = false;
+            }
+        }, auth);
+        appVerifier.render().then(widgetId => {
+            console.log("reCAPTCHA rendered with widget ID:", widgetId);
+        }).catch(error => {
+            console.error("Error rendering reCAPTCHA:", error);
+            twofaStatusMessage.textContent = `Error loading reCAPTCHA: ${error.message}`;
         });
+    } catch (error) {
+        console.error("Error initializing reCAPTCHA:", error);
+        twofaStatusMessage.textContent = `Error initializing reCAPTCHA: ${error.message}`;
+    }
+}
+        // Function to hide 2FA modal
+        function hideTwoFactorAuthModal() {
+            console.log("hideTwoFactorAuthModal called.");
+            twoFactorAuthModal.style.display = 'none';
+            resetTwoFactorAuthModal();
+        }
+        twoFactorAuthCloseBtn.onclick = hideTwoFactorAuthModal;
 
 
         // Main initialization function for the chat app after auth and displayUserId are set
@@ -826,13 +1190,13 @@ View SafeLibrary AI Docs
                         // Profile exists, no password, but current UID doesn't match stored UID.
                         // This is a new anonymous session claiming an existing displayUserId without password.
                         console.log("Existing displayUserId without password found. Updating user profile with current anonymous UID.");
-                        userProfile = await createUserProfile(displayUserId, auth.currentUser.uid, false); // Update existing profile
+                        userProfile = await createUserProfile(displayUserId, auth.currentUser.uid, false, auth.currentUser.email, auth.currentUser.emailVerified); // Update existing profile
                     }
                     // If userProfile.firebaseUid === auth.currentUser.uid, no update needed, proceed.
                 } else {
                     // No profile exists for this displayUserId. Create a new one.
                     console.log("No user profile found for displayUserId. Creating new profile.");
-                    userProfile = await createUserProfile(displayUserId, auth.currentUser.uid, false);
+                    userProfile = await createUserProfile(displayUserId, auth.currentUser.uid, false, auth.currentUser.email, auth.currentUser.emailVerified);
                 }
             } else {
                 console.warn("displayUserId is null in initializeChatApp. This should not happen if welcome modal logic is correct.");
@@ -883,6 +1247,17 @@ View SafeLibrary AI Docs
                         firebaseAuthUid = user.uid;
                         isAuthReady = true;
                         console.log("Firebase authenticated. UID:", firebaseAuthUid);
+
+                        // Update userProfile with latest emailVerified status
+                        if (userProfile && userProfile.id) {
+                            await firestore.updateDoc(firestore.doc(db, `artifacts/${firebaseConfig.projectId}/public/data/userProfiles`, userProfile.id), {
+                                emailVerified: user.emailVerified,
+                                email: user.email || null // Ensure email is also updated if it becomes available
+                            });
+                            userProfile.emailVerified = user.emailVerified;
+                            userProfile.email = user.email || userProfile.email;
+                            updateEmailVerificationStatus(); // Update UI if verification modal is open
+                        }
 
                         const storedDisplayUserId = localStorage.getItem('displayUserId');
                         if (storedDisplayUserId) {
@@ -976,8 +1351,9 @@ View SafeLibrary AI Docs
          * @param {string} uid The Firebase Auth UID.
          * @param {boolean} hasPass True if a password is set.
          * @param {string|null} email The email associated with the password, if any.
+         * @param {boolean} emailVerified The email verification status.
          */
-        async function createUserProfile(displayId, uid, hasPass, email = null) {
+        async function createUserProfile(displayId, uid, hasPass, email = null, emailVerified = false) {
             const userProfileRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/userProfiles`);
             const existingProfile = await getUserProfile(displayId);
 
@@ -985,25 +1361,25 @@ View SafeLibrary AI Docs
                 const updateData = {
                     firebaseUid: uid,
                     hasPassword: hasPass,
+                    emailVerified: emailVerified, // Update email verified status
                     updatedAt: firestore.serverTimestamp()
                 };
                 if (email) {
                     updateData.email = email;
                 }
                 await firestore.updateDoc(firestore.doc(db, userProfileRef.path, existingProfile.id), updateData);
-                return { id: existingProfile.id, displayUserId: displayId, firebaseUid: uid, hasPassword: hasPass, email: email || existingProfile.email };
+                return { id: existingProfile.id, displayUserId: displayId, firebaseUid: uid, hasPassword: hasPass, email: email || existingProfile.email, emailVerified: emailVerified };
             } else {
                 const newProfileData = {
                     displayUserId: displayId,
                     firebaseUid: uid,
                     hasPassword: hasPass,
+                    email: email,
+                    emailVerified: emailVerified, // Set initial email verified status
                     createdAt: firestore.serverTimestamp()
                 };
-                if (email) {
-                    newProfileData.email = email;
-                }
                 const newProfileRef = await firestore.addDoc(userProfileRef, newProfileData);
-                return { id: newProfileRef.id, displayUserId: displayId, firebaseUid: uid, hasPassword: hasPass, email: email };
+                return { id: newProfileRef.id, displayUserId: displayId, firebaseUid: uid, hasPassword: hasPass, email: email, emailVerified: emailVerified };
             }
         }
 
@@ -1054,15 +1430,34 @@ View SafeLibrary AI Docs
         function renderChatHistory() {
             chatHistoryList.innerHTML = ''; // Clear current list
             chatHistory.forEach(chat => {
-                const chatButton = document.createElement('button');
-                chatButton.classList.add('chat-history-item');
+                const chatItemDiv = document.createElement('div');
+                chatItemDiv.classList.add('chat-history-item');
                 if (chat.id === currentChatId) {
-                    chatButton.classList.add('active');
+                    chatItemDiv.classList.add('active');
                 }
-                chatButton.textContent = chat.title || 'New Chat'; // Display title or 'New Chat'
-                chatButton.dataset.chatId = chat.id;
-                chatButton.addEventListener('click', () => loadChat(chat.id));
-                chatHistoryList.appendChild(chatButton);
+
+                const chatTitleSpan = document.createElement('span');
+                chatTitleSpan.classList.add('chat-title-text');
+                chatTitleSpan.textContent = chat.title || 'New Chat';
+                chatTitleSpan.dataset.chatId = chat.id; // Store chat ID for loading
+                chatTitleSpan.addEventListener('click', () => loadChat(chat.id));
+
+                const deleteButton = document.createElement('button');
+                deleteButton.classList.add('delete-chat-button');
+                deleteButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.14.994.28l2.58 2.22c.287.246.345.689.11 1.054L18.12 19.338c-.287.46-.78.77-1.328.77H9.25a2.25 2.25 0 0 1-2.244-2.077L4.772 5.05c-.157-.756.12-1.543.72-1.996.402-.293.907-.42 1.413-.42h4.5c.49 0 .964.217 1.286.586l.775.876c.159.18.3.364.426.554L14.74 9Z" />
+                    </svg>
+                `;
+                deleteButton.title = `Delete "${chat.title || 'New Chat'}"`;
+                deleteButton.addEventListener('click', (event) => {
+                    event.stopPropagation(); // Prevent loading chat when clicking delete
+                    deleteChat(chat.id, chat.title || 'New Chat');
+                });
+
+                chatItemDiv.appendChild(chatTitleSpan);
+                chatItemDiv.appendChild(deleteButton);
+                chatHistoryList.appendChild(chatItemDiv);
             });
         }
 
@@ -1112,7 +1507,9 @@ View SafeLibrary AI Docs
                 btn.classList.remove('active');
                 if (btn.dataset.chatId === chatId) {
                     btn.classList.add('active');
-                    currentChatTitleDisplay.textContent = btn.textContent; // Update header title
+                    // Find the span inside the button to get the title
+                    const titleSpan = btn.querySelector('.chat-title-text');
+                    currentChatTitleDisplay.textContent = titleSpan ? titleSpan.textContent : 'New Chat'; // Update header title
                 }
             });
 
@@ -1136,8 +1533,18 @@ View SafeLibrary AI Docs
                         messageElement.textContent = `You: ${message.text}`;
                     } else if (message.senderId === 'AI') {
                         messageElement.classList.add('ai-message');
-                        // Use marked.js to convert Markdown to HTML
-                        messageElement.innerHTML = `AI: ${marked.parse(message.text)}`;
+                        // Check if the AI message is an image
+                        if (message.text && message.text.startsWith('[IMAGE_BASE64]:')) {
+                            const base64Data = message.text.substring('[IMAGE_BASE64]:'.length);
+                            const imgElement = document.createElement('img');
+                            imgElement.src = `data:image/png;base64,${base64Data}`;
+                            imgElement.alt = "AI Generated Image";
+                            messageElement.appendChild(document.createTextNode('AI Generated Image: '));
+                            messageElement.appendChild(imgElement);
+                        } else {
+                            // Otherwise, render as Markdown
+                            messageElement.innerHTML = `AI: ${marked.parse(message.text)}`;
+                        }
                     } else {
                         // For messages from other display users (their ID will be displayed)
                         messageElement.classList.add('ai-message');
@@ -1150,6 +1557,54 @@ View SafeLibrary AI Docs
                 console.error("Error listening to messages for chat", chatId, ":", error);
                 console.error("Firestore chat messages error details:", error);
                 showModal(`Error loading chat messages: ${error.message}. Please check your Firestore Security Rules.`);
+            });
+        }
+
+        /**
+         * Deletes a specific chat session and all its messages.
+         * @param {string} chatId The ID of the chat to delete.
+         * @param {string} chatTitle The title of the chat for confirmation message.
+         */
+        async function deleteChat(chatId, chatTitle) {
+            showModal(`Are you sure you want to delete the chat "${chatTitle}"? This action cannot be undone.`, true, async () => {
+                showModal("Deleting chat. Please wait...");
+                try {
+                    if (!isAuthReady || !db || !firebaseAuthUid) {
+                        throw new Error("App not ready or user not identified for deletion.");
+                    }
+
+                    // 1. Delete all messages in the subcollection
+                    const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`);
+                    const messagesSnapshot = await firestore.getDocs(messagesCollectionRef);
+                    const messageDeletePromises = [];
+                    messagesSnapshot.forEach(msgDoc => {
+                        messageDeletePromises.push(firestore.deleteDoc(firestore.doc(db, messagesCollectionRef.path, msgDoc.id)));
+                    });
+                    await Promise.all(messageDeletePromises);
+                    console.log(`All messages for chat ${chatId} deleted.`);
+
+                    // 2. Delete the chat document itself
+                    await firestore.deleteDoc(firestore.doc(db, `artifacts/${firebaseConfig.projectId}/public/data/chats`, chatId));
+                    console.log(`Chat ${chatId} document deleted.`);
+
+                    showModal("Chat deleted successfully!");
+
+                    // If the deleted chat was the currently active one, load a new/different chat
+                    if (currentChatId === chatId) {
+                        currentChatId = null; // Clear current chat
+                        if (chatHistory.length > 0) {
+                            // Load the first chat in the updated history
+                            await loadChat(chatHistory[0].id);
+                        } else {
+                            // If no other chats, create a new one
+                            await createNewChat();
+                        }
+                    }
+                    // loadChatHistory will automatically re-render the sidebar due to onSnapshot
+                } catch (error) {
+                    console.error("Error deleting chat:", error);
+                    showModal(`Error deleting chat: ${error.message}. Please check your Firestore Security Rules.`);
+                }
             });
         }
 
@@ -1265,36 +1720,40 @@ View SafeLibrary AI Docs
          * Calls the Gemini API with the user's prompt and adds the AI's response to Firestore.
          * @param {string} prompt The user's message to send to the AI.
          * @param {string} chatId The ID of the current chat session.
+         * @param {boolean} isToolCall Whether this is a tool call (e.g., summarize, suggest questions) or a regular chat message.
          */
-        async function callGeminiAPI(prompt, chatId) {
+        async function callGeminiAPI(prompt, chatId, isToolCall = false) {
             loadingIndicator.style.display = 'block';
 
             // Fetch previous messages for context (last N messages)
             const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`);
-            const previousMessagesQuery = firestore.query(messagesCollectionRef, firestore.orderBy('timestamp', 'desc'), firestore.limit(10));
+            // Fetch more messages for context for tool calls, fewer for regular chat
+            const limit = isToolCall ? 20 : 10;
+            const previousMessagesQuery = firestore.query(messagesCollectionRef, firestore.orderBy('timestamp', 'desc'), firestore.limit(limit));
             const previousMessagesSnapshot = await firestore.getDocs(previousMessagesQuery);
             
             let chatHistoryForAI = [];
             // Add previous messages in chronological order (Firestore query is desc, so reverse)
             previousMessagesSnapshot.docs.reverse().forEach(doc => {
                 const msg = doc.data();
-                // When sending to AI, convert HTML back to plain text if needed, or ensure it's always Markdown
-                // For simplicity, we assume AI responses are stored as Markdown and user inputs are plain text.
-                // If AI needs to see *rendered* HTML, this would be more complex.
-                // For now, AI just sees the raw Markdown/text.
-                if (msg.senderId === displayUserId) { // Compare with displayUserId
-                    chatHistoryForAI.push({ role: "user", parts: [{ text: msg.text }] });
-                } else if (msg.senderId === 'AI') {
-                    chatHistoryForAI.push({ role: "model", parts: [{ text: msg.text }] });
+                // Ensure only text messages are sent to the AI for text generation
+                if (msg.text && !msg.text.startsWith('[IMAGE_BASE64]:')) {
+                    if (msg.senderId === displayUserId) {
+                        chatHistoryForAI.push({ role: "user", parts: [{ text: msg.text }] });
+                    } else if (msg.senderId === 'AI') {
+                        chatHistoryForAI.push({ role: "model", parts: [{ text: msg.text }] });
+                    }
                 }
             });
 
             // Add the current user prompt. Crucially, instruct the AI to use Markdown.
-            const formattedPrompt = `${prompt}\n\nPlease format your response using Markdown (e.g., headings, paragraphs, bold, italics, lists, code blocks) for readability.`;
+            const finalPrompt = isToolCall ? prompt : `${prompt}\n\nPlease format your response using Markdown (e.g., headings, paragraphs, bold, italics, lists, code blocks) for readability.`;
+            
             if (chatHistoryForAI.length === 0 || chatHistoryForAI[chatHistoryForAI.length - 1].role !== 'user') {
-                chatHistoryForAI.push({ role: "user", parts: [{ text: formattedPrompt }] });
+                chatHistoryForAI.push({ role: "user", parts: [{ text: finalPrompt }] });
             } else {
-                chatHistoryForAI[chatHistoryForAI.length - 1].parts[0].text = formattedPrompt;
+                // If the last message was already from the user (e.g., if we're re-sending), update it
+                chatHistoryForAI[chatHistoryForAI.length - 1].parts[0].text = finalPrompt;
             }
 
             const payload = { contents: chatHistoryForAI };
@@ -1351,12 +1810,298 @@ View SafeLibrary AI Docs
             }
         }
 
+        /**
+         * Summarizes the current chat conversation using the Gemini API.
+         */
+        async function summarizeChat() {
+            console.log("summarizeChat called.");
+            if (!currentChatId) {
+                showModal("Please select or start a chat first.");
+                return;
+            }
+
+            // Add user message indicating the action
+            await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                text: "Please summarize this chat.",
+                senderId: displayUserId,
+                firebaseUid: firebaseAuthUid,
+                timestamp: firestore.serverTimestamp()
+            });
+
+            showModal("Generating summary... ✨");
+            loadingIndicator.style.display = 'block';
+
+            try {
+                const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`);
+                const messagesSnapshot = await firestore.getDocs(firestore.query(messagesCollectionRef, firestore.orderBy('timestamp', 'asc')));
+
+                if (messagesSnapshot.empty) {
+                    showModal("No messages in this chat to summarize.");
+                    loadingIndicator.style.display = 'none';
+                    return;
+                }
+
+                let conversationText = "";
+                messagesSnapshot.forEach(doc => {
+                    const msg = doc.data();
+                    // Only include text messages for summarization
+                    if (msg.text && !msg.text.startsWith('[IMAGE_BASE64]:')) {
+                        conversationText += `${msg.senderId}: ${msg.text}\n`;
+                    }
+                });
+
+                const prompt = `Please provide a concise summary of the following chat conversation. Focus on the main topics and conclusions. Format the summary using Markdown with headings, paragraphs, and bullet points for readability:\n\n${conversationText}`;
+                
+                await callGeminiAPI(prompt, currentChatId, true); // Use callGeminiAPI with isToolCall = true
+                showModal("Summary generated and added to chat!");
+
+            } catch (error) {
+                console.error("Error summarizing chat:", error);
+                showModal(`Failed to summarize chat: ${error.message}`);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        /**
+         * Suggests follow-up questions for the current chat using the Gemini API.
+         */
+        async function suggestFollowUpQuestions() {
+            console.log("suggestFollowUpQuestions called.");
+            if (!currentChatId) {
+                showModal("Please select or start a chat first.");
+                return;
+            }
+
+            // Add user message indicating the action
+            await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                text: "Please suggest follow-up questions for this chat.",
+                senderId: displayUserId,
+                firebaseUid: firebaseAuthUid,
+                timestamp: firestore.serverTimestamp()
+            });
+
+            showModal("Generating questions... ✨");
+            loadingIndicator.style.display = 'block';
+
+            try {
+                const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`);
+                // Fetch the last 10 messages for context
+                const messagesSnapshot = await firestore.getDocs(firestore.query(messagesCollectionRef, firestore.orderBy('timestamp', 'desc'), firestore.limit(10)));
+
+                if (messagesSnapshot.empty) {
+                    showModal("No messages in this chat to suggest questions from.");
+                    loadingIndicator.style.display = 'none';
+                    return;
+                }
+
+                let conversationSnippet = "";
+                messagesSnapshot.docs.reverse().forEach(doc => { // Reverse to get chronological order
+                    const msg = doc.data();
+                    // Only include text messages for suggestions
+                    if (msg.text && !msg.text.startsWith('[IMAGE_BASE64]:')) {
+                        conversationSnippet += `${msg.senderId}: ${msg.text}\n`;
+                    }
+                });
+
+                const prompt = `Based on the following recent chat conversation snippet, please suggest 3-5 concise and relevant follow-up questions. Present them as a Markdown unordered list:\n\n${conversationSnippet}`;
+                
+                await callGeminiAPI(prompt, currentChatId, true); // Use callGeminiAPI with isToolCall = true
+                showModal("Suggested questions generated and added to chat!");
+
+            } catch (error) {
+                console.error("Error suggesting questions:", error);
+                showModal(`Failed to suggest questions: ${error.message}`);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        /**
+         * Generates an image using the Imagen API based on user input.
+         */
+        async function generateImageWithAI() {
+            console.log("generateImageWithAI called.");
+            const imagePrompt = userInput.value.trim();
+            if (!imagePrompt) {
+                showModal("Please enter a description for the image you want to generate in the text box.");
+                return;
+            }
+
+            if (!currentChatId) {
+                showModal("Please select or start a chat first.");
+                return;
+            }
+
+            // Add user message indicating the image generation request
+            await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                text: `Generate image: "${imagePrompt}"`,
+                senderId: displayUserId,
+                firebaseUid: firebaseAuthUid,
+                timestamp: firestore.serverTimestamp()
+            });
+
+            userInput.value = ''; // Clear input field
+            loadingIndicator.style.display = 'block';
+            showModal("Generating image... This may take a moment. 🎨");
+
+            const payload = { instances: { prompt: imagePrompt }, parameters: { "sampleCount": 1} };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    let errorDetails = 'Unknown error';
+                    try {
+                        const errorData = await response.json();
+                        errorDetails = errorData.error?.message || JSON.stringify(errorData);
+                    } catch (jsonError) {
+                        errorDetails = `HTTP error ${response.status}: ${response.statusText || 'No response text'}`;
+                        console.error("Failed to parse error response JSON:", jsonError);
+                    }
+                    throw new Error(`Image API error: ${errorDetails}`);
+                }
+
+                const result = await response.json();
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    const base64ImageData = result.predictions[0].bytesBase64Encoded;
+                    // Store the image data with a special prefix so loadChat can render it as an image
+                    await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                        text: `[IMAGE_BASE64]:${base64ImageData}`,
+                        senderId: 'AI',
+                        firebaseUid: firebaseAuthUid,
+                        timestamp: firestore.serverTimestamp()
+                    });
+                    showModal("Image generated and added to chat!");
+                } else {
+                    console.warn("Imagen API returned an unexpected response structure or no image data.");
+                    showModal("AI couldn't generate an image. Please try a different prompt.");
+                    await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                        text: "AI failed to generate an image.",
+                        senderId: 'AI',
+                        firebaseUid: firebaseAuthUid,
+                        timestamp: firestore.serverTimestamp()
+                    });
+                }
+            } catch (error) {
+                console.error("Error generating image:", error);
+                let errorMessage = `Image generation error: ${error.message || 'An unexpected error occurred. Please check your network connection.'}`;
+                showModal(errorMessage);
+                await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                    text: `AI encountered an error generating image: ${errorMessage.substring(0, 100)}...`,
+                    senderId: 'AI',
+                    firebaseUid: firebaseAuthUid,
+                    timestamp: firestore.serverTimestamp()
+                });
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        /**
+         * Opens the modal for editing code with AI.
+         */
+        function openEditCodeModal() {
+            console.log("openEditCodeModal called.");
+            if (!currentChatId) {
+                showModal("Please select or start a chat first.");
+                return;
+            }
+            showEditCodeModal();
+        }
+
+        /**
+         * Sends code and instructions to the AI for editing.
+         */
+        async function submitCodeForEdit() {
+            console.log("submitCodeForEdit called.");
+            const originalCode = originalCodeInput.value.trim();
+            const editInstructions = editInstructionsInput.value.trim();
+
+            if (!originalCode || !editInstructions) {
+                showModal("Please provide both the code to edit and the editing instructions.");
+                return;
+            }
+
+            hideEditCodeModal(); // Hide the modal
+            loadingIndicator.style.display = 'block';
+            showModal("AI is editing your code... 🧑‍💻");
+
+            // Add user message indicating the code editing request
+            await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                text: `Edit code with instructions: "${editInstructions}"\n\`\`\`\n${originalCode}\n\`\`\``,
+                senderId: displayUserId,
+                firebaseUid: firebaseAuthUid,
+                timestamp: firestore.serverTimestamp()
+            });
+
+            const prompt = `I need you to edit the following code based on the instructions provided. Please return ONLY the edited code, formatted as a Markdown code block. Do not include any conversational text or explanations outside the code block.\n\nInstructions: ${editInstructions}\n\nOriginal Code:\n\`\`\`\n${originalCode}\n\`\`\``;
+
+            try {
+                const chatHistoryForAI = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistoryForAI };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Code Edit API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const editedCode = result.candidates[0].content.parts[0].text;
+                    await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                        text: editedCode, // Store the raw Markdown code block
+                        senderId: 'AI',
+                        firebaseUid: firebaseAuthUid,
+                        timestamp: firestore.serverTimestamp()
+                    });
+                    showModal("Code edited and added to chat!");
+                } else {
+                    console.warn("Gemini API returned no content for code editing.");
+                    showModal("AI couldn't edit the code. Please refine your instructions or code.");
+                    await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                        text: "AI failed to edit the code.",
+                        senderId: 'AI',
+                        firebaseUid: firebaseAuthUid,
+                        timestamp: firestore.serverTimestamp()
+                    });
+                }
+            } catch (error) {
+                console.error("Error editing code with AI:", error);
+                showModal(`Code editing error: ${error.message}.`);
+                await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
+                    text: `AI encountered an error editing code: ${error.message.substring(0, 100)}...`,
+                    senderId: 'AI',
+                    firebaseUid: firebaseAuthUid,
+                    timestamp: firestore.serverTimestamp()
+                });
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+
         // --- Settings Functionality ---
 
         /**
          * Handles creating a password for the current user.
          */
         async function handleCreatePassword() {
+            console.log("handleCreatePassword called.");
             const email = createEmailInput.value.trim();
             const password = createPasswordInput.value.trim();
 
@@ -1377,8 +2122,8 @@ View SafeLibrary AI Docs
                 const credential = EmailAuthProvider.credential(email, password);
                 await linkWithCredential(auth.currentUser, credential);
                 
-                // Update user profile in Firestore, including email
-                userProfile = await createUserProfile(displayUserId, firebaseAuthUid, true, email);
+                // Update user profile in Firestore, including email and emailVerified status
+                userProfile = await createUserProfile(displayUserId, firebaseAuthUid, true, email, auth.currentUser.emailVerified);
 
                 showModal("Password created successfully! Your account is now linked to this email.");
                 console.log("Password created and account linked.");
@@ -1398,6 +2143,7 @@ View SafeLibrary AI Docs
          * Handles logging in with a password.
          */
         async function handleLoginWithPassword() {
+            console.log("handleLoginWithPassword called.");
             const password = loginPasswordInput.value.trim();
 
             if (!password) {
@@ -1443,6 +2189,7 @@ View SafeLibrary AI Docs
          * Signs out the Firebase anonymous user and clears local storage.
          */
         async function handleLogout() {
+            console.log("handleLogout called.");
             hideSettingsModal(); // Close settings modal first
             showModal("Logging out...");
             try {
@@ -1464,8 +2211,9 @@ View SafeLibrary AI Docs
          * A Firebase Cloud Function for recursive deletion is recommended for production.
          */
         async function handleDeleteAccount() {
+            console.log("handleDeleteAccount called.");
             hideSettingsModal(); // Close settings modal first
-            showModal("Are you sure you want to delete ALL your chats and account? This action cannot be undone.", true, async () => {
+            showModal("Are you sure you want to delete ALL your chats and account? This action cannot be undone. This will delete all your data and Firebase account.", true, async () => {
                 showModal("Deleting your data. Please wait...");
                 try {
                     if (!isAuthReady || !db || !firebaseAuthUid) {
@@ -1527,14 +2275,182 @@ View SafeLibrary AI Docs
             });
         }
 
+        /**
+         * Sends a verification email to the current user.
+         */
+        async function sendVerificationEmail() {
+            console.log("sendVerificationEmail called.");
+            const user = auth.currentUser;
+            if (!user) {
+                showModal("No user is currently logged in.");
+                return;
+            }
+            if (!user.email) {
+                showModal("Your account does not have an email address associated with it. Please create a password first.");
+                return;
+            }
+            if (user.emailVerified) {
+                showModal("Your email is already verified!");
+                return;
+            }
+
+            try {
+                await sendEmailVerification(user);
+                showModal("Verification email sent! Please check your inbox and spam folder.");
+                console.log("Verification email sent to:", user.email);
+            } catch (error) {
+                console.error("Error sending verification email:", error);
+                showModal(`Failed to send verification email: ${error.message}`);
+            }
+        }
+
+        /**
+         * Updates the email verification status display in the verification modal.
+         */
+        function updateEmailVerificationStatus() {
+            console.log("updateEmailVerificationStatus called.");
+            const user = auth.currentUser;
+            if (user && user.email) {
+                emailVerificationStatus.innerHTML = `Email Verified: <span class="${user.emailVerified ? 'verified' : 'not-verified'}">${user.emailVerified ? 'Yes' : 'No'}</span>`;
+                verifyEmailButton.disabled = user.emailVerified; // Disable if already verified
+                if (!user.emailVerified && !(userProfile && userProfile.hasPassword)) { // Check if no password and not verified
+                    verifyEmailButton.disabled = true;
+                    emailVerificationStatus.innerHTML = `Email Verified: <span class="not-verified">N/A (No email linked)</span>`;
+                }
+            } else {
+                emailVerificationStatus.innerHTML = `Email Verified: <span class="not-verified">N/A (No email linked)</span>`;
+                verifyEmailButton.disabled = true; // Disable if no email
+            }
+        }
+
+        /**
+         * Initiates the 2FA enrollment process by sending a verification code to the phone number.
+         */
+        async function send2FACode() {
+            console.log("send2FACode called.");
+            const phoneNumber = twofaPhoneInput.value.trim();
+            if (!phoneNumber) {
+                twofaStatusMessage.textContent = "Please enter a phone number.";
+                return;
+            }
+            if (!auth.currentUser || !auth.currentUser.emailVerified) {
+                twofaStatusMessage.textContent = "You must be logged in and have a verified email to add 2FA.";
+                return;
+            }
+
+            twofaStatusMessage.textContent = "Sending code...";
+            sendTwofaCodeButton.disabled = true;
+
+            try {
+                // Always re-render reCAPTCHA before sending
+                if (!appVerifier) {
+                    showModal("reCAPTCHA not initialized. Please close and reopen the 2FA modal.");
+                    sendTwofaCodeButton.disabled = false;
+                    return;
+                }
+                // FIX: Use modular PhoneAuthProvider instance
+                const provider = new PhoneAuthProvider(auth);
+                verificationId = await provider.verifyPhoneNumber(phoneNumber, appVerifier);
+                console.log("Verification ID received:", verificationId);
+
+                twofaInstructionText.textContent = "Enter the 6-digit code sent to your phone:";
+                twofaPhoneInput.style.display = 'none';
+                sendTwofaCodeButton.style.display = 'none';
+                recaptchaContainer.style.display = 'none';
+                twofaCodeInput.style.display = 'block';
+                verifyTwofaCodeButton.style.display = 'block';
+                twofaStatusMessage.textContent = "Code sent! Check your phone.";
+                twofaCodeInput.focus();
+
+            } catch (error) {
+                console.error("Error sending 2FA code:", error);
+                let errorMessage = `Error sending code: ${error.message}`;
+                if (error.code === 'auth/invalid-phone-number') {
+                    errorMessage = "Invalid phone number format.";
+                } else if (error.code === 'auth/quota-exceeded') {
+                    errorMessage = "SMS quota exceeded or too many requests. Please try again later.";
+                } else if (error.code === 'auth/missing-verification-id') {
+                    errorMessage = "Missing verification ID. Please ensure reCAPTCHA is working.";
+                } else if (error.code === 'auth/web-storage-unsupported') {
+                    errorMessage = "Web storage is not supported in this browser/environment. Please enable third-party cookies or try a different browser.";
+                }
+                twofaStatusMessage.textContent = errorMessage;
+                sendTwofaCodeButton.disabled = false;
+                // Reset reCAPTCHA and state on error
+                resetTwoFactorAuthModal();
+            }
+        }
+
+        /**
+         * Verifies the 2FA code entered by the user and enrolls the second factor.
+         */
+        async function verify2FACode() {
+            console.log("verify2FACode called.");
+            const code = twofaCodeInput.value.trim();
+            if (!code) {
+                twofaStatusMessage.textContent = "Please enter the verification code.";
+                return;
+            }
+            if (!verificationId) {
+                twofaStatusMessage.textContent = "No verification code was sent. Please send the code first.";
+                return;
+            }
+
+            twofaStatusMessage.textContent = "Verifying code...";
+            verifyTwofaCodeButton.disabled = true;
+
+            try {
+                // Create a PhoneAuthCredential using the verificationId and the code
+                const phoneCredential = PhoneAuthProvider.credential(verificationId, code);
+
+                // Enroll the second factor using multiFactor
+                await multiFactor(auth.currentUser).enroll(
+                    PhoneMultiFactorGenerator.credential(phoneCredential)
+                );
+
+                twofaStatusMessage.textContent = "2FA enabled successfully!";
+                showModal("Two-Factor Authentication (2FA) has been successfully enabled for your account!");
+                hideTwoFactorAuthModal();
+                // Update user profile in Firestore to mark 2FA as enabled
+                if (userProfile && userProfile.id) {
+                    await firestore.updateDoc(firestore.doc(db, `artifacts/${firebaseConfig.projectId}/public/data/userProfiles`, userProfile.id), {
+                        twoFactorEnabled: true
+                    });
+                }
+
+            } catch (error) {
+                console.error("Error verifying 2FA code:", error);
+                let errorMessage = `Error verifying code: ${error.message}`;
+                if (error.code === 'auth/invalid-verification-code') {
+                    errorMessage = "Invalid verification code. Please try again.";
+                } else if (error.code === 'auth/credential-already-in-use') {
+                    errorMessage = "This phone number is already linked to another account.";
+                } else if (error.code === 'auth/invalid-verification-id') {
+                    errorMessage = "Invalid verification ID. Please try sending the code again.";
+                }
+                twofaStatusMessage.textContent = errorMessage;
+                verifyTwofaCodeButton.disabled = false;
+                // Reset verificationId on error
+                verificationId = null;
+            }
+        }
+
+
         // Event listeners for settings buttons
-        settingsButton.addEventListener('click', showSettingsModal);
-        createPasswordButton.addEventListener('click', showCreatePasswordModal); // New listener
-        logoutButton.addEventListener('click', handleLogout);
-        deleteAccountButton.addEventListener('click', handleDeleteAccount);
+        settingsButton.addEventListener('click', () => { console.log("Settings button clicked."); showSettingsModal(); });
+        createPasswordButton.addEventListener('click', () => { console.log("Create Password button clicked."); showCreatePasswordModal(); });
+        verificationButton.addEventListener('click', () => { console.log("Verification button clicked."); showVerificationModal(); });
+        logoutButton.addEventListener('click', () => { console.log("Logout button clicked."); handleLogout(); });
+        deleteAccountButton.addEventListener('click', () => { console.log("Delete Account button clicked."); handleDeleteAccount(); });
         moreOptionsButton.addEventListener('click', () => {
+            console.log("More Options button clicked.");
             showModal("More settings options are coming soon!");
         });
+        viewAiDocsButton.addEventListener('click', () => {
+            console.log("View AI Docs button clicked.");
+            // This button is now a link, so the href will handle navigation.
+        });
+
 
         // Event listeners for create password modal
         submitCreatePasswordButton.addEventListener('click', handleCreatePassword);
@@ -1557,8 +2473,31 @@ View SafeLibrary AI Docs
             }
         });
         loginSwitchUserButton.addEventListener('click', () => {
+            console.log("Login Switch User button clicked.");
             hideLoginPasswordModal();
             handleLogout(); // Effectively logs out and prompts for new user ID
+        });
+
+        // Event listeners for edit code modal
+        // No change needed here, as the problem is likely with the main modal interactions
+        submitCodeEditButton.addEventListener('click', submitCodeForEdit);
+        originalCodeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && !e.shiftKey) {
+                e.preventDefault();
+                const start = originalCodeInput.selectionStart;
+                const end = originalCodeInput.selectionEnd;
+                originalCodeInput.value = originalCodeInput.value.substring(0, start) + '\t' + originalCodeInput.value.substring(end);
+                originalCodeInput.selectionStart = originalCodeInput.selectionEnd = start + 1;
+            }
+        });
+        editInstructionsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && !e.shiftKey) {
+                e.preventDefault();
+                const start = editInstructionsInput.selectionStart;
+                const end = editInstructionsInput.selectionEnd;
+                editInstructionsInput.value = editInstructionsInput.value.substring(0, start) + '\t' + editInstructionsInput.value.substring(end);
+                editInstructionsInput.selectionStart = editInstructionsInput.selectionEnd = start + 1;
+            }
         });
 
 
@@ -1571,29 +2510,31 @@ View SafeLibrary AI Docs
         });
         newChatButton.addEventListener('click', createNewChat);
 
-        //Security Plugin
-              if (!window.location.href.includes("houselearning")) {
-      var newWin = window.open();
-      if (newWin) {
-        newWin.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head><title>Blocked</title></head>
-          <body style="font-family:sans-serif; text-align:center; padding:50px;">
-            <h1 style="color:red;">Cannot load page</h1>
-            <p>This page can only be accessed from a valid HouseLearning URL.</p>
-          </body>
-          </html>
-        `);
-        newWin.document.close();
-      } else {
-        // If popups are blocked
-        alert("Cannot load page — URL check failed and popup was blocked.");
-      }
-      window.close();
-    }
+        // New event listeners for LLM features
+        summarizeChatButton.addEventListener('click', summarizeChat);
+        suggestQuestionsButton.addEventListener('click', suggestFollowUpQuestions);
+        generateImageButton.addEventListener('click', generateImageWithAI);
+        editCodeButton.addEventListener('click', openEditCodeModal);
+
+        // Event listeners for Verification Modal
+        verifyEmailButton.addEventListener('click', () => { console.log("Verify Email button clicked."); sendVerificationEmail(); });
+        add2FAButton.addEventListener('click', () => { console.log("Add 2FA button clicked."); showTwoFactorAuthModal(); });
+
+        // Event listeners for Two-Factor Auth Modal
+        sendTwofaCodeButton.addEventListener('click', send2FACode);
+        verifyTwofaCodeButton.addEventListener('click', verify2FACode);
+        twofaPhoneInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                send2FACode();
+            }
+        });
+        twofaCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                verify2FACode();
+            }
+        });
+
     </script>
-    
     <center>
         <h3>In order to save chats, please create a password in the settings menu.</h3>
     </center>
