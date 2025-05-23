@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase AI Chat (GitHub Pages)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* Custom styles for the chat application */
         body {
@@ -18,53 +19,163 @@
             padding: 20px; /* Add padding for smaller screens */
             box-sizing: border-box;
         }
-        .chat-container {
+        .app-container {
+            display: flex;
             background-color: #ffffff;
-            border-radius: 1rem; /* Rounded corners for the container */
+            border-radius: 1rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 600px;
+            max-width: 900px; /* Increased max-width for sidebar */
+            min-height: 80vh; /* Ensure enough height for the whole app */
+            max-height: 90vh; /* Max height for the whole app container */
+            overflow: hidden; /* Hide overflow for the entire app */
+        }
+        #sidebar {
+            width: 250px; /* Fixed width for the sidebar */
+            background-color: #202123; /* Dark background like ChatGPT */
+            color: #e0e0e0;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            min-height: 70vh; /* Ensure enough height */
+            border-right: 1px solid #333;
+            overflow-y: auto; /* Scrollbar for sidebar chats */
+            flex-shrink: 0; /* Prevent sidebar from shrinking */
+        }
+        #new-chat-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #343541; /* Darker background for new chat button */
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            text-align: left;
+            transition: background-color 0.2s;
+        }
+        #new-chat-button:hover {
+            background-color: #444654;
+        }
+        .chat-history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .chat-history-item {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: transparent;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s;
+            white-space: nowrap; /* Prevent title from wrapping */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow */
+        }
+        .chat-history-item.active {
+            background-color: #444654; /* Active chat background */
+            font-weight: bold;
+        }
+        #settings-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #343541;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            margin-top: 1rem; /* Space from chat history */
+            text-align: left;
+            transition: background-color 0.2s;
+        }
+        #settings-button:hover {
+            background-color: #444654;
+        }
+        #main-chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Ensure main chat area also handles its overflow */
+        }
+        .chat-header {
+            background-color: #3b82f6; /* Blue for chat header */
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #e5e7eb;
         }
         .chat-messages {
             flex-grow: 1;
             padding: 1.5rem;
-            overflow-y: auto;
-            border-bottom: 1px solid #e5e7eb;
+            overflow-y: auto; /* Ensures vertical scrollbar if content overflows */
             background-color: #f9fafb;
+            display: flex;
+            flex-direction: column;
         }
         .message-bubble {
             max-width: 80%;
             padding: 0.75rem 1rem;
-            border-radius: 1rem; /* Rounded corners for message bubbles */
+            border-radius: 1rem;
             margin-bottom: 0.75rem;
             word-wrap: break-word;
         }
         .user-message {
-            background-color: #3b82f6; /* Blue for user messages */
+            background-color: #3b82f6;
             color: white;
             align-self: flex-end;
             margin-left: auto;
         }
         .ai-message {
-            background-color: #e5e7eb; /* Light grey for AI messages */
+            background-color: #e5e7eb;
             color: #374151;
             align-self: flex-start;
             margin-right: auto;
+            /* Add basic styling for Markdown elements within AI messages */
+            /* This ensures headings, lists, etc., are somewhat styled */
         }
+        .ai-message h1 { font-size: 1.8em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
+        .ai-message h2 { font-size: 1.5em; font-weight: bold; margin-top: 0.8em; margin-bottom: 0.4em; }
+        .ai-message h3 { font-size: 1.2em; font-weight: bold; margin-top: 0.6em; margin-bottom: 0.3em; }
+        .ai-message p { margin-bottom: 0.5em; }
+        .ai-message ul, .ai-message ol { margin-left: 1.5em; margin-bottom: 0.5em; list-style-type: disc; }
+        .ai-message ol { list-style-type: decimal; }
+        .ai-message li { margin-bottom: 0.2em; }
+        .ai-message strong, .ai-message b { font-weight: bold; }
+        .ai-message em, .ai-message i { font-style: italic; }
+        .ai-message pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 0.8em;
+            border-radius: 0.5em;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        .ai-message code {
+            background-color: #e0e0e0;
+            padding: 0.1em 0.4em;
+            border-radius: 0.3em;
+            font-family: 'Fira Code', 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
         .input-area {
             display: flex;
             padding: 1.5rem;
             gap: 0.75rem;
             align-items: center;
+            border-top: 1px solid #e5e7eb;
         }
         .input-area input {
             flex-grow: 1;
             padding: 0.75rem 1rem;
-            border-radius: 0.75rem; /* Rounded corners for input */
+            border-radius: 0.75rem;
             border: 1px solid #d1d5db;
             outline: none;
             transition: border-color 0.2s;
@@ -73,10 +184,10 @@
             border-color: #3b82f6;
         }
         .input-area button {
-            background-color: #2563eb; /* Darker blue for button */
+            background-color: #2563eb;
             color: white;
             padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem; /* Rounded corners for button */
+            border-radius: 0.75rem;
             border: none;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
@@ -89,13 +200,13 @@
             transform: translateY(0);
         }
         .loading-indicator {
-            display: none; /* Hidden by default */
+            display: none;
             text-align: center;
             padding: 1rem;
             color: #6b7280;
         }
         .modal {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             z-index: 1000;
             left: 0;
@@ -128,31 +239,260 @@
             text-decoration: none;
             cursor: pointer;
         }
+        /* Welcome Modal Styles (higher z-index) */
+        #welcome-modal {
+            display: flex; /* Flex to center content */
+            position: fixed;
+            z-index: 1001; /* Higher than other modals */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #welcome-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 500px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #welcome-modal-content input {
+            padding: 10px;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #welcome-modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+        #welcome-modal-content button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Settings Modal Styles */
+        #settings-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1002; /* Even higher z-index for settings modal */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #settings-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #settings-modal-content h2 {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        #settings-modal-content .settings-option-button {
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 0.5rem;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s, border-color 0.2s;
+            width: 100%;
+            text-align: center;
+        }
+        #settings-modal-content .settings-option-button:hover {
+            background-color: #e0e0e0;
+            border-color: #ccc;
+        }
+        #settings-modal-content #delete-account-button {
+            background-color: #dc2626; /* Red for delete */
+            color: white;
+            border-color: #b91c1c;
+        }
+        #settings-modal-content #delete-account-button:hover {
+            background-color: #b91c1c;
+        }
+
+        /* Create Password Modal Styles */
+        #create-password-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1003; /* Even higher z-index */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #create-password-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #create-password-modal-content input {
+            padding: 10px;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #create-password-modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+        #create-password-modal-content button:hover {
+            background-color: #2563eb;
+        }
+
+        /* Login Password Modal Styles */
+        #login-password-modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1004; /* Even higher z-index */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        #login-password-modal-content {
+            background-color: #fefefe;
+            padding: 30px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 450px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #login-password-modal-content input {
+            padding: 10px;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #login-password-modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.2s;
+        }
+        #login-password-modal-content button:hover {
+            background-color: #2563eb;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+                max-width: 100%;
+                min-height: 95vh;
+            }
+            #sidebar {
+                width: 100%;
+                max-height: 200px; /* Limit sidebar height on small screens */
+                border-right: none;
+                border-bottom: 1px solid #333;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="p-4 bg-blue-600 text-white text-center text-lg font-semibold rounded-t-xl">
-            Firebase AI Chat
-        </div>
-        <div id="user-id-display" class="p-2 text-sm text-gray-600 bg-gray-100 text-center">
-            Loading user ID...
-        </div>
-        <div id="chat-messages" class="chat-messages flex flex-col">
-            <p class="text-center text-gray-500">Start chatting with the AI!</p>
-        </div>
-        <div id="loading-indicator" class="loading-indicator">
-            <div class="flex justify-center items-center">
-                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    <div class="app-container">
+        <div id="sidebar">
+            <button id="new-chat-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                AI is thinking...
+                New Chat
+            </button>
+            <div id="chat-history-list" class="chat-history-list">
+                </div>
+            <div id="user-id-display" class="p-2 text-xs text-gray-400 text-center mt-auto">
+                Loading user ID...
             </div>
+            <button id="settings-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.06-.333.31-.607.64-.706 1.04-.323 2.18-.323 3.22 0 .33.099.58.373.64.706l.547 3.011c.03.165.147.308.312.396.654.34 1.373.535 2.115.584.16.01.306.07.439.185l2.459 1.838c.24.18.32.482.232.795-.15.523-.626.852-1.171.852-.41 0-.79-.18-1.074-.485l-2.585-2.768c-.26-.279-.6-.419-.95-.419-.35 0-.69.14-.95.419l-2.585 2.768c-.284.305-.664.485-1.074.485-.545 0-1.02-.329-1.17-.852-.088-.313 0-.615.232-.795l2.459-1.838c.133-.115.279-.175.439-.185.742-.049 1.461-.244 2.115-.584.165-.088.282-.231.312-.396l.547-3.011Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+                Settings
+            </button>
         </div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type your message..." class="flex-grow">
-            <button id="send-button">Send</button>
+
+        <div id="main-chat-area">
+            <div class="chat-header">
+                <span id="current-chat-title">New Chat</span>
+            </div>
+            <div id="chat-messages" class="chat-messages flex flex-col">
+                <p class="text-center text-gray-500">Start chatting with the AI!</p>
+            </div>
+            <div id="loading-indicator" class="loading-indicator">
+                <div class="flex justify-center items-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    AI is thinking...
+                </div>
+            </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="Type your message..." class="flex-grow">
+                <button id="send-button">Send</button>
+            </div>
         </div>
     </div>
 
@@ -163,11 +503,82 @@
         </div>
     </div>
 
+    <div id="welcome-modal" class="modal">
+        <div id="welcome-modal-content" class="modal-content">
+            <h2 class="text-2xl font-bold text-gray-800">Welcome to AI Chat!</h2>
+            <p class="text-gray-600">Enter a User ID to group your chats. This is not a secure login, but helps organize your conversations on this device.</p>
+            <input type="text" id="display-user-id-input" placeholder="Your User ID (e.g., 'Alice', 'My_Work_ID')" class="p-2 border rounded-md">
+            <button id="start-chatting-button">Start Chatting</button>
+            <p class="text-sm text-gray-500">You can use any ID you like. If you use the same ID later, you'll see your previous chats.</p>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div id="settings-modal-content" class="modal-content">
+            <span class="modal-close settings-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800">Settings</h2>
+            <button id="create-password-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3v.225a2.25 2.25 0 0 0 1.258 2.013l.1.076c.715.533 1.157 1.44 1.157 2.414V17.25a3 3 0 0 1-3 3h-1.372c-.516 0-.966.304-1.21.741l-.354.624a2.25 2.25 0 0 1-2.012 1.259h-3.5a2.25 2.25 0 0 1-2.012-1.259l-.354-.624a2.25 2.25 0 0 0-1.21-.741H6.75a3 3 0 0 1-3-3V14.25c0-.974.442-1.881 1.157-2.414l.1-.076a2.25 2.25 0 0 0 1.258-2.013V8.25a3 3 0 0 1 3-3h6Z" />
+                </svg>
+                Create Password
+            </button>
+            <button id="logout-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                </svg>
+                Log Out
+            </button>
+            <button id="delete-account-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.14.994.28l2.58 2.22c.287.246.345.689.11 1.054L18.12 19.338c-.287.46-.78.77-1.328.77H9.25a2.25 2.25 0 0 1-2.244-2.077L4.772 5.05c-.157-.756.12-1.543.72-1.996.402-.293.907-.42 1.413-.42h4.5c.49 0 .964.217 1.286.586l.775.876c.159.18.3.364.426.554L14.74 9Z" />
+                </svg>
+                Delete All My Chats & Account
+            </button>
+            <button id="more-options-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                </svg>
+                More Options (Coming Soon)
+            </button>
+            <a href="">
+            <button id="more-options-button" class="settings-option-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                </svg>
+View SafeLibrary AI Docs
+            </button>
+            </a>
+        </div>
+    </div>
+
+    <div id="create-password-modal" class="modal">
+        <div id="create-password-modal-content" class="modal-content">
+            <span class="modal-close create-password-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800">Create Password</h2>
+            <p class="text-gray-600">Link your current session to an email and password.</p>
+            <input type="email" id="create-email-input" placeholder="Your Email" class="p-2 border rounded-md">
+            <input type="password" id="create-password-input" placeholder="New Password (min 6 characters)" class="p-2 border rounded-md">
+            <button id="submit-create-password-button">Create Password</button>
+        </div>
+    </div>
+
+    <div id="login-password-modal" class="modal">
+        <div id="login-password-modal-content" class="modal-content">
+            <span class="modal-close login-password-close-btn">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800">Login with Password</h2>
+            <p class="text-gray-600">Enter the password for <span id="login-display-user-id-text" class="font-bold"></span></p>
+            <input type="password" id="login-password-input" placeholder="Your Password" class="p-2 border rounded-md">
+            <button id="submit-login-password-button">Login</button>
+            <button id="login-switch-user-button" class="settings-option-button mt-2">Switch User / Log Out</button>
+        </div>
+    </div>
+
     <script type="module">
         // Firebase imports from CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, linkWithCredential, EmailAuthProvider, signInWithEmailAndPassword, deleteUser } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import * as firestore from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // IMPORTANT: REPLACE THESE WITH YOUR ACTUAL FIREBASE PROJECT CONFIGURATION
         // You can find this in your Firebase project settings -> Project settings -> General -> Your apps -> Web app -> Firebase SDK snippet -> Config
@@ -177,7 +588,7 @@
             projectId: "gorj-ppb",
             storageBucket: "gorj-ppb.firebasestorage.app",
             messagingSenderId: "278478870117",
-            appId: "1:278478870117:web:87e99dea1f3893c0ea588c",
+            appId: "1:278478870117:web:87e99dea1f38993c0ea588c",
             measurementId: "G-GKY0STDFLH"
         };
 
@@ -196,8 +607,16 @@
         let app;
         let db;
         let auth;
-        let userId = null;
+        let firebaseAuthUid = null; // The actual Firebase Authentication UID
+        let displayUserId = null; // The user-defined ID for grouping chats
+
         let isAuthReady = false;
+        let userProfile = null; // Stores the user's profile from Firestore
+
+        // Chat state variables
+        let currentChatId = null;
+        let currentChatMessagesUnsubscribe = null; // To unsubscribe from previous chat's messages
+        let chatHistory = []; // Array to store chat metadata { id, title, createdAt }
 
         // DOM elements
         const chatMessagesDiv = document.getElementById('chat-messages');
@@ -205,32 +624,243 @@
         const sendButton = document.getElementById('send-button');
         const loadingIndicator = document.getElementById('loading-indicator');
         const userIdDisplay = document.getElementById('user-id-display');
+        const newChatButton = document.getElementById('new-chat-button');
+        const chatHistoryList = document.getElementById('chat-history-list');
+        const currentChatTitleDisplay = document.getElementById('current-chat-title');
+        const settingsButton = document.getElementById('settings-button'); // New settings button
 
-        // Modal elements
+        // Modal elements (general alert modal)
         const modal = document.getElementById('myModal');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseBtn = document.getElementsByClassName('modal-close')[0];
 
-        // Function to show custom modal
-        function showModal(message) {
+        // Welcome Modal elements
+        const welcomeModal = document.getElementById('welcome-modal');
+        const displayUserIdInput = document.getElementById('display-user-id-input');
+        const startChattingButton = document.getElementById('start-chatting-button');
+
+        // Settings Modal elements
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsCloseBtn = document.getElementsByClassName('settings-close-btn')[0];
+        const createPasswordButton = document.getElementById('create-password-button'); // New
+        const logoutButton = document.getElementById('logout-button');
+        const deleteAccountButton = document.getElementById('delete-account-button');
+        const moreOptionsButton = document.getElementById('more-options-button');
+
+        // Create Password Modal elements
+        const createPasswordModal = document.getElementById('create-password-modal');
+        const createPasswordCloseBtn = document.getElementsByClassName('create-password-close-btn')[0];
+        const createEmailInput = document.getElementById('create-email-input');
+        const createPasswordInput = document.getElementById('create-password-input');
+        const submitCreatePasswordButton = document.getElementById('submit-create-password-button');
+
+        // Login Password Modal elements
+        const loginPasswordModal = document.getElementById('login-password-modal');
+        const loginPasswordCloseBtn = document.getElementsByClassName('login-password-close-btn')[0];
+        const loginDisplayUserIdText = document.getElementById('login-display-user-id-text');
+        const loginPasswordInput = document.getElementById('login-password-input');
+        const submitLoginPasswordButton = document.getElementById('submit-login-password-button');
+        const loginSwitchUserButton = document.getElementById('login-switch-user-button');
+
+
+        // Function to show custom modal (for alerts/confirmations)
+        function showModal(message, isConfirm = false, onConfirm = null) {
             modalMessage.textContent = message;
+            // Clear previous confirmation buttons if any
+            let confirmBtn = document.getElementById('modal-confirm-btn');
+            let cancelBtn = document.getElementById('modal-cancel-btn');
+            if (confirmBtn) confirmBtn.remove();
+            if (cancelBtn) cancelBtn.remove();
+
+            if (isConfirm) {
+                confirmBtn = document.createElement('button');
+                confirmBtn.id = 'modal-confirm-btn';
+                confirmBtn.textContent = 'Confirm';
+                confirmBtn.classList.add('px-4', 'py-2', 'bg-red-500', 'text-white', 'rounded-md', 'mr-2');
+                confirmBtn.onclick = () => {
+                    modal.style.display = 'none';
+                    if (onConfirm) onConfirm();
+                };
+                modal.querySelector('.modal-content').appendChild(confirmBtn);
+
+                cancelBtn = document.createElement('button');
+                cancelBtn.id = 'modal-cancel-btn';
+                cancelBtn.textContent = 'Cancel';
+                cancelBtn.classList.add('px-4', 'py-2', 'bg-gray-300', 'text-gray-800', 'rounded-md');
+                cancelBtn.onclick = () => {
+                    modal.style.display = 'none';
+                };
+                modal.querySelector('.modal-content').appendChild(cancelBtn);
+            }
             modal.style.display = 'flex';
         }
 
-        // Close modal when 'x' is clicked
+        // Close general alert modal when 'x' is clicked
         modalCloseBtn.onclick = function() {
             modal.style.display = 'none';
         }
 
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            if (event.target == modal) {
+        // Close general alert modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target == modal && event.target !== welcomeModal && event.target !== settingsModal && event.target !== createPasswordModal && event.target !== loginPasswordModal) {
                 modal.style.display = 'none';
             }
+        });
+
+        // Function to show the welcome/login modal
+        function showWelcomeModal() {
+            welcomeModal.style.display = 'flex';
+            displayUserIdInput.focus();
+            console.log("Welcome modal shown.");
+        }
+
+        // Function to hide the welcome/login modal and set displayUserId
+        async function hideWelcomeModal() {
+            console.log("hideWelcomeModal called.");
+            const enteredId = displayUserIdInput.value.trim();
+            if (enteredId) {
+                displayUserId = enteredId;
+                localStorage.setItem('displayUserId', displayUserId); // Save to local storage
+                console.log("Display User ID set from input:", displayUserId);
+            } else {
+                // If no ID entered, generate a random one for this session
+                displayUserId = `Guest_${crypto.randomUUID().substring(0, 8)}`;
+                localStorage.setItem('displayUserId', displayUserId);
+                console.log("Display User ID generated as guest:", displayUserId);
+            }
+            userIdDisplay.textContent = `Firebase UID: ${firebaseAuthUid.substring(0, 8)}... | Your ID: ${displayUserId}`;
+            welcomeModal.style.display = 'none';
+            console.log("Welcome modal hidden. Calling initializeChatApp...");
+            try {
+                await initializeChatApp(); // Proceed with chat app initialization
+            } catch (e) {
+                console.error("Error calling initializeChatApp from hideWelcomeModal:", e);
+                showModal(`Failed to start chat: ${e.message}`);
+            }
+        }
+
+        // Function to show settings modal
+        function showSettingsModal() {
+            settingsModal.style.display = 'flex';
+        }
+
+        // Function to hide settings modal
+        function hideSettingsModal() {
+            settingsModal.style.display = 'none';
+        }
+
+        // Close settings modal when 'x' is clicked
+        settingsCloseBtn.onclick = hideSettingsModal;
+
+        // Close settings modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target == settingsModal) {
+                hideSettingsModal();
+            }
+        });
+
+        // Function to show create password modal
+        function showCreatePasswordModal() {
+            hideSettingsModal(); // Hide settings modal first
+            createPasswordModal.style.display = 'flex';
+            createEmailInput.focus();
+        }
+
+        // Function to hide create password modal
+        function hideCreatePasswordModal() {
+            createPasswordModal.style.display = 'none';
+            createEmailInput.value = '';
+            createPasswordInput.value = '';
+        }
+
+        // Close create password modal when 'x' is clicked
+        createPasswordCloseBtn.onclick = hideCreatePasswordModal;
+
+        // Close create password modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target == createPasswordModal) {
+                hideCreatePasswordModal();
+            }
+        });
+
+        // Function to show login password modal
+        function showLoginPasswordModal() {
+            loginPasswordModal.style.display = 'flex';
+            loginDisplayUserIdText.textContent = displayUserId;
+            loginPasswordInput.focus();
+        }
+
+        // Function to hide login password modal
+        function hideLoginPasswordModal() {
+            loginPasswordModal.style.display = 'none';
+            loginPasswordInput.value = '';
+        }
+
+        // Close login password modal when 'x' is clicked
+        loginPasswordCloseBtn.onclick = hideLoginPasswordModal;
+
+        // Close login password modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target == loginPasswordModal) {
+                hideLoginPasswordModal();
+            }
+        });
+
+
+        // Main initialization function for the chat app after auth and displayUserId are set
+        async function initializeChatApp() {
+            console.log("initializeChatApp called.");
+            // Check if userProfile exists and if it has a password
+            if (displayUserId) {
+                userProfile = await getUserProfile(displayUserId); // Attempt to read existing profile
+
+                if (userProfile) {
+                    // Profile exists.
+                    if (userProfile.hasPassword && auth.currentUser.uid !== userProfile.firebaseUid) {
+                        // Profile has password AND current UID doesn't match stored UID.
+                        // This means a different anonymous session is trying to access a password-protected account.
+                        console.log("Password detected for this user ID. Showing login modal.");
+                        showLoginPasswordModal();
+                        return; // Stop initialization until login is successful
+                    } else if (!userProfile.hasPassword && auth.currentUser.uid !== userProfile.firebaseUid) {
+                        // Profile exists, no password, but current UID doesn't match stored UID.
+                        // This is a new anonymous session claiming an existing displayUserId without password.
+                        console.log("Existing displayUserId without password found. Updating user profile with current anonymous UID.");
+                        userProfile = await createUserProfile(displayUserId, auth.currentUser.uid, false); // Update existing profile
+                    }
+                    // If userProfile.firebaseUid === auth.currentUser.uid, no update needed, proceed.
+                } else {
+                    // No profile exists for this displayUserId. Create a new one.
+                    console.log("No user profile found for displayUserId. Creating new profile.");
+                    userProfile = await createUserProfile(displayUserId, auth.currentUser.uid, false);
+                }
+            } else {
+                console.warn("displayUserId is null in initializeChatApp. This should not happen if welcome modal logic is correct.");
+                // This branch should ideally not be hit if displayUserId is always set.
+                // If it is, it means the welcome modal was bypassed or failed.
+                // We'll proceed with a fallback, but it indicates a flow issue.
+            }
+
+            // Now that userProfile and firebaseAuthUid are correctly established/linked
+            // (or login modal is shown), proceed with loading chats.
+            // Ensure firebaseAuthUid is set from the current authenticated user before loading chats.
+            firebaseAuthUid = auth.currentUser.uid;
+            userIdDisplay.textContent = `Firebase UID: ${firebaseAuthUid.substring(0, 8)}... | Your ID: ${displayUserId}`;
+
+            await loadChatHistory();
+            if (chatHistory.length === 0) {
+                console.log("No chat history found, creating new chat.");
+                await createNewChat();
+            } else {
+                console.log("Chat history found, loading most recent chat.");
+                await loadChat(chatHistory[0].id);
+            }
+            console.log("initializeChatApp finished.");
         }
 
         // Initialize Firebase and set up authentication listener
         window.onload = async () => {
+            console.log("Window loaded. Starting Firebase initialization.");
             try {
                 // Validate Firebase config has minimal required info
                 if (!firebaseConfig.projectId || firebaseConfig.projectId === "YOUR_PROJECT_ID" ||
@@ -242,20 +872,47 @@
                 }
 
                 app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
+                db = firestore.getFirestore(app);
                 auth = getAuth(app);
+                console.log("Firebase app, db, auth initialized.");
 
-                // Listen for authentication state changes
+                // Listener for authentication state changes
                 onAuthStateChanged(auth, async (user) => {
+                    console.log("onAuthStateChanged triggered. User:", user);
                     if (user) {
-                        userId = user.uid;
-                        userIdDisplay.textContent = `Your User ID: ${userId}`;
+                        firebaseAuthUid = user.uid;
                         isAuthReady = true;
-                        setupRealtimeChatListener();
+                        console.log("Firebase authenticated. UID:", firebaseAuthUid);
+
+                        const storedDisplayUserId = localStorage.getItem('displayUserId');
+                        if (storedDisplayUserId) {
+                            displayUserId = storedDisplayUserId;
+                            userIdDisplay.textContent = `Firebase UID: ${firebaseAuthUid.substring(0, 8)}... | Your ID: ${displayUserId}`;
+                            console.log("Display User ID loaded from local storage:", displayUserId);
+                            await initializeChatApp(); // Proceed directly if ID is found
+                        } else {
+                            console.log("No display User ID in local storage. Showing welcome modal.");
+                            showWelcomeModal(); // Show modal if no ID is stored
+                        }
                     } else {
+                        // User is signed out. Attempt anonymous sign-in.
+                        console.log("No user signed in. Attempting anonymous sign-in.");
                         try {
-                            // Sign in anonymously for simple access on GitHub Pages
-                            await signInAnonymously(auth);
+                            const anonUserCredential = await signInAnonymously(auth);
+                            firebaseAuthUid = anonUserCredential.user.uid;
+                            isAuthReady = true;
+                            console.log("Successfully signed in anonymously. UID:", firebaseAuthUid);
+
+                            const storedDisplayUserId = localStorage.getItem('displayUserId');
+                            if (storedDisplayUserId) {
+                                displayUserId = storedDisplayUserId;
+                                userIdDisplay.textContent = `Firebase UID: ${firebaseAuthUid.substring(0, 8)}... | Your ID: ${displayUserId}`;
+                                console.log("Display User ID loaded from local storage after anonymous sign-in:", displayUserId);
+                                await initializeChatApp();
+                            } else {
+                                console.log("No display User ID in local storage after anonymous sign-in. Showing welcome modal.");
+                                showWelcomeModal();
+                            }
                         } catch (error) {
                             console.error("Error during anonymous authentication:", error);
                             let errorMessage = `Authentication failed: ${error.message}. Messages may not be saved.`;
@@ -267,13 +924,25 @@
                             }
                             showModal(errorMessage);
                             // Fallback to a random ID if anonymous sign-in also fails
-                            userId = crypto.randomUUID();
-                            userIdDisplay.textContent = `Your User ID: ${userId} (Anonymous, Limited Access)`;
+                            firebaseAuthUid = crypto.randomUUID(); // Still need a UID for rules
+                            displayUserId = `Guest_${crypto.randomUUID().substring(0, 8)}`; // Generate display ID
+                            userIdDisplay.textContent = `Firebase UID: ${firebaseAuthUid.substring(0, 8)}... | Your ID: ${displayUserId} (Limited Access)`;
                             isAuthReady = true;
-                            setupRealtimeChatListener(); // Still try to set up listener
+                            console.log("Anonymous sign-in failed. Proceeding with generated IDs. Calling initializeChatApp.");
+                            await initializeChatApp(); // Attempt to proceed with generated IDs
                         }
                     }
                 });
+
+                // Explicitly attach listener to startChattingButton here, inside window.onload
+                console.log("Attempting to attach event listener to start-chatting-button.");
+                if (startChattingButton) {
+                    startChattingButton.addEventListener('click', hideWelcomeModal);
+                    console.log("Event listener attached to start-chatting-button.");
+                } else {
+                    console.error("Error: 'start-chatting-button' element not found in the DOM.");
+                }
+
             } catch (error) {
                 console.error("Initialization failed:", error);
                 chatMessagesDiv.innerHTML = `<p class="text-red-500 text-center">Initialization error: ${error.message}</p>`;
@@ -282,24 +951,178 @@
         };
 
         /**
-         * Sets up a real-time listener for chat messages from Firestore.
-         * Messages are ordered by their timestamp and displayed in the chat area.
+         * Fetches a user profile from Firestore based on displayUserId.
+         * @param {string} displayId The user-defined ID.
+         * @returns {Promise<Object|null>} The user profile object or null if not found.
          */
-        function setupRealtimeChatListener() {
-            if (!isAuthReady || !db) {
-                console.warn("Firestore not ready or not authenticated. Cannot set up listener.");
+        async function getUserProfile(displayId) {
+            if (!db) return null;
+            const q = firestore.query(
+                firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/userProfiles`),
+                firestore.where('displayUserId', '==', displayId),
+                firestore.limit(1)
+            );
+            const querySnapshot = await firestore.getDocs(q);
+            if (!querySnapshot.empty) {
+                const doc = querySnapshot.docs[0];
+                return { id: doc.id, ...doc.data() };
+            }
+            return null;
+        }
+
+        /**
+         * Creates or updates a user profile in Firestore.
+         * @param {string} displayId The user-defined ID.
+         * @param {string} uid The Firebase Auth UID.
+         * @param {boolean} hasPass True if a password is set.
+         * @param {string|null} email The email associated with the password, if any.
+         */
+        async function createUserProfile(displayId, uid, hasPass, email = null) {
+            const userProfileRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/userProfiles`);
+            const existingProfile = await getUserProfile(displayId);
+
+            if (existingProfile) {
+                const updateData = {
+                    firebaseUid: uid,
+                    hasPassword: hasPass,
+                    updatedAt: firestore.serverTimestamp()
+                };
+                if (email) {
+                    updateData.email = email;
+                }
+                await firestore.updateDoc(firestore.doc(db, userProfileRef.path, existingProfile.id), updateData);
+                return { id: existingProfile.id, displayUserId: displayId, firebaseUid: uid, hasPassword: hasPass, email: email || existingProfile.email };
+            } else {
+                const newProfileData = {
+                    displayUserId: displayId,
+                    firebaseUid: uid,
+                    hasPassword: hasPass,
+                    createdAt: firestore.serverTimestamp()
+                };
+                if (email) {
+                    newProfileData.email = email;
+                }
+                const newProfileRef = await firestore.addDoc(userProfileRef, newProfileData);
+                return { id: newProfileRef.id, displayUserId: displayId, firebaseUid: uid, hasPassword: hasPass, email: email };
+            }
+        }
+
+        /**
+         * Loads the user's chat history from Firestore and updates the sidebar.
+         */
+        async function loadChatHistory() {
+            console.log("loadChatHistory called. isAuthReady:", isAuthReady, "db:", !!db, "firebaseAuthUid:", firebaseAuthUid);
+            if (!isAuthReady || !db || !firebaseAuthUid) { // Filter by firebaseAuthUid now
+                console.warn("Firestore not ready or firebaseAuthUid not set. Cannot load chat history.");
                 return;
             }
 
-            // Define the collection path for public data.
-            // Using firebaseConfig.projectId for the appId part of the path.
-            const chatCollectionPath = `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`;
-            console.log("Firestore Collection Path being used:", chatCollectionPath); // Debugging log
-            const chatCollectionRef = collection(db, chatCollectionPath);
-            const q = query(chatCollectionRef, orderBy('timestamp', 'asc'));
+            const chatsCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats`);
+            // Query by firebaseAuthUid
+            const q = firestore.query(chatsCollectionRef, firestore.where('firebaseUid', '==', firebaseAuthUid));
+            console.log("Firestore query for chat history:", q);
 
-            onSnapshot(q, (snapshot) => {
-                chatMessagesDiv.innerHTML = ''; // Clear existing messages
+            // Use onSnapshot for real-time updates to the chat history list
+            firestore.onSnapshot(q, (snapshot) => {
+                console.log("Received chat history snapshot.");
+                chatHistory = [];
+                snapshot.forEach((doc) => {
+                    const chat = doc.data();
+                    chatHistory.push({ id: doc.id, ...chat });
+                });
+
+                // Sort chatHistory by createdAt in JavaScript after fetching
+                chatHistory.sort((a, b) => {
+                    const dateA = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate() : a.createdAt) : new Date(0);
+                    const dateB = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate() : b.createdAt) : new Date(0);
+                    return dateB.getTime() - dateA.getTime(); // Sort descending (newest first)
+                });
+
+                renderChatHistory(); // Re-render the sidebar
+                console.log("Chat history rendered. Total chats:", chatHistory.length);
+            }, (error) => {
+                console.error("Error loading chat history:", error);
+                // Log the full error object for more details
+                console.error("Firestore chat history error details:", error); 
+                showModal(`Error loading chat history: ${error.message}. Please check your Firestore Security Rules.`);
+            });
+        }
+
+        /**
+         * Renders the chat history buttons in the sidebar.
+         */
+        function renderChatHistory() {
+            chatHistoryList.innerHTML = ''; // Clear current list
+            chatHistory.forEach(chat => {
+                const chatButton = document.createElement('button');
+                chatButton.classList.add('chat-history-item');
+                if (chat.id === currentChatId) {
+                    chatButton.classList.add('active');
+                }
+                chatButton.textContent = chat.title || 'New Chat'; // Display title or 'New Chat'
+                chatButton.dataset.chatId = chat.id;
+                chatButton.addEventListener('click', () => loadChat(chat.id));
+                chatHistoryList.appendChild(chatButton);
+            });
+        }
+
+        /**
+         * Creates a new chat session.
+         */
+        async function createNewChat() {
+            console.log("createNewChat called. isAuthReady:", isAuthReady, "db:", !!db, "firebaseAuthUid:", firebaseAuthUid);
+            if (!isAuthReady || !db || !firebaseAuthUid) { // Use firebaseAuthUid
+                showModal("Authentication not ready or User ID not set. Cannot create new chat.");
+                return;
+            }
+
+            try {
+                // Add a new chat document with a temporary title
+                const newChatRef = await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats`), {
+                    title: 'New Chat', // Temporary title
+                    createdAt: firestore.serverTimestamp(),
+                    firebaseUid: firebaseAuthUid, // Use firebaseAuthUid here
+                    userId: displayUserId, // Also store displayUserId for convenience/display
+                    messageCount: 0 // To track if it's the first message
+                });
+                console.log("New chat created with ID:", newChatRef.id);
+                await loadChat(newChatRef.id); // Load the newly created chat
+            } catch (error) {
+                console.error("Error creating new chat:", error);
+                console.error("Firestore create chat error details:", error);
+                showModal(`Failed to create new chat: ${error.message}. Please check your Firestore Security Rules.`);
+            }
+        }
+
+        /**
+         * Loads a specific chat session by its ID.
+         * @param {string} chatId The ID of the chat to load.
+         */
+        async function loadChat(chatId) {
+            console.log("loadChat called with chatId:", chatId);
+            if (currentChatMessagesUnsubscribe) {
+                currentChatMessagesUnsubscribe(); // Unsubscribe from previous chat's messages
+            }
+
+            currentChatId = chatId;
+            chatMessagesDiv.innerHTML = '<p class="text-center text-gray-500">Loading chat...</p>'; // Clear and show loading
+            
+            // Update active state in sidebar
+            document.querySelectorAll('.chat-history-item').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.chatId === chatId) {
+                    btn.classList.add('active');
+                    currentChatTitleDisplay.textContent = btn.textContent; // Update header title
+                }
+            });
+
+            // Set up new listener for the selected chat's messages
+            const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`);
+            const q = firestore.query(messagesCollectionRef, firestore.orderBy('timestamp', 'asc'));
+
+            currentChatMessagesUnsubscribe = firestore.onSnapshot(q, (snapshot) => {
+                console.log("Received messages snapshot for chat:", chatId);
+                chatMessagesDiv.innerHTML = ''; // Clear messages before rendering
                 if (snapshot.empty) {
                     chatMessagesDiv.innerHTML = '<p class="text-center text-gray-500">Start chatting with the AI!</p>';
                 }
@@ -308,24 +1131,25 @@
                     const messageElement = document.createElement('div');
                     messageElement.classList.add('message-bubble');
 
-                    if (message.senderId === userId) {
+                    if (message.senderId === displayUserId) { // Compare with displayUserId
                         messageElement.classList.add('user-message');
                         messageElement.textContent = `You: ${message.text}`;
                     } else if (message.senderId === 'AI') {
                         messageElement.classList.add('ai-message');
-                        messageElement.textContent = `AI: ${message.text}`;
+                        // Use marked.js to convert Markdown to HTML
+                        messageElement.innerHTML = `AI: ${marked.parse(message.text)}`;
                     } else {
-                        // For messages from other anonymous users (their UID will be displayed partially)
+                        // For messages from other display users (their ID will be displayed)
                         messageElement.classList.add('ai-message');
-                        messageElement.textContent = `${message.senderId.substring(0, 8)}...: ${message.text}`;
+                        messageElement.innerHTML = `${message.senderId}: ${marked.parse(message.text)}`; // Use marked.js here too
                     }
                     chatMessagesDiv.appendChild(messageElement);
                 });
-                // Scroll to the bottom of the chat
-                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+                chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Scroll to bottom
             }, (error) => {
-                console.error("Error listening to messages:", error);
-                showModal(`Error loading messages: ${error.message}`);
+                console.error("Error listening to messages for chat", chatId, ":", error);
+                console.error("Firestore chat messages error details:", error);
+                showModal(`Error loading chat messages: ${error.message}. Please check your Firestore Security Rules.`);
             });
         }
 
@@ -333,44 +1157,147 @@
          * Sends a user message to Firestore and then triggers the AI response.
          */
         async function sendMessage() {
+            console.log("sendMessage called. currentChatId:", currentChatId);
             const messageText = userInput.value.trim();
             if (messageText === '') return;
 
-            if (!isAuthReady || !db || !userId) {
-                showModal("Authentication not ready. Please wait or refresh.");
+            if (!isAuthReady || !db || !firebaseAuthUid || !currentChatId) { // Use firebaseAuthUid
+                showModal("Chat not ready. Please wait or create a new chat.");
                 return;
             }
 
             userInput.value = ''; // Clear input immediately
 
             try {
+                const chatDocRef = firestore.doc(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}`);
+                const chatDoc = await firestore.getDoc(chatDocRef);
+                const chatData = chatDoc.data();
+                const isFirstMessage = chatData.messageCount === 0;
+
                 // Add user message to Firestore
-                await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
+                await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${currentChatId}/messages`), {
                     text: messageText,
-                    senderId: userId,
-                    timestamp: serverTimestamp()
+                    senderId: displayUserId, // Store displayUserId for display
+                    firebaseUid: firebaseAuthUid, // Store firebaseAuthUid for security rules
+                    timestamp: firestore.serverTimestamp()
                 });
+                console.log("User message added to Firestore.");
+
+                // Update message count for the chat
+                await firestore.updateDoc(chatDocRef, {
+                    messageCount: (chatData.messageCount || 0) + 1
+                });
+                console.log("Chat message count updated.");
+
+                // If it's the first message, generate a title for the chat
+                if (isFirstMessage) {
+                    loadingIndicator.style.display = 'block'; // Show loading for title generation
+                    console.log("First message, generating chat title...");
+                    const generatedTitle = await generateChatTitle(messageText);
+                    await firestore.updateDoc(chatDocRef, {
+                        title: generatedTitle
+                    });
+                    loadingIndicator.style.display = 'none'; // Hide loading
+                    console.log("Chat title generated and updated:", generatedTitle);
+                }
 
                 // Call the Gemini API for AI response
-                await callGeminiAPI(messageText);
+                console.log("Calling Gemini API...");
+                await callGeminiAPI(messageText, currentChatId);
 
             } catch (error) {
                 console.error("Error sending message or calling AI:", error);
-                showModal(`Error: ${error.message}`);
+                console.error("Send message/AI call error details:", error);
+                showModal(`Error: ${error.message}. Please check your Firestore Security Rules and Gemini API key.`);
+                loadingIndicator.style.display = 'none'; // Ensure loading indicator is hidden on error
+            }
+        }
+
+        /**
+         * Calls the Gemini API to generate a title for a new chat.
+         * @param {string} firstUserMessage The first message from the user.
+         * @returns {Promise<string>} A promise that resolves with the generated title.
+         */
+        async function generateChatTitle(firstUserMessage) {
+            const prompt = `Generate a very short, concise, and descriptive title (5-8 words max) for a chat conversation based on this initial user message: "${firstUserMessage}". The title should be suitable for a chat history list.`;
+            let chatHistoryForTitle = [];
+            chatHistoryForTitle.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = { contents: chatHistoryForTitle };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`API error generating title: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    let title = result.candidates[0].content.parts[0].text.trim();
+                    // Clean up common AI title formatting (e.g., "Title: ", "Chat Title: ")
+                    title = title.replace(/^(Title|Chat Title|Conversation|Topic):\s*/i, '');
+                    // Limit length if AI generates something too long
+                    if (title.length > 50) {
+                        title = title.substring(0, 47) + '...';
+                    }
+                    return title;
+                } else {
+                    console.warn("Gemini API returned no content for title generation.");
+                    return "Untitled Chat";
+                }
+            } catch (error) {
+                console.error("Error generating chat title:", error);
+                console.error("Gemini title generation error details:", error);
+                return "Untitled Chat";
             }
         }
 
         /**
          * Calls the Gemini API with the user's prompt and adds the AI's response to Firestore.
          * @param {string} prompt The user's message to send to the AI.
+         * @param {string} chatId The ID of the current chat session.
          */
-        async function callGeminiAPI(prompt) {
+        async function callGeminiAPI(prompt, chatId) {
             loadingIndicator.style.display = 'block';
 
-            let chatHistory = [];
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            // Fetch previous messages for context (last N messages)
+            const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`);
+            const previousMessagesQuery = firestore.query(messagesCollectionRef, firestore.orderBy('timestamp', 'desc'), firestore.limit(10));
+            const previousMessagesSnapshot = await firestore.getDocs(previousMessagesQuery);
+            
+            let chatHistoryForAI = [];
+            // Add previous messages in chronological order (Firestore query is desc, so reverse)
+            previousMessagesSnapshot.docs.reverse().forEach(doc => {
+                const msg = doc.data();
+                // When sending to AI, convert HTML back to plain text if needed, or ensure it's always Markdown
+                // For simplicity, we assume AI responses are stored as Markdown and user inputs are plain text.
+                // If AI needs to see *rendered* HTML, this would be more complex.
+                // For now, AI just sees the raw Markdown/text.
+                if (msg.senderId === displayUserId) { // Compare with displayUserId
+                    chatHistoryForAI.push({ role: "user", parts: [{ text: msg.text }] });
+                } else if (msg.senderId === 'AI') {
+                    chatHistoryForAI.push({ role: "model", parts: [{ text: msg.text }] });
+                }
+            });
 
-            const payload = { contents: chatHistory };
+            // Add the current user prompt. Crucially, instruct the AI to use Markdown.
+            const formattedPrompt = `${prompt}\n\nPlease format your response using Markdown (e.g., headings, paragraphs, bold, italics, lists, code blocks) for readability.`;
+            if (chatHistoryForAI.length === 0 || chatHistoryForAI[chatHistoryForAI.length - 1].role !== 'user') {
+                chatHistoryForAI.push({ role: "user", parts: [{ text: formattedPrompt }] });
+            } else {
+                chatHistoryForAI[chatHistoryForAI.length - 1].parts[0].text = formattedPrompt;
+            }
+
+            const payload = { contents: chatHistoryForAI };
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
             try {
@@ -392,33 +1319,248 @@
                     result.candidates[0].content.parts.length > 0) {
                     const aiResponseText = result.candidates[0].content.parts[0].text;
 
-                    // Add AI response to Firestore
-                    await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
-                        text: aiResponseText,
-                        senderId: 'AI',
-                        timestamp: serverTimestamp()
+                    // Add AI response (which should be Markdown) to Firestore
+                    await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`), {
+                        text: aiResponseText, // Store the raw Markdown text
+                        senderId: 'AI', // Mark sender as AI
+                        firebaseUid: firebaseAuthUid, // Store firebaseAuthUid for security rules
+                        timestamp: firestore.serverTimestamp()
                     });
                 } else {
                     console.warn("Gemini API returned an unexpected response structure or no content.");
                     showModal("AI couldn't generate a response. Please try again.");
-                    await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
+                    await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`), {
                         text: "AI failed to generate a response.",
                         senderId: 'AI',
-                        timestamp: serverTimestamp()
+                        firebaseUid: firebaseAuthUid, // Store firebaseAuthUid for security rules
+                        timestamp: firestore.serverTimestamp()
                     });
                 }
             } catch (error) {
                 console.error("Error calling Gemini API:", error);
-                showModal(`AI response error: ${error.message}`);
-                await addDoc(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chatMessages`), {
+                console.error("Gemini API call error details:", error);
+                showModal(`AI response error: ${error.message}. Please check your Gemini API key and network connection.`);
+                await firestore.addDoc(firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`), {
                     text: `AI encountered an error: ${error.message.substring(0, 100)}...`,
                     senderId: 'AI',
-                    timestamp: serverTimestamp()
+                    firebaseUid: firebaseAuthUid, // Store firebaseAuthUid for security rules
+                    timestamp: firestore.serverTimestamp()
                 });
             } finally {
                 loadingIndicator.style.display = 'none';
             }
         }
+
+        // --- Settings Functionality ---
+
+        /**
+         * Handles creating a password for the current user.
+         */
+        async function handleCreatePassword() {
+            const email = createEmailInput.value.trim();
+            const password = createPasswordInput.value.trim();
+
+            if (!email || !password) {
+                showModal("Please enter both email and password.");
+                return;
+            }
+            if (password.length < 6) {
+                showModal("Password must be at least 6 characters long.");
+                return;
+            }
+
+            hideCreatePasswordModal(); // Hide the create password modal
+            showModal("Creating password...");
+
+            try {
+                // Link the current anonymous account to email/password
+                const credential = EmailAuthProvider.credential(email, password);
+                await linkWithCredential(auth.currentUser, credential);
+                
+                // Update user profile in Firestore, including email
+                userProfile = await createUserProfile(displayUserId, firebaseAuthUid, true, email);
+
+                showModal("Password created successfully! Your account is now linked to this email.");
+                console.log("Password created and account linked.");
+            } catch (error) {
+                console.error("Error creating password:", error);
+                let errorMessage = `Failed to create password: ${error.message}`;
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "This email is already in use by another account. Please use a different email or log in with that email.";
+                } else if (error.code === 'auth/credential-already-in-use') {
+                    errorMessage = "This email/password is already linked to another account.";
+                }
+                showModal(errorMessage);
+            }
+        }
+
+        /**
+         * Handles logging in with a password.
+         */
+        async function handleLoginWithPassword() {
+            const password = loginPasswordInput.value.trim();
+
+            if (!password) {
+                showModal("Please enter your password.");
+                return;
+            }
+
+            hideLoginPasswordModal(); // Hide the login modal
+            showModal("Logging in...");
+
+            try {
+                // Get the email from the user profile
+                if (!userProfile || !userProfile.email) {
+                    throw new Error("User profile or email not found for password login.");
+                }
+                const email = userProfile.email; // Assuming email is stored in userProfile after creation
+
+                // Sign in with email and password
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                firebaseAuthUid = userCredential.user.uid; // Update firebaseAuthUid to the new one if changed
+                isAuthReady = true;
+
+                // Update local storage to ensure the correct displayUserId is active
+                localStorage.setItem('displayUserId', displayUserId);
+
+                showModal("Logged in successfully! Reloading chats...");
+                await initializeChatApp(); // Re-initialize with the authenticated user
+            } catch (error) {
+                console.error("Error logging in with password:", error);
+                let errorMessage = `Login failed: ${error.message}`;
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    errorMessage = "Invalid email or password. Please try again.";
+                }
+                showModal(errorMessage);
+                // If login fails, force re-prompt for display ID
+                localStorage.removeItem('displayUserId');
+                window.location.reload();
+            }
+        }
+
+        /**
+         * Handles the user logging out.
+         * Signs out the Firebase anonymous user and clears local storage.
+         */
+        async function handleLogout() {
+            hideSettingsModal(); // Close settings modal first
+            showModal("Logging out...");
+            try {
+                if (auth.currentUser) {
+                    await auth.signOut();
+                }
+                localStorage.removeItem('displayUserId'); // Clear the custom user ID
+                window.location.reload(); // Reload the page to prompt for new login
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showModal(`Error logging out: ${error.message}`);
+            }
+        }
+
+        /**
+         * Handles the user deleting their account and all associated data.
+         * WARNING: This deletes all chats and messages for the current displayUserId.
+         * For very large datasets, this client-side deletion might be slow or hit rate limits.
+         * A Firebase Cloud Function for recursive deletion is recommended for production.
+         */
+        async function handleDeleteAccount() {
+            hideSettingsModal(); // Close settings modal first
+            showModal("Are you sure you want to delete ALL your chats and account? This action cannot be undone.", true, async () => {
+                showModal("Deleting your data. Please wait...");
+                try {
+                    if (!isAuthReady || !db || !firebaseAuthUid) {
+                        throw new Error("App not ready or user not identified for deletion.");
+                    }
+
+                    // 1. Get all chat IDs belonging to this firebaseAuthUid
+                    const chatsToDeleteQuery = firestore.query(
+                        firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats`),
+                        firestore.where('firebaseUid', '==', firebaseAuthUid) // Filter by firebaseAuthUid
+                    );
+                    const chatsSnapshot = await firestore.getDocs(chatsToDeleteQuery);
+
+                    const deletePromises = [];
+
+                    // 2. For each chat, delete all its messages and then the chat document itself
+                    chatsSnapshot.forEach(chatDoc => {
+                        const chatId = chatDoc.id;
+                        const messagesCollectionRef = firestore.collection(db, `artifacts/${firebaseConfig.projectId}/public/data/chats/${chatId}/messages`);
+                        
+                        // Get all messages in the subcollection
+                        deletePromises.push(firestore.getDocs(messagesCollectionRef).then(messagesSnapshot => {
+                            const messageDeletePromises = [];
+                            messagesSnapshot.forEach(msgDoc => {
+                                messageDeletePromises.push(firestore.deleteDoc(firestore.doc(db, messagesCollectionRef.path, msgDoc.id)));
+                            });
+                            return Promise.all(messageDeletePromises);
+                        }).then(() => {
+                            // After messages are deleted, delete the chat document
+                            return firestore.deleteDoc(firestore.doc(db, `artifacts/${firebaseConfig.projectId}/public/data/chats`, chatId));
+                        }));
+                    });
+
+                    // 3. Delete the user profile document
+                    if (userProfile && userProfile.id) {
+                        deletePromises.push(firestore.deleteDoc(firestore.doc(db, `artifacts/${firebaseConfig.projectId}/public/data/userProfiles`, userProfile.id)));
+                    }
+
+                    await Promise.all(deletePromises); // Wait for all chat, message, and profile deletions to complete
+
+                    // 4. Delete the Firebase user account
+                    if (auth.currentUser && auth.currentUser.uid === firebaseAuthUid) {
+                        await deleteUser(auth.currentUser); // Use deleteUser from firebase/auth
+                        console.log("Firebase user account deleted.");
+                    } else {
+                        console.warn("Firebase user not found or mismatch, skipping user account deletion.");
+                    }
+                    
+                    localStorage.removeItem('displayUserId'); // Clear the custom user ID
+                    showModal("Account and all chats deleted successfully! Reloading...");
+                    setTimeout(() => {
+                        window.location.reload(); // Reload the page
+                    }, 2000);
+
+                } catch (error) {
+                    console.error("Error deleting account and data:", error);
+                    showModal(`Error deleting account: ${error.message}. Please try again.`);
+                }
+            });
+        }
+
+        // Event listeners for settings buttons
+        settingsButton.addEventListener('click', showSettingsModal);
+        createPasswordButton.addEventListener('click', showCreatePasswordModal); // New listener
+        logoutButton.addEventListener('click', handleLogout);
+        deleteAccountButton.addEventListener('click', handleDeleteAccount);
+        moreOptionsButton.addEventListener('click', () => {
+            showModal("More settings options are coming soon!");
+        });
+
+        // Event listeners for create password modal
+        submitCreatePasswordButton.addEventListener('click', handleCreatePassword);
+        createEmailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                createPasswordInput.focus();
+            }
+        });
+        createPasswordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleCreatePassword();
+            }
+        });
+
+        // Event listeners for login password modal
+        submitLoginPasswordButton.addEventListener('click', handleLoginWithPassword);
+        loginPasswordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleLoginWithPassword();
+            }
+        });
+        loginSwitchUserButton.addEventListener('click', () => {
+            hideLoginPasswordModal();
+            handleLogout(); // Effectively logs out and prompts for new user ID
+        });
+
 
         // Event listeners for sending messages
         sendButton.addEventListener('click', sendMessage);
@@ -427,7 +1569,12 @@
                 sendMessage();
             }
         });
+        newChatButton.addEventListener('click', createNewChat);
+
     </script>
+    <center>
+        <h3>In order to save chats, please create a password in the settings menu.</h3>
+    </center>
     <img src="https://houselearning.github.io/safe-library/programs/assets/firebase-brand.png" width="100" height="80" alt="Powered by Firebase" style="position: absolute; bottom: 20px; right: 20px;">
 </body>
 </html>
