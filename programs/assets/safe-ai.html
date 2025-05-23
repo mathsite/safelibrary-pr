@@ -1571,7 +1571,21 @@ View SafeLibrary AI Docs
         });
         newChatButton.addEventListener('click', createNewChat);
 
+        //Security Plugin
+            if (!window.location.href.includes("houselearning")) {
+      window.location.replace("data:text/html," + encodeURIComponent(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Blocked</title></head>
+        <body style="font-family:sans-serif; text-align:center; padding:50px;">
+          <h1 style="color:red;">Cannot load page</h1>
+          <p>This page can only be accessed from a valid HouseLearning URL.</p>
+        </body>
+        </html>
+      `));
+    }
     </script>
+    
     <center>
         <h3>In order to save chats, please create a password in the settings menu.</h3>
     </center>
