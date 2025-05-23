@@ -835,7 +835,7 @@
             apiKey: "AIzaSyDMsnn5QTXgUuUMLX8MDgZ-L8_o3_CNK70",
             authDomain: "gorj-ppb.firebaseapp.com",
             projectId: "gorj-ppb",
-            storageBucket: "gorj-ppb.firebaseapp.com",
+            storageBucket: "gorj-ppb.appspot.com", // Corrected from firebaseapp.com
             messagingSenderId: "278478870117",
             appId: "1:278478870117:web:87e99dea1f38993c0ea588c",
             measurementId: "G-GKY0STDFLH"
@@ -1127,41 +1127,59 @@
 
         // Function to show 2FA modal
         function showTwoFactorAuthModal() {
-    console.log("showTwoFactorAuthModal called.");
-    hideVerificationModal(); // Hide verification modal first
-    twoFactorAuthModal.style.display = 'flex';
-    resetTwoFactorAuthModal();
-    twofaPhoneInput.focus();
+            console.log("showTwoFactorAuthModal called.");
+            hideVerificationModal(); // Hide verification modal first
+            twoFactorAuthModal.style.display = 'flex';
+            resetTwoFactorAuthModal();
+            twofaPhoneInput.focus();
 
-    // Always re-create reCAPTCHA
-    try {
-        // FIX: Ensure 'auth' is defined
-        if (!auth) {
-            twofaStatusMessage.textContent = "Firebase Auth is not initialized. Please reload the page.";
-            return;
-        }
-        appVerifier = new RecaptchaVerifier('recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response) => {
-                console.log("reCAPTCHA solved:", response);
-            },
-            'expired-callback': () => {
-                console.warn("reCAPTCHA expired.");
-                twofaStatusMessage.textContent = "reCAPTCHA expired. Please try again.";
-                sendTwofaCodeButton.disabled = false;
+            sendTwofaCodeButton.disabled = true; // Disable initially until reCAPTCHA is ready
+
+            // Always re-create reCAPTCHA
+            try {
+                // FIX: Ensure 'auth' is defined
+                if (!auth) {
+                    twofaStatusMessage.textContent = "Firebase Auth is not initialized. Please reload the page.";
+                    console.error("Firebase Auth object is null or undefined when trying to initialize reCAPTCHA.");
+                    return;
+                }
+                console.log("Auth object before RecaptchaVerifier:", auth); // Debugging line
+
+                appVerifier = new RecaptchaVerifier('recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => {
+                        console.log("reCAPTCHA solved:", response);
+                        twofaStatusMessage.textContent = "reCAPTCHA verified. Click 'Send Code' to proceed.";
+                        sendTwofaCodeButton.disabled = false; // Enable send button after reCAPTCHA is solved
+                    },
+                    'expired-callback': () => {
+                        console.warn("reCAPTCHA expired.");
+                        twofaStatusMessage.textContent = "reCAPTCHA expired. Please try again.";
+                        sendTwofaCodeButton.disabled = false;
+                        // Clear reCAPTCHA explicitly on expiry to force a re-render next time
+                        if (appVerifier && appVerifier.clear) {
+                            appVerifier.clear();
+                        }
+                        recaptchaContainer.innerHTML = ''; // Clear the DOM element
+                        // Re-render reCAPTCHA immediately on expiry
+                        showTwoFactorAuthModal(); // This will re-initialize reCAPTCHA
+                    }
+                }, auth); // Pass the auth instance here
+
+                appVerifier.render().then(widgetId => {
+                    console.log("reCAPTCHA rendered with widget ID:", widgetId);
+                }).catch(error => {
+                    console.error("Error rendering reCAPTCHA:", error);
+                    // More specific error message
+                    twofaStatusMessage.textContent = `Error loading reCAPTCHA: ${error.code || 'unknown'} - ${error.message || 'No specific error message provided.'}`;
+                    sendTwofaCodeButton.disabled = true; // Disable if reCAPTCHA fails to render
+                });
+            } catch (error) {
+                console.error("Error initializing reCAPTCHA (outer catch):", error);
+                twofaStatusMessage.textContent = `Error initializing reCAPTCHA: ${error.code || 'unknown'} - ${error.message || 'No specific error message provided.'}`;
+                sendTwofaCodeButton.disabled = true; // Disable if reCAPTCHA initialization fails
             }
-        }, auth);
-        appVerifier.render().then(widgetId => {
-            console.log("reCAPTCHA rendered with widget ID:", widgetId);
-        }).catch(error => {
-            console.error("Error rendering reCAPTCHA:", error);
-            twofaStatusMessage.textContent = `Error loading reCAPTCHA: ${error.message}`;
-        });
-    } catch (error) {
-        console.error("Error initializing reCAPTCHA:", error);
-        twofaStatusMessage.textContent = `Error initializing reCAPTCHA: ${error.message}`;
-    }
-}
+        }
         // Function to hide 2FA modal
         function hideTwoFactorAuthModal() {
             console.log("hideTwoFactorAuthModal called.");
