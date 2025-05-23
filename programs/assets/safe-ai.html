@@ -1572,17 +1572,25 @@ View SafeLibrary AI Docs
         newChatButton.addEventListener('click', createNewChat);
 
         //Security Plugin
-            if (!window.location.href.includes("houselearning")) {
-      window.location.replace("data:text/html," + encodeURIComponent(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>Blocked</title></head>
-        <body style="font-family:sans-serif; text-align:center; padding:50px;">
-          <h1 style="color:red;">Cannot load page</h1>
-          <p>This page can only be accessed from a valid HouseLearning URL.</p>
-        </body>
-        </html>
-      `));
+              if (!window.location.href.includes("houselearning")) {
+      var newWin = window.open();
+      if (newWin) {
+        newWin.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head><title>Blocked</title></head>
+          <body style="font-family:sans-serif; text-align:center; padding:50px;">
+            <h1 style="color:red;">Cannot load page</h1>
+            <p>This page can only be accessed from a valid HouseLearning URL.</p>
+          </body>
+          </html>
+        `);
+        newWin.document.close();
+      } else {
+        // If popups are blocked
+        alert("Cannot load page — URL check failed and popup was blocked.");
+      }
+      window.close();
     }
     </script>
     
