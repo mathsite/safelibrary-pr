@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeLibrary | Lorem Ipsum Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 200px; margin-top: 10px; white-space: pre-wrap; }
+    select, input, button { margin: 5px 0; padding: 8px; }
+    label { display: block; margin-top: 10px; }
+    #wordCount { margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>SafeLibrary Lorem Ipsum Generator</h1>
+
+  <label for="paragraphs">Number of Paragraphs:</label>
+  <input type="number" id="paragraphs" value="3" min="1">
+
+  <label for="words">Words Per Paragraph (1 - 2034):</label>
+  <input type="number" id="words" value="50" min="1" max="2034">
+
+  <label for="format">Format:</label>
+  <select id="format">
+    <option value="plain">Plain Text</option>
+    <option value="html">HTML &lt;p&gt; Tags</option>
+    <option value="markdown">Markdown</option>
+  </select>
+
+  <button onclick="generateLorem()">Generate</button>
+  <button onclick="copyToClipboard()">Copy to Clipboard</button>
+
+  <textarea id="output" readonly></textarea>
+
+  <div id="wordCount">Word Count: 0</div>
+
+  <script>
+    let loremText = 'Lorem Ipsum Text Goes Here...';
+
+    // Load lorem ipsum text from external file
+    fetch('https://houselearning.github.io/safe-library/programs/assets/loremipsum.txt')
+      .then(response => response.text())
+      .then(text => {
+        loremText = text.trim();
+      })
+      .catch(error => {
+        loremText = 'Failed to load lorem ipsum text.';
+        console.error('Error fetching loremipsum.txt:', error);
+      });
+
+    function generateLorem() {
+      const paragraphCount = parseInt(document.getElementById('paragraphs').value);
+      const wordCount = parseInt(document.getElementById('words').value);
+      const format = document.getElementById('format').value;
+      const output = document.getElementById('output');
+      const wordCountDisplay = document.getElementById('wordCount');
+      let result = '';
+
+      const words = loremText.split(/\s+/);
+      let totalWords = 0;
+
+      for (let i = 0; i < paragraphCount; i++) {
+        let paragraphWords = words.slice(0, Math.min(wordCount, words.length));
+        let paragraphText = paragraphWords.join(' ');
+        totalWords += paragraphWords.length;
+
+        if (format === 'plain') {
+          result += '    ' + paragraphText + '\n\n';
+        } else if (format === 'html') {
+          result += `<p style="text-indent: 2em; margin-bottom: 1em;">${paragraphText}</p>\n`;
+        } else if (format === 'markdown') {
+          result += `> ${paragraphText}\n\n`;
+        }
+      }
+
+      output.value = result;
+      wordCountDisplay.textContent = 'Word Count: ' + totalWords;
+    }
+
+    function copyToClipboard() {
+      const output = document.getElementById('output');
+      output.select();
+      output.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      alert('Copied to clipboard!');
+    }
+  </script>
+
+</body>
+</html>
