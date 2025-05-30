@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeLibrary 3D Model Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <style>
+        /* Custom CSS for font and body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars due to canvas */
+        }
+        canvas {
+            display: block; /* Remove extra space below canvas */
+            width: 100%;
+            height: 100%;
+        }
+        /* Loading spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6; /* Blue-500 */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        /* Custom styles for the file input button to make it look like a button */
+        .file-input-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6; /* Blue-500 */
+            color: white;
+            border-radius: 0.5rem; /* Rounded corners */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        .file-input-button:hover {
+            background-color: #2563eb; /* Blue-600 */
+            transform: translateY(-1px); /* Slight lift on hover */
+        }
+        .file-input-button:active {
+            background-color: #1d4ed8; /* Blue-700 */
+            transform: translateY(0); /* Press effect */
+        }
+        /* Hide the actual file input */
+        .hidden-file-input {
+            display: none;
+        }
+        /* Message box styling */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+        .message-box.error {
+            background-color: #f44336; /* Red for error */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        /* Style for color swatches */
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out;
+        }
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 flex flex-col min-h-screen">
+    <header class="bg-white shadow-md p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600">SafeLibrary 3D Viewer</h1>
+            <nav>
+                <ul class="flex space-x-4">
+                    <li><a href="#" class="text-gray-700 hover:text-blue-500 transition-colors duration-200">Home</a></li>
+                    <li><a href="https://houselearning.github.io/safe-library/media/3d-models/" class="text-gray-700 hover:text-blue-500 transition-colors duration-200">Models</a></li>
+                    <li><a href="https://houselearning.github.io/safe-library/" class="text-gray-700 hover:text-blue-500 transition-colors duration-200">SafeLibrary</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-4 relative">
+        <div id="loading-indicator" class="absolute inset-0 bg-gray-200 bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+            <div class="spinner"></div>
+            <p class="ml-4 text-lg font-semibold text-gray-700">Loading 3D scene...</p>
+        </div>
+
+        <div id="llm-loading-indicator" class="absolute inset-0 bg-gray-200 bg-opacity-75 flex items-center justify-center z-20 rounded-lg hidden">
+            <div class="spinner"></div>
+            <p class="ml-4 text-lg font-semibold text-gray-700">AI is thinking...</p>
+        </div>
+
+        <div id="message-box" class="message-box"></div>
+
+        <div id="viewer-container" class="relative w-full h-full max-w-4xl max-h-[70vh] bg-white rounded-lg shadow-xl overflow-hidden">
+            <canvas id="3d-canvas" class="w-full h-full"></canvas>
+        </div>
+
+        <div class="mt-6 p-4 bg-white rounded-lg shadow-md text-center w-full max-w-md flex flex-col items-center space-y-4 overflow-y-auto max-h-[300px]">
+            <p class="text-gray-700">Click and drag on the 3D model to rotate it.</p>
+            <p class="text-gray-700">Scroll to zoom in and out.</p>
+
+            <label for="model-upload" class="file-input-button">
+                Upload 3D Model (.glb, .gltf, .obj)
+            </label>
+            <input type="file" id="model-upload" accept=".glb,.gltf,.obj" class="hidden-file-input">
+
+            <button id="edit-mode-toggle" class="file-input-button bg-purple-600 hover:bg-purple-700">
+                Enter Edit Mode
+            </button>
+
+            <div id="edit-controls" class="w-full space-y-4 hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mt-4">Edit Tools</h3>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <button id="add-cube-button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200">Add Cube</button>
+                    <button id="add-sphere-button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200">Add Sphere</button>
+                    <button id="add-cone-button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200">Add Cone</button>
+                    <button id="add-cylinder-button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200">Add Cylinder</button>
+                    <button id="add-torus-button" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200">Add Torus</button>
+                </div>
+
+                <div class="flex items-center justify-center space-x-2">
+                    <label for="color-picker" class="text-gray-700 font-medium">Shape Color:</label>
+                    <input type="color" id="color-picker" value="#3b82f6" class="rounded-md border border-gray-300 p-1">
+                    <button id="apply-color-button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200">Apply Color to New Shape</button>
+                    <button id="paint-object-button" class="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800 transition-colors duration-200">Paint Selected Object</button>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-4">Resize Selected Object</h3>
+                <div class="grid grid-cols-3 gap-2 w-full">
+                    <div class="flex flex-col items-center">
+                        <label for="scale-x" class="text-gray-700 text-sm">Scale X:</label>
+                        <input type="range" id="scale-x" min="0.1" max="5" step="0.1" value="1" class="w-full" disabled>
+                        <span id="scale-x-value" class="text-xs text-gray-600">1.0</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label for="scale-y" class="text-gray-700 text-sm">Scale Y:</label>
+                        <input type="range" id="scale-y" min="0.1" max="5" step="0.1" value="1" class="w-full" disabled>
+                        <span id="scale-y-value" class="text-xs text-gray-600">1.0</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label for="scale-z" class="text-gray-700 text-sm">Scale Z:</label>
+                        <input type="range" id="scale-z" min="0.1" max="5" step="0.1" value="1" class="w-full" disabled>
+                        <span id="scale-z-value" class="text-xs text-gray-600">1.0</span>
+                    </div>
+                </div>
+
+
+                <div class="flex justify-center gap-2">
+                    <button id="undo-button" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors duration-200" disabled>Undo</button>
+                    <button id="redo-button" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors duration-200" disabled>Redo</button>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-800 mt-4">AI Features</h3>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <button id="describe-model-button" class="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors duration-200">✨ Describe Model Composition</button>
+                    <button id="suggest-colors-button" class="px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-colors duration-200">✨ Suggest Colors</button>
+                    <button id="generate-name-button" class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors duration-200">✨ Generate Object Name</button>
+                    <button id="suggest-optimization-button" class="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors duration-200">✨ Suggest Optimization</button>
+                </div>
+
+                <div id="llm-output-area" class="w-full text-left p-2 bg-gray-50 rounded-md border border-gray-200 text-sm hidden">
+                    </div>
+
+                <div id="suggested-colors-area" class="w-full text-left p-2 bg-gray-50 rounded-md border border-gray-200 hidden">
+                    <p class="font-semibold mb-2">Suggested Colors:</p>
+                    <div id="color-swatches-container" class="flex flex-wrap gap-2 justify-center">
+                        </div>
+                </div>
+
+                <button id="exit-edit-mode-button" class="file-input-button bg-red-600 hover:bg-red-700">
+                    Exit Edit Mode
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4 text-center mt-auto">
+        <p>&copy; 2025 SafeLibrary. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Ensure the script runs after the DOM is fully loaded
+        window.onload = function() {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const llmLoadingIndicator = document.getElementById('llm-loading-indicator');
+            const viewerContainer = document.getElementById('viewer-container');
+            const canvas = document.getElementById('3d-canvas');
+            const modelUploadInput = document.getElementById('model-upload');
+            const messageBox = document.getElementById('message-box');
+            const editModeToggle = document.getElementById('edit-mode-toggle');
+            const editControls = document.getElementById('edit-controls');
+            const addCubeButton = document.getElementById('add-cube-button');
+            const addSphereButton = document.getElementById('add-sphere-button');
+            const addConeButton = document.getElementById('add-cone-button');
+            const addCylinderButton = document.getElementById('add-cylinder-button');
+            const addTorusButton = document.getElementById('add-torus-button');
+            const colorPicker = document.getElementById('color-picker');
+            const applyColorButton = document.getElementById('apply-color-button');
+            const paintObjectButton = document.getElementById('paint-object-button');
+            const undoButton = document.getElementById('undo-button');
+            const redoButton = document.getElementById('redo-button');
+            const exitEditModeButton = document.getElementById('exit-edit-mode-button');
+
+            // Resize controls
+            const scaleXInput = document.getElementById('scale-x');
+            const scaleYInput = document.getElementById('scale-y');
+            const scaleZInput = document.getElementById('scale-z');
+            const scaleXValue = document.getElementById('scale-x-value');
+            const scaleYValue = document.getElementById('scale-y-value');
+            const scaleZValue = document.getElementById('scale-z-value');
+
+            // New LLM related elements
+            const describeModelButton = document.getElementById('describe-model-button');
+            const suggestColorsButton = document.getElementById('suggest-colors-button');
+            const generateNameButton = document.getElementById('generate-name-button');
+            const suggestOptimizationButton = document.getElementById('suggest-optimization-button');
+            const llmOutputArea = document.getElementById('llm-output-area');
+            const suggestedColorsArea = document.getElementById('suggested-colors-area');
+            const colorSwatchesContainer = document.getElementById('color-swatches-container');
+
+            // Scene setup
+            let scene, camera, renderer, modelGroup;
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let editMode = false;
+            let selectedObject = null; // Currently selected object for coloring/manipulation
+
+            // History for Undo/Redo
+            let history = [];
+            let historyPointer = -1; // Points to the last executed command
+
+            // Raycaster for object selection
+            let raycaster = new THREE.Raycaster();
+            let mouse = new THREE.Vector2();
+
+            // Gemini API Key (updated)
+            const apiKey = "AIzaSyDcdQwmJDrxOPnt5R8_29oAeke_QJkOiwI";
+
+            // --- Helper function to convert Markdown to HTML ---
+            function convertMarkdownToHtml(markdownText) {
+                // Convert newlines to <br> tags
+                let htmlText = markdownText.replace(/\n/g, '<br>');
+                // Convert *text* to <i>text</i>
+                htmlText = htmlText.replace(/\*(.*?)\*/g, '<i>$1</i>');
+                return htmlText;
+            }
+
+            // --- Command Pattern Classes for Undo/Redo ---
+            class Command {
+                constructor() {
+                    this.type = 'base';
+                }
+                execute() {
+                    console.log('Execute base command');
+                }
+                undo() {
+                    console.log('Undo base command');
+                }
+            }
+
+            class AddShapeCommand extends Command {
+                constructor(modelGroup, shapeMesh) {
+                    super();
+                    this.type = 'addShape';
+                    this.modelGroup = modelGroup;
+                    this.shapeMesh = shapeMesh;
+                }
+                execute() {
+                    this.modelGroup.add(this.shapeMesh);
+                }
+                undo() {
+                    this.modelGroup.remove(this.shapeMesh);
+                    // Dispose of geometry and material to prevent memory leaks
+                    this.shapeMesh.geometry.dispose();
+                    if (Array.isArray(this.shapeMesh.material)) {
+                        this.shapeMesh.material.forEach(m => m.dispose());
+                    } else {
+                        this.shapeMesh.material.dispose();
+                    }
+                }
+            }
+
+            class ColorShapeCommand extends Command {
+                constructor(mesh, oldColor, newColor) {
+                    super();
+                    this.type = 'colorShape';
+                    this.mesh = mesh;
+                    this.oldColor = oldColor; // Store the original color
+                    this.newColor = newColor; // Store the new color
+                }
+                execute() {
+                    // Ensure the material is a MeshPhongMaterial or similar that has a color property
+                    if (this.mesh.material && this.mesh.material.color) {
+                        this.mesh.material.color.set(this.newColor);
+                    } else if (Array.isArray(this.mesh.material)) {
+                        // Handle multi-material objects (like some imported models)
+                        this.mesh.material.forEach(mat => {
+                            if (mat.color) mat.color.set(this.newColor);
+                        });
+                    }
+                }
+                undo() {
+                    if (this.mesh.material && this.mesh.material.color) {
+                        this.mesh.material.color.set(this.oldColor);
+                    } else if (Array.isArray(this.mesh.material)) {
+                        this.mesh.material.forEach(mat => {
+                            if (mat.color) mat.color.set(this.oldColor);
+                        });
+                    }
+                }
+            }
+
+            class ResizeShapeCommand extends Command {
+                constructor(mesh, oldScale, newScale) {
+                    super();
+                    this.type = 'resizeShape';
+                    this.mesh = mesh;
+                    this.oldScale = oldScale.clone(); // Store a clone of the old scale
+                    this.newScale = newScale.clone(); // Store a clone of the new scale
+                }
+                execute() {
+                    this.mesh.scale.copy(this.newScale);
+                }
+                undo() {
+                    this.mesh.scale.copy(this.oldScale);
+                }
+            }
+            // --- End Command Pattern Classes ---
+
+            // Function to show messages to the user
+            function showMessage(message, isError = false) {
+                messageBox.textContent = message;
+                messageBox.classList.remove('error');
+                if (isError) {
+                    messageBox.classList.add('error');
+                }
+                messageBox.classList.add('show');
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 3000); // Message disappears after 3 seconds
+            }
+
+            // Function to execute a command and manage history
+            function executeCommand(command) {
+                // If we're not at the end of history (i.e., we've undone some actions),
+                // clear the redoable history
+                if (historyPointer < history.length - 1) {
+                    history = history.slice(0, historyPointer + 1);
+                }
+                command.execute();
+                history.push(command);
+                historyPointer++;
+                updateUndoRedoButtons();
+                fitCameraToGroup(modelGroup); // Re-fit camera after adding/removing
+            }
+
+            // Function to undo the last command
+            function undo() {
+                if (historyPointer >= 0) {
+                    const command = history[historyPointer];
+                    command.undo();
+                    historyPointer--;
+                    updateUndoRedoButtons();
+                    fitCameraToGroup(modelGroup); // Re-fit camera after undoing
+                    deselectObject(); // Deselect after undoing to avoid issues
+                }
+            }
+
+            // Function to redo the next command
+            function redo() {
+                if (historyPointer < history.length - 1) {
+                    historyPointer++;
+                    const command = history[historyPointer];
+                    command.execute();
+                    updateUndoRedoButtons();
+                    fitCameraToGroup(modelGroup); // Re-fit camera after redoing
+                }
+            }
+
+            // Update state of Undo/Redo buttons
+            function updateUndoRedoButtons() {
+                undoButton.disabled = historyPointer < 0;
+                redoButton.disabled = historyPointer >= history.length - 1;
+            }
+
+            // Deselects the currently selected object
+            function deselectObject() {
+                if (selectedObject) {
+                    // Restore original emissive colors for all meshes within the deselected object
+                    selectedObject.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            let materials = Array.isArray(child.material) ? child.material : [child.material];
+                            materials.forEach(mat => {
+                                if (mat.emissive && mat._originalEmissiveHex !== undefined) {
+                                    mat.emissive.setHex(mat._originalEmissiveHex);
+                                    delete mat._originalEmissiveHex; // Clean up custom property
+                                }
+                            });
+                        }
+                    });
+                    selectedObject = null;
+                }
+                // Disable and reset resize controls
+                scaleXInput.disabled = true;
+                scaleYInput.disabled = true;
+                scaleZInput.disabled = true;
+                scaleXInput.value = 1;
+                scaleYInput.value = 1;
+                scaleZInput.value = 1;
+                scaleXValue.textContent = '1.0';
+                scaleYValue.textContent = '1.0';
+                scaleZValue.textContent = '1.0';
+            }
+
+            function init() {
+                // Hide loading indicator initially
+                loadingIndicator.style.display = 'none';
+
+                // Create a new Three.js scene
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xf0f0f0); // Light gray background
+
+                // Set up the camera
+                camera = new THREE.PerspectiveCamera(75, viewerContainer.clientWidth / viewerContainer.clientHeight, 0.1, 1000);
+                camera.position.z = 5; // Position the camera back to see the object
+
+                // Set up the renderer
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+                renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio); // Handle high-DPI screens
+
+                // Initialize the model group, which will contain all loaded models and added shapes
+                modelGroup = new THREE.Group();
+                scene.add(modelGroup);
+
+                // Add ambient light to illuminate all objects equally
+                const ambientLight = new THREE.AmbientLight(0x404040); // Soft white light
+                scene.add(ambientLight);
+
+                // Add directional light for shadows and definition
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // White light, medium intensity
+                directionalLight.position.set(1, 1, 1).normalize(); // Position the light
+                scene.add(directionalLight);
+
+                // Add a simple placeholder object initially to the group
+                const geometry = new THREE.BoxGeometry(1, 1, 1); // A cube with size 1x1x1
+                const material = new THREE.MeshPhongMaterial({ color: 0x3b82f6 }); // Blue color, reacts to light
+                const placeholderModel = new THREE.Mesh(geometry, material);
+                placeholderModel.name = "Initial Cube"; // Give it a name for selection
+                modelGroup.add(placeholderModel);
+
+                // Event Listeners for mouse interaction (rotation/zoom)
+                canvas.addEventListener('mousedown', onMouseDown);
+                canvas.addEventListener('mouseup', onMouseUp);
+                canvas.addEventListener('mousemove', onMouseMove);
+                canvas.addEventListener('wheel', onMouseWheel);
+
+                // Handle window resizing
+                window.addEventListener('resize', onWindowResize);
+
+                // Handle model upload
+                modelUploadInput.addEventListener('change', onModelUpload);
+
+                // Edit Mode Buttons
+                editModeToggle.addEventListener('click', toggleEditMode);
+                addCubeButton.addEventListener('click', () => addShape('cube'));
+                addSphereButton.addEventListener('click', () => addShape('sphere'));
+                addConeButton.addEventListener('click', () => addShape('cone'));
+                addCylinderButton.addEventListener('click', () => addShape('cylinder'));
+                addTorusButton.addEventListener('click', () => addShape('torus'));
+                applyColorButton.addEventListener('click', applyColorToNewShape);
+                paintObjectButton.addEventListener('click', paintSelectedObject);
+                undoButton.addEventListener('click', undo);
+                redoButton.addEventListener('click', redo);
+                exitEditModeButton.addEventListener('click', toggleEditMode);
+
+                // Resize controls listeners
+                scaleXInput.addEventListener('input', resizeSelectedObject);
+                scaleYInput.addEventListener('input', resizeSelectedObject);
+                scaleZInput.addEventListener('input', resizeSelectedObject);
+
+                // LLM Feature Buttons
+                describeModelButton.addEventListener('click', describeModelComposition);
+                suggestColorsButton.addEventListener('click', suggestColorPalettes);
+                generateNameButton.addEventListener('click', generateObjectNameOrPurpose);
+                suggestOptimizationButton.addEventListener('click', suggestModelOptimizations);
+
+                // Start the animation loop
+                animate();
+                fitCameraToGroup(modelGroup);
+                updateUndoRedoButtons();
+            };
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            // Handle mouse down event for dragging
+            function onMouseDown(event) {
+                if (!editMode) {
+                    isDragging = true;
+                    previousMousePosition.x = event.clientX;
+                    previousMousePosition.y = event.clientY;
+                }
+            }
+
+            // Handle mouse up event to stop dragging
+            function onMouseUp(event) {
+                isDragging = false;
+            }
+
+            // Handle mouse move event for rotation
+            function onMouseMove(event) {
+                if (!isDragging) return;
+
+                const deltaX = event.clientX - previousMousePosition.x;
+                const deltaY = event.clientY - previousMousePosition.y;
+
+                modelGroup.rotation.y += deltaX * 0.01;
+                modelGroup.rotation.x += deltaY * 0.01;
+
+                previousMousePosition.x = event.clientX;
+                previousMousePosition.y = event.clientY;
+            }
+
+            // Handle mouse wheel event for zooming
+            function onMouseWheel(event) {
+                event.preventDefault();
+
+                camera.position.z += event.deltaY * 0.01;
+                camera.position.z = Math.max(1, Math.min(50, camera.position.z));
+
+                renderer.render(scene, camera);
+            }
+
+            // Handle window resize event
+            function onWindowResize() {
+                camera.aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+            }
+
+            // Function to load a 3D model
+            function loadModel(file) {
+                loadingIndicator.style.display = 'flex';
+                deselectObject();
+
+                while(modelGroup.children.length > 0){
+                    const object = modelGroup.children[0];
+                    modelGroup.remove(object);
+                    if (object.geometry) object.geometry.dispose();
+                    if (object.material) {
+                        if (Array.isArray(object.material)) {
+                            object.material.forEach(m => m.dispose());
+                        } else {
+                            object.material.dispose();
+                        }
+                    }
+                }
+                history = [];
+                historyPointer = -1;
+                updateUndoRedoButtons();
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const url = event.target.result;
+                    const fileName = file.name.toLowerCase();
+
+                    if (fileName.endsWith('.glb') || fileName.endsWith('.gltf')) {
+                        const loader = new THREE.GLTFLoader();
+                        loader.load(url, (gltf) => {
+                            const newModel = gltf.scene;
+                            newModel.name = file.name;
+                            modelGroup.add(newModel);
+                            fitCameraToGroup(modelGroup);
+                            loadingIndicator.style.display = 'none';
+                            showMessage('Model loaded successfully!');
+                        }, undefined, (error) => {
+                            console.error('Error loading GLTF model:', error);
+                            loadingIndicator.style.display = 'none';
+                            showMessage('Error loading GLTF model. Please try another file.', true);
+                        });
+                    } else if (fileName.endsWith('.obj')) {
+                        const loader = new THREE.OBJLoader();
+                        loader.load(url, (obj) => {
+                            const newModel = obj;
+                            newModel.name = file.name;
+                            modelGroup.add(newModel);
+                            fitCameraToGroup(modelGroup);
+                            loadingIndicator.style.display = 'none';
+                            showMessage('Model loaded successfully!');
+                        }, undefined, (error) => {
+                            console.error('Error loading OBJ model:', error);
+                            loadingIndicator.style.display = 'none';
+                            showMessage('Error loading OBJ model. Please try another file.', true);
+                        });
+                    } else {
+                        loadingIndicator.style.display = 'none';
+                        showMessage('Unsupported file format. Please upload .glb, .gltf, or .obj files.', true);
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error('Error reading file:', error);
+                    loadingIndicator.style.display = 'none';
+                    showMessage('Error reading file. Please try again.', true);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Function to fit camera to the entire model group
+            function fitCameraToGroup(group) {
+                const box = new THREE.Box3().setFromObject(group);
+                if (box.isEmpty()) {
+                    camera.position.set(0, 0, 5);
+                    camera.lookAt(0, 0, 0);
+                    camera.updateProjectionMatrix();
+                    return;
+                }
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = camera.fov * (Math.PI / 180);
+                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+
+                cameraZ *= 1.2;
+
+                camera.position.set(center.x, center.y, center.z + cameraZ);
+                camera.lookAt(center);
+                camera.updateProjectionMatrix();
+            }
+
+            // Handle file upload event
+            function onModelUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    loadModel(file);
+                }
+            }
+
+            // --- Edit Mode Functions ---
+            function toggleEditMode() {
+                editMode = !editMode;
+                if (editMode) {
+                    editModeToggle.textContent = 'Exit Edit Mode';
+                    editModeToggle.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+                    editModeToggle.classList.add('bg-red-600', 'hover:bg-red-700');
+                    editControls.classList.remove('hidden');
+                    canvas.addEventListener('click', onCanvasClickForSelection);
+                    showMessage('Entered Edit Mode. Click on an object to select it for coloring and resizing.');
+                } else {
+                    editModeToggle.textContent = 'Enter Edit Mode';
+                    editModeToggle.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    editModeToggle.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                    editControls.classList.add('hidden');
+                    canvas.removeEventListener('click', onCanvasClickForSelection);
+                    deselectObject();
+                    llmOutputArea.classList.add('hidden');
+                    suggestedColorsArea.classList.add('hidden');
+                    showMessage('Exited Edit Mode.');
+                }
+            }
+
+            // Function to add a shape to the scene
+            function addShape(type) {
+                let geometry;
+                let meshName;
+                const initialScale = 1;
+
+                if (type === 'cube') {
+                    geometry = new THREE.BoxGeometry(initialScale, initialScale, initialScale);
+                    meshName = 'Added Cube';
+                } else if (type === 'sphere') {
+                    geometry = new THREE.SphereGeometry(initialScale * 0.75, 32, 32);
+                    meshName = 'Added Sphere';
+                } else if (type === 'cone') {
+                    geometry = new THREE.ConeGeometry(initialScale * 0.5, initialScale, 32);
+                    meshName = 'Added Cone';
+                } else if (type === 'cylinder') {
+                    geometry = new THREE.CylinderGeometry(initialScale * 0.5, initialScale * 0.5, initialScale, 32);
+                    meshName = 'Added Cylinder';
+                } else if (type === 'torus') {
+                    geometry = new THREE.TorusGeometry(initialScale * 0.6, initialScale * 0.2, 16, 100);
+                    meshName = 'Added Torus';
+                }
+                else {
+                    return;
+                }
+
+                const material = new THREE.MeshPhongMaterial({ color: colorPicker.value });
+                const newMesh = new THREE.Mesh(geometry, material);
+                newMesh.name = meshName;
+                newMesh.scale.set(initialScale, initialScale, initialScale);
+
+                const groupCenter = new THREE.Vector3();
+                new THREE.Box3().setFromObject(modelGroup).getCenter(groupCenter);
+                newMesh.position.copy(groupCenter);
+                newMesh.position.z += 1.5;
+
+                executeCommand(new AddShapeCommand(modelGroup, newMesh));
+                showMessage(`Added a ${type}.`);
+                selectObject(newMesh);
+            }
+
+            // Function to apply color to a newly added shape (from color picker)
+            function applyColorToNewShape() {
+                showMessage('This button applies the selected color to NEW shapes you add. Use "Paint Selected Object" to color existing objects.', false);
+            }
+
+            // Function to paint the selected object
+            function paintSelectedObject() {
+                if (selectedObject) {
+                    const newColor = colorPicker.value;
+                    let commandsToExecute = [];
+
+                    // Traverse the selected object (could be a Group or a Mesh)
+                    selectedObject.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            let materials = Array.isArray(child.material) ? child.material : [child.material];
+                            materials.forEach(mat => {
+                                if (mat.color) { // Only attempt to change materials with a color property
+                                    const oldColor = '#' + mat.color.getHexString();
+                                    if (oldColor.toLowerCase() !== newColor.toLowerCase()) { // Case-insensitive comparison
+                                        commandsToExecute.push(new ColorShapeCommand(child, oldColor, newColor));
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    if (commandsToExecute.length > 0) {
+                        // Execute all color changes. For simplicity, we'll execute them one by one.
+                        // A more advanced system might use a CompositeCommand for a single undo step.
+                        commandsToExecute.forEach(cmd => executeCommand(cmd));
+                        showMessage(`Painted ${selectedObject.name || 'selected object'} with new color.`);
+                    } else {
+                        showMessage('No colorable parts found or object already has this color.', false);
+                    }
+                } else {
+                    showMessage('No object selected to paint. Click on an object in the viewer to select it.', true);
+                }
+            }
+
+            // Function to resize the currently selected object
+            function resizeSelectedObject() {
+                if (selectedObject) {
+                    const oldScale = selectedObject.scale.clone();
+                    const newScale = new THREE.Vector3(
+                        parseFloat(scaleXInput.value),
+                        parseFloat(scaleYInput.value),
+                        parseFloat(scaleZInput.value)
+                    );
+
+                    if (!oldScale.equals(newScale)) {
+                        executeCommand(new ResizeShapeCommand(selectedObject, oldScale, newScale));
+                        showMessage(`Resized ${selectedObject.name || 'selected object'}.`);
+                    }
+
+                    scaleXValue.textContent = newScale.x.toFixed(1);
+                    scaleYValue.textContent = newScale.y.toFixed(1);
+                    scaleZValue.textContent = newScale.z.toFixed(1);
+                }
+            }
+
+            // Handle canvas click for object selection in edit mode
+            function onCanvasClickForSelection(event) {
+                mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
+                mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+
+                // Intersect with all children of modelGroup, recursively
+                const intersects = raycaster.intersectObjects(modelGroup.children, true);
+
+                if (intersects.length > 0) {
+                    let clickedObject = intersects[0].object; // This is the actual mesh hit
+
+                    // Find the top-level object that is a direct child of modelGroup
+                    // by traversing up from the clicked mesh.
+                    let objectToSelect = null;
+                    let current = clickedObject;
+                    while (current) {
+                        if (current.parent === modelGroup) {
+                            objectToSelect = current;
+                            break;
+                        }
+                        current = current.parent;
+                    }
+
+                    if (objectToSelect) {
+                        selectObject(objectToSelect);
+                    } else {
+                        // If no direct child of modelGroup was found in the hierarchy of the clicked object,
+                        // it means the click might have registered on something not directly manageable
+                        // by the current selection logic, or a very complex nested structure.
+                        // In this case, we deselect and inform the user.
+                        deselectObject();
+                        showMessage('Could not identify a top-level object to select. Try clicking a different part of the model.', false);
+                    }
+                } else {
+                    // No object clicked, deselect
+                    deselectObject();
+                    showMessage('No object selected.');
+                }
+            }
+
+            // Function to select an object and highlight it
+            function selectObject(objectToSelect) {
+                deselectObject(); // Always deselect previous first
+
+                selectedObject = objectToSelect;
+
+                // Highlight the selected object by traversing all its meshes
+                selectedObject.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        let materials = Array.isArray(child.material) ? child.material : [child.material];
+                        materials.forEach(mat => {
+                            if (mat.emissive) {
+                                // Store original emissive hex on the material itself
+                                if (mat._originalEmissiveHex === undefined) { // Only store if not already stored
+                                    mat._originalEmissiveHex = mat.emissive.getHex();
+                                }
+                                mat.emissive.setHex(0x222222); // Add a subtle glow
+                            }
+                        });
+                    }
+                });
+
+                showMessage(`Selected: ${selectedObject.name || 'Unnamed Object'}`);
+
+                // Update resize controls with selected object's scale
+                scaleXInput.value = selectedObject.scale.x.toFixed(1);
+                scaleYInput.value = selectedObject.scale.y.toFixed(1);
+                scaleZInput.value = selectedObject.scale.z.toFixed(1);
+                scaleXValue.textContent = selectedObject.scale.x.toFixed(1);
+                scaleYValue.textContent = selectedObject.scale.y.toFixed(1);
+                scaleZValue.textContent = selectedObject.scale.z.toFixed(1);
+
+                // Enable resize controls
+                scaleXInput.disabled = false;
+                scaleYInput.disabled = false;
+                scaleZInput.disabled = false;
+            }
+
+            // --- Gemini API Functions ---
+
+            // Function to describe the model composition using LLM
+            async function describeModelComposition() {
+                llmLoadingIndicator.classList.remove('hidden');
+                llmOutputArea.classList.add('hidden');
+                suggestedColorsArea.classList.add('hidden');
+
+                let modelDescription = "The 3D model currently contains the following components:\n";
+                if (modelGroup.children.length === 0) {
+                    modelDescription += "No objects are currently in the viewer.";
+                } else {
+                    modelGroup.children.forEach((child, index) => {
+                        let type = "Unknown Object";
+                        if (child.isMesh) {
+                            if (child.geometry instanceof THREE.BoxGeometry) {
+                                type = "Cube";
+                            } else if (child.geometry instanceof THREE.SphereGeometry) {
+                                type = "Sphere";
+                            } else if (child.geometry instanceof THREE.ConeGeometry) {
+                                type = "Cone";
+                            } else if (child.geometry instanceof THREE.CylinderGeometry) {
+                                type = "Cylinder";
+                            } else if (child.geometry instanceof THREE.TorusGeometry) {
+                                type = "Torus";
+                            }
+                            else {
+                                type = "Imported Model";
+                            }
+                        } else if (child.isGroup) {
+                            type = "Imported Group";
+                        }
+
+                        let color = "No specific color (e.g., imported texture)";
+                        if (child.material && child.material.color) {
+                            color = `#${child.material.color.getHexString()}`;
+                        } else {
+                            child.traverse((subChild) => {
+                                if (subChild.isMesh && subChild.material && subChild.material.color) {
+                                    color = `#${subChild.material.color.getHexString()}`;
+                                    return;
+                                }
+                            });
+                        }
+                        modelDescription += `- ${type} (Name: ${child.name || 'Unnamed'}), Color: ${color}\n`;
+                    });
+                }
+
+                const prompt = `Analyze the following description of a 3D model's components and generate a concise, creative, and engaging summary of its composition. Focus on the overall structure and visual elements. Format the response using Markdown, with italicized words indicated by asterisks (e.g., *example*).
+                \nDescription:\n${modelDescription}`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        llmOutputArea.innerHTML = convertMarkdownToHtml(text); // Apply markdown conversion
+                        llmOutputArea.classList.remove('hidden');
+                        showMessage('Model description generated!');
+                    } else {
+                        llmOutputArea.textContent = 'Could not generate description. Please try again.';
+                        llmOutputArea.classList.remove('hidden');
+                        showMessage('Failed to generate description.', true);
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for description:', error);
+                    llmOutputArea.textContent = 'Error: Could not connect to AI. Please check your network or try again later.';
+                    llmOutputArea.classList.remove('hidden');
+                    showMessage('Error generating description.', true);
+                } finally {
+                    llmLoadingIndicator.classList.add('hidden');
+                }
+            }
+
+            // Function to suggest color palettes using LLM
+            async function suggestColorPalettes() {
+                llmLoadingIndicator.classList.remove('hidden');
+                llmOutputArea.classList.add('hidden');
+                suggestedColorsArea.classList.add('hidden');
+                colorSwatchesContainer.innerHTML = '';
+
+                let existingColors = new Set();
+                modelGroup.traverse((child) => {
+                    if (child.isMesh && child.material) {
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(mat => {
+                                if (mat.color) existingColors.add(`#${mat.color.getHexString()}`);
+                            });
+                        } else if (child.material.color) {
+                            existingColors.add(`#${child.material.color.getHexString()}`);
+                        }
+                    }
+                });
+
+                const colorsArray = Array.from(existingColors);
+                if (colorsArray.length === 0) {
+                    showMessage('No colors found in the model to base suggestions on. Add some shapes first!', true);
+                    llmLoadingIndicator.classList.add('hidden');
+                    return;
+                }
+
+                const prompt = `Given the following existing colors in a 3D model: ${colorsArray.join(', ')}.
+                Suggest a palette of 3-5 complementary or harmonious hex colors. Provide the response as a JSON array of hex color strings (e.g., ["#RRGGBB", "#RRGGBB"]).`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: { "type": "STRING" }
+                        }
+                    }
+                };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const json = result.candidates[0].content.parts[0].text;
+                        const suggestedColors = JSON.parse(json);
+
+                        if (Array.isArray(suggestedColors) && suggestedColors.every(color => typeof color === 'string' && color.startsWith('#'))) {
+                            suggestedColors.forEach(color => {
+                                const swatch = document.createElement('div');
+                                swatch.className = 'color-swatch';
+                                swatch.style.backgroundColor = color;
+                                swatch.title = color;
+                                swatch.addEventListener('click', () => {
+                                    colorPicker.value = color;
+                                    showMessage(`Color picker set to ${color}`);
+                                });
+                                colorSwatchesContainer.appendChild(swatch);
+                            });
+                            suggestedColorsArea.classList.remove('hidden');
+                            showMessage('Color palette suggested!');
+                        } else {
+                            showMessage('AI returned an invalid color palette format.', true);
+                            console.error('Invalid color palette format from Gemini API:', suggestedColors);
+                        }
+                    } else {
+                        showMessage('Could not suggest colors. Please try again.', true);
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for colors:', error);
+                    showMessage('Error suggesting colors. Please check your network or try again later.', true);
+                } finally {
+                    llmLoadingIndicator.classList.add('hidden');
+                }
+            }
+
+            // New: Generate Object Name/Purpose using LLM
+            async function generateObjectNameOrPurpose() {
+                if (!selectedObject) {
+                    showMessage('Please select an object first to generate its name/purpose.', true);
+                    return;
+                }
+
+                llmLoadingIndicator.classList.remove('hidden');
+                llmOutputArea.classList.add('hidden');
+                suggestedColorsArea.classList.add('hidden');
+
+                let objectType = "an unknown object";
+                if (selectedObject.isMesh) {
+                    if (selectedObject.geometry instanceof THREE.BoxGeometry) {
+                        objectType = "a cube";
+                    } else if (selectedObject.geometry instanceof THREE.SphereGeometry) {
+                        objectType = "a sphere";
+                    } else if (selectedObject.geometry instanceof THREE.ConeGeometry) {
+                        objectType = "a cone";
+                    } else if (selectedObject.geometry instanceof THREE.CylinderGeometry) {
+                        objectType = "a cylinder";
+                    } else if (selectedObject.geometry instanceof THREE.TorusGeometry) {
+                        objectType = "a torus";
+                    } else {
+                        objectType = "an imported 3D model";
+                    }
+                } else if (selectedObject.isGroup) {
+                    objectType = "an imported group of 3D models";
+                }
+
+                let objectColor = "no specific color";
+                if (selectedObject.material && selectedObject.material.color) {
+                    objectColor = `color #${selectedObject.material.color.getHexString()}`;
+                } else if (Array.isArray(selectedObject.material) && selectedObject.material.length > 0 && selectedObject.material[0].color) {
+                    objectColor = `primary color #${selectedObject.material[0].color.getHexString()}`;
+                }
+
+                const prompt = `Given that the selected 3D object is ${objectType} and has ${objectColor}, suggest a creative and fitting name or a potential purpose for this object in a 3D scene. Be concise. Format the response using Markdown, with italicized words indicated by asterisks (e.g., *example*).`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        llmOutputArea.innerHTML = `<strong>Suggested Name/Purpose:</strong> ${convertMarkdownToHtml(text)}`; // Apply markdown conversion
+                        llmOutputArea.classList.remove('hidden');
+                        showMessage('Object name/purpose generated!');
+                    } else {
+                        llmOutputArea.textContent = 'Could not generate name/purpose. Please try again.';
+                        llmOutputArea.classList.remove('hidden');
+                        showMessage('Failed to generate name/purpose.', true);
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for name/purpose:', error);
+                    llmOutputArea.textContent = 'Error: Could not connect to AI. Please check your network or try again later.';
+                    llmOutputArea.classList.remove('hidden');
+                    showMessage('Error generating name/purpose.', true);
+                } finally {
+                    llmLoadingIndicator.classList.add('hidden');
+                }
+            }
+
+            // New: Suggest Model Optimizations using LLM (conceptual)
+            async function suggestModelOptimizations() {
+                llmLoadingIndicator.classList.remove('hidden');
+                llmOutputArea.classList.add('hidden');
+                suggestedColorsArea.classList.add('hidden');
+
+                let totalObjects = modelGroup.children.length;
+                let meshCount = 0;
+                let complexObjects = 0;
+
+                modelGroup.traverse((child) => {
+                    if (child.isMesh) {
+                        meshCount++;
+                        // Heuristic for complexity: check if it's an imported model or has many faces (though not easily accessible without parsing geometry)
+                        if (!(child.geometry instanceof THREE.BoxGeometry || child.geometry instanceof THREE.SphereGeometry ||
+                              child.geometry instanceof THREE.ConeGeometry || child.geometry instanceof THREE.CylinderGeometry ||
+                              child.geometry instanceof THREE.TorusGeometry)) {
+                            complexObjects++;
+                        }
+                    }
+                });
+
+                let modelSummary = `The current 3D scene contains ${totalObjects} top-level objects, with ${meshCount} individual mesh components. Approximately ${complexObjects} of these appear to be complex imported models.`;
+
+                const prompt = `Given the following summary of a 3D model scene: "${modelSummary}".
+                Provide conceptual suggestions on how this 3D model could be optimized for performance or visual quality. Focus on general strategies like geometry simplification, texture optimization, or rendering techniques. Provide 3-5 bullet points. Format the response using Markdown, with italicized words indicated by asterisks (e.g., *example*).`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        llmOutputArea.innerHTML = `<strong>Optimization Suggestions:</strong><br>${convertMarkdownToHtml(text)}`; // Apply markdown conversion
+                        llmOutputArea.classList.remove('hidden');
+                        showMessage('Optimization suggestions generated!');
+                    } else {
+                        llmOutputArea.textContent = 'Could not generate optimization suggestions. Please try again.';
+                        llmOutputArea.classList.remove('hidden');
+                        showMessage('Failed to generate suggestions.', true);
+                        console.error('Gemini API response structure unexpected:', result);
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API for optimizations:', error);
+                    llmOutputArea.textContent = 'Error: Could not connect to AI. Please check your network or try again later.';
+                    llmOutputArea.classList.remove('hidden');
+                    showMessage('Error generating suggestions.', true);
+                } finally {
+                    llmLoadingIndicator.classList.add('hidden');
+                }
+            }
+
+            // Initialize the 3D scene when the window loads
+            init();
+        };
+    </script>
+</body>
+</html>
