@@ -1,0 +1,22 @@
+<svg viewBox="0 0 250 150" xmlns="http://www.w3.org/2000/svg">
+    <rect x="25" y="40" width="200" height="80" rx="15" ry="15" fill="#444444" stroke="#222222" stroke-width="3"/>
+
+    <rect x="35" y="65" width="180" height="20" rx="5" ry="5" fill="#222222"/>
+
+    <g id="credit-card">
+        <rect x="0" y="60" width="80" height="50" rx="5" ry="5" fill="#4285F4" stroke="#2A569C" stroke-width="1"/>
+        <rect x="5" y="65" width="15" height="10" rx="2" ry="2" fill="#C0C0C0"/>
+        <rect x="0" y="70" width="80" height="10" fill="#000000"/>
+        <text x="5" y="105" font-family="Arial, sans-serif" font-size="8" fill="#FFFFFF" font-weight="bold">VISA</text>
+
+        <animateTransform
+            attributeName="transform"
+            attributeType="XML"
+            type="translate"
+            values="0 0; 170 0; 170 0; 0 0"
+            keyTimes="0; 0.4; 0.8; 1"
+            dur="3s"
+            repeatCount="indefinite"
+        />
+    </g>
+</svg>
