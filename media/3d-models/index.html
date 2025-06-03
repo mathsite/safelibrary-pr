@@ -1,1 +1,118 @@
-placeholder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>SafeLibrary | Browse 3D Models</title>
+	<style>
+		body {
+			margin: 0;
+			font-family: Arial, sans-serif;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: flex-start;
+			background-color: #f9f9f9;
+		}
+		.panel {
+			width: 200px;
+			margin: 10px;
+			background-color: white;
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+			text-align: center;
+			cursor: pointer;
+			overflow: hidden;
+		}
+		.panel img {
+			width: 100%;
+			height: 150px;
+			object-fit: cover;
+		}
+		.panel p {
+			margin: 0;
+			padding: 10px;
+			font-size: 1em;
+			color: #333;
+		}
+		.panel:hover {
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+		}
+	</style>
+</head>
+<body>
+	<!-- Panels -->
+	<script>
+		const panels = [
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 1', file: 'model1.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 2', file: 'model2.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 3', file: 'model3.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 4', file: 'model4.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 5', file: 'model5.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 6', file: 'model6.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 7', file: 'model7.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 8', file: 'model8.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 9', file: 'model9.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 10', file: 'model10.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 11', file: 'model11.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 12', file: 'model12.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 13', file: 'model13.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 14', file: 'model14.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 15', file: 'model15.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 16', file: 'model16.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 17', file: 'model17.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 18', file: 'model18.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 19', file: 'model19.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 20', file: 'model20.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 21', file: 'model21.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 22', file: 'model22.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 23', file: 'model23.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 24', file: 'model24.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 25', file: 'model25.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 26', file: 'model26.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 27', file: 'model27.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 28', file: 'model28.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+            { image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 29', file: 'model29.glb' },
+			{ image: 'https://via.placeholder.com/200x150', text: 'Model 30', file: 'model30.glb' }
+		];
+
+		panels.forEach(panel => {
+			const div = document.createElement('div');
+			div.className = 'panel';
+			div.innerHTML = `
+				<img src="${panel.image}" alt="${panel.text}">
+				<p>${panel.text}</p>
+			`;
+			div.addEventListener('click', () => {
+				const link = document.createElement('a');
+				link.href = panel.file;
+				link.download = panel.file;
+				link.click();
+			});
+			document.body.appendChild(div);
+		});
+	</script>
+</body>
+</html>
