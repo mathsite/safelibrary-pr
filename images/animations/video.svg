@@ -59,8 +59,7 @@
             dur="1s"
             fill="freeze"
             id="cursorMove"
-            begin="0s; resetAll.end"
-        />
+            begin="0s; progressBarFillAnim.end + 1s" /> <!-- Adjusted begin for robust looping -->
     </polygon>
 
     <!-- Animations for the video player interaction sequence -->
