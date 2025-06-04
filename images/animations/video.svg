@@ -1,0 +1,90 @@
+<svg width="400" height="250" viewBox="0 0 400 250" style="display: block; max-width: 100%; height: auto; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);">
+    <!-- Video Player Frame: A dark grey rectangle with rounded corners -->
+    <rect x="50" y="20" width="300" height="180" rx="10" ry="10" fill="#333" stroke="#222" stroke-width="2"/>
+
+    <!-- Video Screen: A slightly lighter grey rectangle inside the frame -->
+    <rect id="videoScreen" x="65" y="35" width="270" height="130" rx="5" ry="5" fill="#555"/>
+
+    <!-- Video Content: Two people sitting on a bench in a park -->
+    <g id="videoContent" opacity="1">
+        <!-- Park Background Elements -->
+        <rect x="65" y="135" width="270" height="30" fill="#6B8E23"/> <!-- Green Ground/Grass -->
+        <circle cx="100" cy="80" r="25" fill="#4CAF50"/> <!-- Tree Leaves -->
+        <rect x="95" y="100" width="10" height="35" fill="#8B4513"/> <!-- Tree Trunk -->
+
+        <!-- Bench -->
+        <rect x="150" y="125" width="100" height="10" rx="3" ry="3" fill="#A0522D"/> <!-- Bench Seat -->
+        <rect x="155" y="135" width="5" height="15" fill="#8B4513"/> <!-- Bench Leg 1 -->
+        <rect x="240" y="135" width="5" height="15" fill="#8B4513"/> <!-- Bench Leg 2 -->
+        <rect x="150" y="115" width="100" height="10" rx="3" ry="3" fill="#A0522D" transform="rotate(-5 200 120)"/> <!-- Bench Backrest -->
+
+        <!-- Person 1 (left, sitting) -->
+        <g id="person1_sitting">
+            <circle cx="175" cy="105" r="8" fill="#E0BBE4"/> <!-- Head -->
+            <rect x="170" y="113" width="10" height="15" fill="#957DAD"/> <!-- Body -->
+            <rect x="170" y="128" width="10" height="5" fill="#957DAD" transform="rotate(-10 175 130)"/> <!-- Legs (simplified) -->
+        </g>
+
+        <!-- Person 2 (right, sitting) -->
+        <g id="person2_sitting">
+            <circle cx="225" cy="105" r="8" fill="#FFC72C"/> <!-- Head -->
+            <rect x="220" y="113" width="10" height="15" fill="#FF9A00"/> <!-- Body -->
+            <rect x="220" y="128" width="10" height="5" fill="#FF9A00" transform="rotate(-10 225 130)"/> <!-- Legs (simplified) -->
+        </g>
+    </g>
+
+    <!-- Controls Bar at the bottom of the player -->
+    <rect x="50" y="175" width="300" height="25" fill="#444" rx="0" ry="0"/>
+
+    <!-- Progress Bar Background -->
+    <rect x="65" y="185" width="270" height="5" fill="#666" rx="2.5" ry="2.5"/>
+    <!-- Progress Bar Foreground: This rectangle's width will animate -->
+    <rect id="progressBar" x="65" y="185" width="0" height="5" fill="#4CAF50" rx="2.5" ry="2.5"/>
+
+    <!-- Play Button (a blue triangle) -->
+    <polygon id="playButton" points="170,100 230,130 170,160" fill="#2196F3" opacity="1"/>
+
+    <!-- Pause Button (two blue rectangles), initially hidden -->
+    <g id="pauseButton" opacity="0">
+        <rect x="185" y="110" width="10" height="30" fill="#2196F3"/>
+        <rect x="205" y="110" width="10" height="30" fill="#2196F3"/>
+    </g>
+
+    <!-- Cursor: A white arrow shape -->
+    <!-- Initial position of the cursor is set by transform attribute -->
+    <polygon id="cursor" points="0,0 10,0 0,10" fill="white" stroke="#333" stroke-width="1" transform="translate(50,50)">
+        <!-- Animation for cursor movement from initial position to the play button -->
+        <animateMotion
+            path="M 0 0 L 150 80" /* Relative path: moves from (50,50) to (200,130) */
+            dur="1s" /* Duration of cursor movement */
+            fill="freeze" /* Cursor stays at the end of its path */
+            id="cursorMove" /* ID for chaining other animations */
+            begin="0s; resetAll.end" /* Starts at 0s, and restarts when resetAll ends */
+        />
+    </polygon>
+
+    <!-- Animations for the video player interaction sequence -->
+
+    <!-- Play Button fades out when cursor reaches it -->
+    <animate attributeName="opacity" href="#playButton" from="1" to="0" begin="cursorMove.end" dur="0.2s" fill="freeze" id="playToPauseAnim"/>
+    <!-- Pause Button fades in simultaneously -->
+    <animate attributeName="opacity" href="#pauseButton" from="0" to="1" begin="cursorMove.end" dur="0.2s" fill="freeze"/>
+
+    <!-- Video Screen changes color slightly to indicate playing -->
+    <animate attributeName="fill" href="#videoScreen" from="#555" to="#424242" begin="cursorMove.end" dur="0.2s" fill="freeze"/>
+
+    <!-- Progress Bar fills up over 4 seconds, starting after the button click animation -->
+    <animate attributeName="width" href="#progressBar" from="0" to="270" begin="playToPauseAnim.end" dur="4s" fill="freeze" id="progressBarFillAnim"/>
+
+    <!-- Cursor hides shortly after clicking the button -->
+    <animate attributeName="opacity" href="#cursor" from="1" to="0" begin="playToPauseAnim.end" dur="0.1s" fill="freeze"/>
+
+    <!-- Reset all elements to their initial state after the video finishes playing -->
+    <!-- This 'set' animation chain acts as the loop trigger -->
+    <set attributeName="opacity" href="#playButton" to="1" begin="progressBarFillAnim.end" id="resetAll"/>
+    <set attributeName="opacity" href="#pauseButton" to="0" begin="progressBarFillAnim.end"/>
+    <set attributeName="width" href="#progressBar" to="0" begin="progressBarFillAnim.end"/>
+    <set attributeName="fill" href="#videoScreen" to="#555" begin="progressBarFillAnim.end"/>
+    <set attributeName="opacity" href="#cursor" to="1" begin="progressBarFillAnim.end"/>
+    <set attributeName="opacity" href="#videoContent" to="1" begin="progressBarFillAnim.end"/>
+</svg>
