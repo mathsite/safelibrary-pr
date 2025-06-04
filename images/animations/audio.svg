@@ -44,7 +44,7 @@
             dur="1s"
             fill="freeze"
             id="cursorMove"
-            begin="1s; resetComplete.end + 0.1s" /> <!-- Added a small delay after resetComplete.end -->
+            begin="1s; resetAll.end + 0.1s" /> <!-- 1-second initial delay, then restarts after resetAll completes plus a small buffer -->
     </polygon>
 
     <!-- Animations for the audio player interaction sequence -->
@@ -62,8 +62,9 @@
 
     <!-- Reset all elements to their initial state after the audio finishes playing -->
     <!-- These 'set' animations ensure the visual state resets instantly -->
-    <set attributeName="opacity" href="#playButton" to="1" begin="progressBarFillAnim.end" id="resetComplete"/> <!-- Added ID for robust looping -->
+    <set attributeName="opacity" href="#playButton" to="1" begin="progressBarFillAnim.end" id="resetAll"/> <!-- ID for robust looping -->
     <set attributeName="opacity" href="#pauseButton" to="0" begin="progressBarFillAnim.end"/>
     <set attributeName="width" href="#progressBar" to="0" begin="progressBarFillAnim.end"/>
     <set attributeName="opacity" href="#cursor" to="1" begin="progressBarFillAnim.end"/>
 </svg>
+ 
