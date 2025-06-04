@@ -55,11 +55,11 @@
     <polygon id="cursor" points="0,0 10,0 0,10" fill="white" stroke="#333" stroke-width="1" transform="translate(50,50)">
         <!-- Animation for cursor movement from initial position to the play button -->
         <animateMotion
-            path="M 0 0 L 150 80" /* Relative path: moves from (50,50) to (200,130) */
-            dur="1s" /* Duration of cursor movement */
-            fill="freeze" /* Cursor stays at the end of its path */
-            id="cursorMove" /* ID for chaining other animations */
-            begin="0s; resetAll.end" /* Starts at 0s, and restarts when resetAll ends */
+            path="M 0 0 L 150 80"
+            dur="1s"
+            fill="freeze"
+            id="cursorMove"
+            begin="0s; resetAll.end"
         />
     </polygon>
 
