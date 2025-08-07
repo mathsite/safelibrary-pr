@@ -1,0 +1,20 @@
+[
+  {
+    "title": "My First Post",
+    "date": "2025-08-07",
+    "excerpt": "A brief introduction to my new blog and what I plan to write about. This is a placeholder for your actual blog content.",
+    "url": "/posts/my-first-post.html"
+  },
+  {
+    "title": "Getting Started with GitHub Pages",
+    "date": "2025-08-05",
+    "excerpt": "A quick guide on how to set up your very first website using GitHub Pages. It's simpler than you think!",
+    "url": "/posts/getting-started-github-pages.html"
+  },
+  {
+    "title": "Why Static Sites?",
+    "date": "2025-08-03",
+    "excerpt": "Exploring the benefits of static site generators for performance, security, and cost.",
+    "url": "/posts/why-static-sites.html"
+  }
+]
