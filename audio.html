@@ -165,9 +165,14 @@
       <h2>Audio Library</h2>
       <p>Browse and play safe audio clips below:</p>
       
-      <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search for audio...">
-      </div>
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Search for audio...">
+  <select id="sortDropdown">
+    <option value="default">Default</option>
+    <option value="atoz">A-Z</option>
+    <option value="ztoa">Z-A</option>
+  </select>
+</div>
 
       <!-- Audio Items -->
       <div class="audio-item">
@@ -1083,6 +1088,29 @@
         audio.load();
       });
     });
+    const sortDropdown = document.getElementById('sortDropdown');
+const audioList = document.querySelector('.section'); // The container for all audio items
+
+sortDropdown.addEventListener('change', (event) => {
+    const sortValue = event.target.value;
+    const audioItems = Array.from(document.querySelectorAll('.audio-item'));
+
+    audioItems.sort((a, b) => {
+        const textA = a.querySelector('h3').textContent.toLowerCase();
+        const textB = b.querySelector('h3').textContent.toLowerCase();
+
+        if (sortValue === 'atoz') {
+            return textA.localeCompare(textB);
+        } else if (sortValue === 'ztoa') {
+            return textB.localeCompare(textA);
+        }
+        // For 'default', return 0 to maintain original order
+        return 0; 
+    });
+
+    // Clear the current list and append the sorted items
+    audioItems.forEach(item => audioList.appendChild(item));
+});
   </script>
 </body>
 </html>
