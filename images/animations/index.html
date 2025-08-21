@@ -1,50 +1,299 @@
-<HTML>
-  <HEAD>
-    <TITLE>SafeLibrary | Images => Animations</TITLE>
-  </HEAD>
-  <BODY>
-             <div style="background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-  <strong>🛠️ Renovation:</strong> We’re currently making updates.  
-  <a href="https://github.com/houselearning/developer-notes/discussions/5" target="_blank" style="color: #856404; font-weight: bold; text-decoration: underline;">
-    Learn more here
-  </a>.
-</div>
-    <h1>Browse hundreds of SVG Animations below</h1>
-    <a href="https://houselearning.github.io/safe-library/images/tutorial_img.png">Need to download an image? Click to show how</a>
-    <hr>
-    <div>
-      <img src="https://houselearning.github.io/safe-library/images/animations/ball.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/butterfly.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/clock.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/cube.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/doorbell.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/explode.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/heart.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/loading.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/raincloud.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/snake-2.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/snake.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/tree.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/check.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/credit-card-swipe.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/denied.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/fingerprint-authorized.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/fingerprint-denied.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/oven.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/phone-charge.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/piggy-bank-insert.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/piggy-bank.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/receipt-print.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/video.svg">
-      <img src="https://houselearning.github.io/safe-library/images/animations/audio.svg">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8YSM87GDVW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-8YSM87GDVW');
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Animations | SafeLibrary</title>
+  <style>
+    /* Global box-sizing */
+    * { box-sizing: border-box; }
 
-    </div>
-    <style>
-      img
-      {
-        width:375px;
-        height:375px;
+    /* Body styling for overall layout and theme transitions */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode { background: #121212; color: #f1f1f1; }
+
+    /* Navbar styling for navigation links */
+    .navbar {
+      background-color: #20232a;
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 12px 20px;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+      scrollbar-width: thin;
+      scrollbar-color: #61dafb transparent;
+    }
+    body.dark-mode .navbar { background-color: #1e1e1e; }
+    .navbar a {
+      color: #61dafb;
+      text-decoration: none;
+      padding: 10px 18px;
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .navbar a:hover { background-color: #61dafb; color: #20232a; }
+
+    /* Announcement banner styling */
+    .announcement {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px auto;
+      max-width: 1000px;
+    }
+    .announcement a { color: #856404; font-weight: bold; text-decoration: underline; }
+
+    /* Main container for content sections */
+    .container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1200px;
+      margin: 20px auto;
+      width: 100%;
+    }
+    /* Section styling for individual content blocks */
+    .section {
+      background: white;
+      padding: 20px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.05);
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+    body.dark-mode .section { background: #1e1e1e; color: #f1f1f1; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+
+    /* Heading 1 styling */
+    h1 {
+      margin-top: 0;
+      font-weight: 700;
+      color: #20232a;
+      border-bottom: 3px solid #61dafb;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+    body.dark-mode h1 { color: #61dafb; }
+    
+    /* Search and sort container styling */
+    .search-container {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .search-container input, .search-container select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+    .search-container input {
+      flex-grow: 1;
+    }
+    
+    /* Image-specific styling */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .image-item {
+      background: #f1f1f1;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: background 0.3s;
+    }
+    body.dark-mode .image-item { background: #2c2c2c; }
+
+    .image-item img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+    
+    /* Theme switch button wrapper and button styling */
+    .theme-switch-wrapper {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+    }
+    .theme-switch button {
+      background: #61dafb;
+      border: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    }
+    body.dark-mode .theme-switch button { background: #444; color: #fff; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="https://houselearning.github.io/home/">Home</a>
+    <a href="https://houselearning.github.io/home/math-page.html">Math Games</a>
+    <a href="https://houselearning.github.io/home/science-page.html">Science Fun</a>
+    <a href="https://houselearning.github.io/home/computer-science-page.html">Coding Challenges</a>
+    <a href="https://houselearning.github.io/home/games.html">Random Games</a>
+    <a href="https://houselearning.github.io/safe-library">Safe Library</a>
+    <a href="https://houselearning.github.io/about">About</a>
+  </nav>
+
+  <div class="announcement">
+    <strong>🛠️ Renovation:</strong> We’re currently making updates.
+    <a href="https://github.com/houselearning/developer-notes/discussions/5" target="_blank">Learn more here</a>.
+  </div>
+
+  <main class="container">
+    <section class="section">
+      <h1>Browse hundreds of SVG Animations below</h1>
+      <p><a href="https://houselearning.github.io/safe-library/images/tutorial_img.png">Need to download an image? Click to show how</a></p>
+
+      <div class="search-container">
+        <input type="text" id="animationSearchInput" placeholder="Search for animations...">
+        <select id="animationSortDropdown">
+          <option value="default">Default</option>
+          <option value="atoz">A-Z</option>
+          <option value="ztoa">Z-A</option>
+        </select>
+      </div>
+
+      <div class="image-grid" id="animation-grid">
+        </div>
+    </section>
+  </main>
+
+  <div class="theme-switch-wrapper">
+    <button id="theme-toggle">🌙</button>
+  </div>
+
+  <script>
+    const animationLinks = [
+      "https://houselearning.github.io/safe-library/images/animations/ball.svg",
+      "https://houselearning.github.io/safe-library/images/animations/butterfly.svg",
+      "https://houselearning.github.io/safe-library/images/animations/clock.svg",
+      "https://houselearning.github.io/safe-library/images/animations/cube.svg",
+      "https://houselearning.github.io/safe-library/images/animations/doorbell.svg",
+      "https://houselearning.github.io/safe-library/images/animations/explode.svg",
+      "https://houselearning.github.io/safe-library/images/animations/heart.svg",
+      "https://houselearning.github.io/safe-library/images/animations/loading.svg",
+      "https://houselearning.github.io/safe-library/images/animations/raincloud.svg",
+      "https://houselearning.github.io/safe-library/images/animations/snake-2.svg",
+      "https://houselearning.github.io/safe-library/images/animations/snake.svg",
+      "https://houselearning.github.io/safe-library/images/animations/tree.svg",
+      "https://houselearning.github.io/safe-library/images/animations/check.svg",
+      "https://houselearning.github.io/safe-library/images/animations/credit-card-swipe.svg",
+      "https://houselearning.github.io/safe-library/images/animations/denied.svg",
+      "https://houselearning.github.io/safe-library/images/animations/fingerprint-authorized.svg",
+      "https://houselearning.github.io/safe-library/images/animations/fingerprint-denied.svg",
+      "https://houselearning.github.io/safe-library/images/animations/oven.svg",
+      "https://houselearning.github.io/safe-library/images/animations/phone-charge.svg",
+      "https://houselearning.github.io/safe-library/images/animations/piggy-bank-insert.svg",
+      "https://houselearning.github.io/safe-library/images/animations/piggy-bank.svg",
+      "https://houselearning.github.io/safe-library/images/animations/receipt-print.svg",
+      "https://houselearning.github.io/safe-library/images/animations/video.svg",
+      "https://houselearning.github.io/safe-library/images/animations/audio.svg"
+    ];
+
+    function createAnimationTitle(link) {
+      const parts = link.split('/');
+      const filename = parts[parts.length - 1];
+      const nameWithoutExtension = filename.replace(/\.svg$/, '');
+      const formattedName = nameWithoutExtension.replace(/_|-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      return formattedName;
+    }
+
+    function createAnimationItem(link) {
+      const animationItem = document.createElement('div');
+      animationItem.className = 'image-item';
+      animationItem.dataset.alt = createAnimationTitle(link);
+
+      const titleElement = document.createElement('p');
+      titleElement.textContent = createAnimationTitle(link);
+
+      const imgElement = document.createElement('img');
+      imgElement.src = link;
+      imgElement.alt = createAnimationTitle(link);
+
+      animationItem.appendChild(imgElement);
+      animationItem.appendChild(titleElement);
+      return animationItem;
+    }
+
+    function renderAnimations(animations) {
+      const animationGrid = document.getElementById('animation-grid');
+      animationGrid.innerHTML = '';
+      animations.forEach(animation => {
+        animationGrid.appendChild(animation);
+      });
+    }
+
+    const initialAnimations = animationLinks.map(link => createAnimationItem(link));
+    renderAnimations(initialAnimations);
+
+    const animationSearchInput = document.getElementById('animationSearchInput');
+    const animationSortDropdown = document.getElementById('animationSortDropdown');
+
+    function filterAndSortAnimations() {
+      const searchTerm = animationSearchInput.value.toLowerCase();
+      const sortValue = animationSortDropdown.value;
+      const allAnimationItems = Array.from(document.querySelectorAll('.image-item'));
+
+      let filteredAnimations = allAnimationItems.filter(item => {
+        const altText = item.getAttribute('data-alt').toLowerCase();
+        return altText.includes(searchTerm);
+      });
+
+      if (sortValue === 'atoz') {
+        filteredAnimations.sort((a, b) => {
+          const textA = a.getAttribute('data-alt').toLowerCase();
+          const textB = b.getAttribute('data-alt').toLowerCase();
+          return textA.localeCompare(textB);
+        });
+      } else if (sortValue === 'ztoa') {
+        filteredAnimations.sort((a, b) => {
+          const textA = a.getAttribute('data-alt').toLowerCase();
+          const textB = b.getAttribute('data-alt').toLowerCase();
+          return textB.localeCompare(textA);
+        });
       }
-    </style>
-  </BODY>
-</HTML>
+
+      renderAnimations(filteredAnimations);
+    }
+
+    animationSearchInput.addEventListener('input', filterAndSortAnimations);
+    animationSortDropdown.addEventListener('change', filterAndSortAnimations);
+
+    const btn = document.getElementById('theme-toggle');
+    btn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ultimate Unit Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 30px;
+      background: #f7f7f7;
+    }
+    select, input, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    .box {
+      border: 1px solid #ccc;
+      display: inline-block;
+      padding: 20px;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Ultimate Unit Converter 🌍</h2>
+    <input type="number" id="inputValue" placeholder="Enter value">
+    
+    <br>
+    <select id="fromUnit"></select>
+    to
+    <select id="toUnit"></select>
+    
+    <br>
+    <button onclick="convert()">Convert</button>
+    <h3 id="result"></h3>
+  </div>
+
+  <script>
+    // Supported units
+    const units = {
+      // Length
+      meters: 1,
+      kilometers: 1000,
+      centimeters: 0.01,
+      millimeters: 0.001,
+      miles: 1609.34,
+      yards: 0.9144,
+      feet: 0.3048,
+      inches: 0.0254,
+
+      // Weight
+      kilograms: 1,
+      grams: 0.001,
+      milligrams: 0.000001,
+      pounds: 0.453592,
+      ounces: 0.0283495,
+      tons: 907.185,
+
+      // Time
+      seconds: 1,
+      minutes: 60,
+      hours: 3600,
+      days: 86400,
+
+      // Volume
+      liters: 1,
+      milliliters: 0.001,
+      gallons: 3.78541,
+      cups: 0.236588
+    };
+
+    // Populate dropdowns
+    const fromSelect = document.getElementById("fromUnit");
+    const toSelect = document.getElementById("toUnit");
+    Object.keys(units).forEach(u => {
+      fromSelect.add(new Option(u, u));
+      toSelect.add(new Option(u, u));
+    });
+
+    // Conversion logic
+    function convert() {
+      let value = parseFloat(document.getElementById("inputValue").value);
+      let from = fromSelect.value;
+      let to = toSelect.value;
+
+      if (isNaN(value)) {
+        document.getElementById("result").innerText = "Enter a valid number!";
+        return;
+      }
+
+      let converted;
+      if (from === "celsius" || from === "fahrenheit" || from === "kelvin" ||
+          to === "celsius" || to === "fahrenheit" || to === "kelvin") {
+        converted = convertTemperature(value, from, to);
+      } else {
+        // Convert everything else via base (meters, kilograms, liters, seconds)
+        let inBase = value * units[from];
+        converted = inBase / units[to];
+      }
+
+      document.getElementById("result").innerText =
+        `${value} ${from} = ${converted.toFixed(4)} ${to}`;
+    }
+
+    // Temperature conversions
+    function convertTemperature(value, from, to) {
+      let celsius;
+      // Normalize to Celsius
+      if (from === "celsius") celsius = value;
+      else if (from === "fahrenheit") celsius = (value - 32) * 5/9;
+      else if (from === "kelvin") celsius = value - 273.15;
+
+      // Convert from Celsius
+      if (to === "celsius") return celsius;
+      if (to === "fahrenheit") return (celsius * 9/5) + 32;
+      if (to === "kelvin") return celsius + 273.15;
+      return celsius; // fallback
+    }
+
+    // Add temperature units manually since they aren't base-scaled
+    ["celsius", "fahrenheit", "kelvin"].forEach(temp => {
+      fromSelect.add(new Option(temp, temp));
+      toSelect.add(new Option(temp, temp));
+    });
+  </script>
+</body>
+</html>
