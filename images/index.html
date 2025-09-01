@@ -95,7 +95,7 @@
       font-size: 24px;
     }
     body.dark-mode h1 { color: #61dafb; }
-    
+
     /* Search and sort container styling */
     .search-container {
       margin-bottom: 20px;
@@ -111,11 +111,11 @@
     .search-container input {
       flex-grow: 1;
     }
-    
+
     /* Image-specific styling */
     .image-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 20px;
     }
 
@@ -150,7 +150,7 @@
       height: auto;
       border-radius: 6px;
     }
-    
+
     /* Theme switch button wrapper and button styling */
     .theme-switch-wrapper {
       position: fixed;
@@ -191,7 +191,7 @@
       <h1>SafeLibrary Images</h1>
       <hr>
       <p>Download any image here. How?</p>
-      
+
       <div class="tutorial-container">
         <img src="https://houselearning.github.io/safe-library/images/tutorial_img.png" alt="Tutorial Image" />
       </div>
@@ -209,15 +209,12 @@
         <div class="image-item" data-alt="Almost There">
           <img src="https://houselearning.github.io/safe-library/images/almostthere.png" alt="Almost There">
         </div>
-              <div class="image-grid" id="image-grid">
         <div class="image-item" data-alt="Economy Seating">
           <img src="https://houselearning.github.io/safe-library/images/economy-seating.png" alt="economy seating">
         </div>
-                      <div class="image-grid" id="image-grid">
         <div class="image-item" data-alt="Middle School">
           <img src="https://houselearning.github.io/safe-library/images/middle-school.png" alt="middle school">
         </div>
-                              <div class="image-grid" id="image-grid">
         <div class="image-item" data-alt="Beach Day">
           <img src="https://houselearning.github.io/safe-library/images/beachday.png" alt="beach day">
         </div>
@@ -267,7 +264,7 @@
           <img src="https://houselearning.github.io/safe-library/images/pickleball.png" alt="Pickleball">
         </div>
       </div>
-      
+
       <hr>
       <h2>View the new animation library!</h2>
       <a href="https://houselearning.github.io/safe-library/images/animations/">Click to view animations</a>
@@ -277,7 +274,6 @@
   <div class="theme-switch-wrapper">
     <button id="theme-toggle">🌙</button>
   </div>
-
   <script>
     const imageSearchInput = document.getElementById('imageSearchInput');
     const imageSortDropdown = document.getElementById('imageSortDropdown');
